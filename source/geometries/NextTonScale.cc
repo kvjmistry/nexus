@@ -458,6 +458,8 @@ void NextTonScale::DefineGas()
   else if (gas_ == "XeHe")
     xenon_gas_ = materials::GXeHe(gas_pressure_, gas_temperature_,
 				      xe_perc_, helium_mass_num_);
+  else if (gas_ == "enrichedXe131")
+    xenon_gas_ = materials::GXe131Enriched(gas_pressure_, gas_temperature_, xe_perc_);
   else
     G4Exception("[NextTonScale]", "DefineGas()", FatalException,
     "Unknown xenon gas type. Valid options are naturalXe, enrichedXe or depletedXe.");
