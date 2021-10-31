@@ -26,6 +26,8 @@ namespace materials {
 			            G4double temperature=STP_Temperature);
   G4Material* GXeEnriched(G4double pressure=STP_Pressure,
 			                    G4double temperature=STP_Temperature);
+  G4Material* GXe131Enriched(G4double pressure, G4double temperature,
+                             G4double percXe);
   G4Material* GXeDepleted(G4double pressure=STP_Pressure,
 				                  G4double temperature=STP_Temperature);
 
@@ -39,6 +41,10 @@ namespace materials {
   G4Material* GXeDepleted_bydensity(G4double density,
 					                          G4double temperature=STP_Temperature,
 					                          G4double pressure=STP_Pressure);
+
+  G4Material* GXe131Enriched_bydensity(G4double density,
+              G4double temperature,
+              G4double pressure, G4double percXe);
 
   // Liquid xenon
   G4Material* LXe();
