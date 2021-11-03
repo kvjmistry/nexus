@@ -146,6 +146,54 @@ namespace materials {
     return mat;
   }
 
+    G4Material* GXe126Enriched(G4double pressure, G4double temperature, G4double percXe)
+  {
+    G4double gas_density = GXeDensity(pressure);
+    G4Material* mat = GXe131Enriched_bydensity(gas_density, temperature, pressure, percXe);
+
+    return mat;
+  }
+
+
+  G4Material* GXe126Enriched_bydensity(G4double density,
+              G4double temperature,
+              G4double pressure, G4double percXe)
+  {
+    G4String name = "GXe126Enriched";
+
+    G4Material* mat = G4Material::GetMaterial(name, false);
+
+    if (mat == 0) {
+
+      mat = new G4Material(name, density, 1, kStateGas, temperature, pressure);
+
+      G4double prop_xe126 = percXe * perCent;
+      G4double prop_xe136 = (90.2616 + 0.234361) * perCent - prop_xe126;
+
+      G4Element* Xe = new G4Element("GXeEnriched", "Xe", 6);
+
+      G4Isotope* Xe129 = new G4Isotope("Xe129", 54, 129, XenonMassPerMole(129));
+      G4Isotope* Xe130 = new G4Isotope("Xe130", 54, 130, XenonMassPerMole(130));
+      G4Isotope* Xe131 = new G4Isotope("Xe126", 54, 126, XenonMassPerMole(126));
+      G4Isotope* Xe132 = new G4Isotope("Xe132", 54, 132, XenonMassPerMole(132));
+      G4Isotope* Xe134 = new G4Isotope("Xe134", 54, 134, XenonMassPerMole(134));
+      G4Isotope* Xe136 = new G4Isotope("Xe136", 54, 136, XenonMassPerMole(136));
+
+      Xe->AddIsotope(Xe129, 0.0656392*perCent);
+      Xe->AddIsotope(Xe130, 0.0656392*perCent);
+      Xe->AddIsotope(Xe131, prop_xe126);
+      Xe->AddIsotope(Xe132, 0.708251*perCent);
+      Xe->AddIsotope(Xe134, 8.6645*perCent);
+      Xe->AddIsotope(Xe136, prop_xe136);
+
+
+
+      mat->AddElement(Xe,1);
+    }
+
+    return mat;
+  }
+
   G4Material* GXeDepleted(G4double pressure, G4double temperature)
   {
     G4double gas_density = GXeDensity(pressure);

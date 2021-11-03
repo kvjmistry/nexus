@@ -28,6 +28,8 @@ namespace materials {
 			                    G4double temperature=STP_Temperature);
   G4Material* GXe131Enriched(G4double pressure, G4double temperature,
                              G4double percXe);
+  G4Material* GXe126Enriched(G4double pressure, G4double temperature,
+                             G4double percXe);
   G4Material* GXeDepleted(G4double pressure=STP_Pressure,
 				                  G4double temperature=STP_Temperature);
 
@@ -43,6 +45,10 @@ namespace materials {
 					                          G4double pressure=STP_Pressure);
 
   G4Material* GXe131Enriched_bydensity(G4double density,
+              G4double temperature,
+              G4double pressure, G4double percXe);
+  
+  G4Material* GXe126Enriched_bydensity(G4double density,
               G4double temperature,
               G4double pressure, G4double percXe);
 
