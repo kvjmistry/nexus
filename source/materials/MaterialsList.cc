@@ -149,7 +149,7 @@ namespace materials {
     G4Material* GXe126Enriched(G4double pressure, G4double temperature, G4double percXe)
   {
     G4double gas_density = GXeDensity(pressure);
-    G4Material* mat = GXe131Enriched_bydensity(gas_density, temperature, pressure, percXe);
+    G4Material* mat = GXe126Enriched_bydensity(gas_density, temperature, pressure, percXe);
 
     return mat;
   }
