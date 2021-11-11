@@ -326,8 +326,43 @@ namespace materials {
       return mat;
   }
 
+  G4Material* GEnrXeAr(G4double pressure, G4double temperature, G4double percXe)
+  {
+    G4String name = "GEnrXeAr";
 
+    G4Material* mat = G4Material::GetMaterial(name, false);
 
+    if (mat == 0) {
+
+      mat = new G4Material(name,
+        (1-(percXe/100.))*ArgonDensity(pressure) +
+        percXe/100.*GXeDensity(pressure),
+        2, kStateGas, temperature, pressure);
+
+      G4Element* EnrXe = new G4Element("GXeEnriched", "Xe", 6);
+
+      G4Isotope* Xe129 = new G4Isotope("Xe129", 54, 129, XenonMassPerMole(129));
+      G4Isotope* Xe130 = new G4Isotope("Xe130", 54, 130, XenonMassPerMole(130));
+      G4Isotope* Xe131 = new G4Isotope("Xe131", 54, 131, XenonMassPerMole(131));
+      G4Isotope* Xe132 = new G4Isotope("Xe132", 54, 132, XenonMassPerMole(132));
+      G4Isotope* Xe134 = new G4Isotope("Xe134", 54, 134, XenonMassPerMole(134));
+      G4Isotope* Xe136 = new G4Isotope("Xe136", 54, 136, XenonMassPerMole(136));
+
+      EnrXe->AddIsotope(Xe129, 0.0656392*perCent);
+      EnrXe->AddIsotope(Xe130, 0.0656392*perCent);
+      EnrXe->AddIsotope(Xe131, 0.234361*perCent);
+      EnrXe->AddIsotope(Xe132, 0.708251*perCent);
+      EnrXe->AddIsotope(Xe134, 8.6645*perCent);
+      EnrXe->AddIsotope(Xe136, 90.2616*perCent);
+
+      G4Element* NaturalAr  = new G4Element("Argon", "Ar", 18, 39.962383123*g/mole);
+
+      mat->AddElement(NaturalAr, (100-percXe)*perCent);
+      mat->AddElement(EnrXe, percXe*perCent);
+    }
+
+      return mat;
+  }
 
   G4Material* GXeHe(G4double pressure,
           G4double temperature,
@@ -384,7 +419,7 @@ namespace materials {
   }
 
 
-
+  
 
 
   G4Material* Steel()

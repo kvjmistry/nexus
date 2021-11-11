@@ -62,6 +62,10 @@ namespace materials {
   G4Material* GXeAr(G4double pressure=STP_Pressure,
 			              G4double temperature=STP_Temperature, G4double percXe=0.);
 
+  // Mixture Enriched Xenon+Ar
+  G4Material* GEnrXeAr(G4double pressure=STP_Pressure,
+			              G4double temperature=STP_Temperature, G4double percXe=0.);
+
   // Mixture Xe+He
   G4Material* GXeHe(G4double pressure=STP_Pressure,
                     G4double temperature=STP_Temperature,
