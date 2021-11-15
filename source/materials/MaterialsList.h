@@ -155,6 +155,9 @@ namespace materials {
   // Limestone (calcium carbonate)
   G4Material* Limestone();
 
+  // Mixture of Xenon and BF3 gas (boron trifluoride)
+  G4Material* GXeBF3(G4double pressure, G4double temperature, G4double percXe);
+
   G4Material* CopyMaterial(G4Material*, const G4String&);
 
 
