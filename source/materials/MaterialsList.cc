@@ -418,7 +418,62 @@ namespace materials {
       return mat;
   }
 
+  G4Material* GXeBF3(G4double pressure, G4double temperature, G4double percXe)
+  {
+    G4String name = "GXeBF3";
 
+    G4Material* mat = G4Material::GetMaterial(name, false);
+
+    if (mat == 0) {
+
+      G4double prop_xe = percXe * perCent;
+      G4double prop_bf3 = 1. - prop_xe;
+
+      // Density at 15 bar and 300K
+      G4double density_bf3 = 40.8*kg/m3;
+
+      mat = new G4Material(name,
+        prop_xe * GXeDensity(pressure)
+        + prop_bf3 * density_bf3,
+        2, kStateGas, temperature, pressure);
+
+
+      G4Element* enrichedXe = new G4Element("GXeEnriched", "enrichedXe", 6);
+      G4Isotope* Xe129 = new G4Isotope("Xe129", 54, 129,
+              XenonMassPerMole(129));
+      G4Isotope* Xe130 = new G4Isotope("Xe130", 54, 130,
+              XenonMassPerMole(130));
+      G4Isotope* Xe131 = new G4Isotope("Xe131", 54, 131,
+              XenonMassPerMole(131));
+      G4Isotope* Xe132 = new G4Isotope("Xe132", 54, 132,
+              XenonMassPerMole(132));
+      G4Isotope* Xe134 = new G4Isotope("Xe134", 54, 134,
+              XenonMassPerMole(134));
+      G4Isotope* Xe136 = new G4Isotope("Xe136", 54, 136,
+              XenonMassPerMole(136));
+
+      enrichedXe->AddIsotope(Xe129, 0.0656392*perCent);
+      enrichedXe->AddIsotope(Xe130, 0.0656392*perCent);
+      enrichedXe->AddIsotope(Xe131, 0.234361*perCent);
+      enrichedXe->AddIsotope(Xe132, 0.708251*perCent);
+      enrichedXe->AddIsotope(Xe134, 8.6645*perCent);
+      enrichedXe->AddIsotope(Xe136, 90.2616*perCent);
+
+      G4NistManager* nist = G4NistManager::Instance();
+      
+      G4Material* BF3 = new G4Material(name, density_bf3, 2, kStateGas, temperature, pressure);
+      G4Element* B = nist->FindOrBuildElement("B");
+      BF3->AddElement(B, 1);
+      G4Element* F = nist->FindOrBuildElement("F");
+      BF3->AddElement(F, 3);
+
+      mat->AddMaterial(BF3, prop_bf3);
+      mat->AddElement(enrichedXe, prop_xe);
+
+    }
+
+      return mat;
+  }
   
 
 
