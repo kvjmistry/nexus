@@ -41,7 +41,7 @@ NextTonScale::NextTonScale():
   fcage_thickn_(1.*cm),
   active_diam_(300.*cm), active_length_(300.*cm),
   cathode_thickn_(.2*mm), anode_thickn_(1.5*cm), readout_gap_(5.*mm),
-  xe_perc_(100.), helium_mass_num_(4),
+  xe_perc_(100.), helium_mass_num_(4), boron_A_(10),
   tank_vis_(true), vessel_vis_(true), ics_vis_(true),
   fcage_vis_(true), cathode_vis_(true), anode_vis_(true), readout_vis_(true),
   specific_vertex_{},
@@ -258,7 +258,7 @@ G4LogicalVolume* NextTonScale::ConstructVesselAndICS(G4LogicalVolume* mother_log
   // Outer diameter of the boron layer
   G4double boron_length = active_length_ + 2*boron_thickn_;
   
-  G4Isotope* B10 = new G4Isotope("B10", 5, 10);
+  G4Isotope* B10 = new G4Isotope("B10", 5, boron_A_);
   G4Element* B  = new G4Element("Boron", "B", 1);
   B->AddIsotope(B10, 100.*perCent);
 
@@ -618,6 +618,11 @@ void NextTonScale::DefineConfigurationParameters()
     msg_->DeclareProperty("helium_A", helium_mass_num_,
 			  "Mass number for helium used, 3 or 4");
   type_helium_cmd.SetParameterName("helium_A", false);
+
+  G4GenericMessenger::Command& type_boron_cmd =
+    msg_->DeclareProperty("boron_A", boron_A_,
+			  "Mass number for boron used, 10 or 11");
+  type_boron_cmd.SetParameterName("boron_A", false);
 
 
   // Geometry visibilities /////////////////////////////////
