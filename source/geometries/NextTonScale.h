@@ -51,7 +51,7 @@ namespace nexus {
     G4double gas_pressure_, gas_temperature_;
     G4double detector_diam_, detector_length_;
     G4double tank_size_, tank_thickn_, water_thickn_;
-    G4double vessel_thickn_, ics_thickn_, endcap_hollow_;
+    G4double vessel_thickn_, ics_thickn_, endcap_hollow_, boron_thickn_;
     G4double fcage_thickn_, active_diam_, active_length_;
     G4double cathode_thickn_, anode_thickn_, readout_gap_;
     G4double xe_perc_, helium_mass_num_;

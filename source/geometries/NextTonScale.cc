@@ -37,7 +37,7 @@ NextTonScale::NextTonScale():
   gas_("naturalXe"), gas_pressure_(15.*bar), gas_temperature_(300.*kelvin),
   detector_diam_(0.), detector_length_(0.),
   tank_size_(0.), tank_thickn_(1.*cm), water_thickn_(3.*m),
-  vessel_thickn_(1.5*mm), ics_thickn_(12.*cm), endcap_hollow_(20.*cm),
+  vessel_thickn_(1.5*mm), ics_thickn_(12.*cm),boron_thickn_(0.0*um), endcap_hollow_(20.*cm),
   fcage_thickn_(1.*cm),
   active_diam_(300.*cm), active_length_(300.*cm),
   cathode_thickn_(.2*mm), anode_thickn_(1.5*cm), readout_gap_(5.*mm),
@@ -71,9 +71,9 @@ void NextTonScale::Construct()
 {
   // We calculate in the following the overall dimensions (external)
   // of the detector and the water tank.
-  detector_diam_   = active_diam_ + 2.*fcage_thickn_ + 2.*ics_thickn_ + 2.*vessel_thickn_;
+  detector_diam_   = active_diam_ + 2.*fcage_thickn_ + 2.*ics_thickn_ + 2.*boron_thickn_ + 2.*vessel_thickn_;
   detector_length_ = active_length_ + 2.*anode_thickn_  + 2.*readout_gap_ +
-                     2.*ics_thickn_ + 2.*endcap_hollow_ + 2.*vessel_thickn_;
+                     2.*ics_thickn_ + 2*boron_thickn_ +  2.*endcap_hollow_ + 2.*vessel_thickn_;
   tank_size_ = std::max(detector_diam_, detector_length_) +
                2.*water_thickn_ + 2.*tank_thickn_;
 
@@ -186,7 +186,11 @@ G4LogicalVolume* NextTonScale::ConstructVesselAndICS(G4LogicalVolume* mother_log
   new G4PVPlacement(vessel_rotation, G4ThreeVector(0.,0.,0.), vessel_logic_vol,
                     vessel_name, mother_logic_vol, false, 0, true);
 
-  if (vessel_vis_) vessel_logic_vol->SetVisAttributes(nexus::TitaniumGrey());
+  if (vessel_vis_) {
+    G4VisAttributes vessel_col = nexus::TitaniumGreyAlpha();
+    vessel_col.SetForceSolid(true);
+    vessel_logic_vol->SetVisAttributes(vessel_col);
+  }
   else vessel_logic_vol->SetVisAttributes(G4VisAttributes::GetInvisible());
 
   // XENON GAS /////////////////////////////////////////////
@@ -236,11 +240,51 @@ G4LogicalVolume* NextTonScale::ConstructVesselAndICS(G4LogicalVolume* mother_log
     new G4LogicalVolume(ics_solid_vol, ics_material, ics_name);
 
   // Setting ics visibility
-  if (ics_vis_) ics_logic_vol->SetVisAttributes(nexus::CopperBrown());
+  if (ics_vis_) {
+    G4VisAttributes ics_col= nexus::CopperBrownAlpha();
+    ics_col.SetForceSolid(true);
+    ics_logic_vol->SetVisAttributes(ics_col);
+  }
   else ics_logic_vol->SetVisAttributes(G4VisAttributes::GetInvisible());
 
   new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,0.), ics_logic_vol,
                     ics_name, gas_logic_vol, false, 0, true);
+
+
+  // Boron Layer
+  G4String boron_name = "BORON";
+  G4double boron_diam = active_diam_ + 2.*fcage_thickn_+ 2.*boron_thickn_;
+
+  // Outer diameter of the boron layer
+  G4double boron_length = active_length_ + 2*boron_thickn_;
+  
+  G4Isotope* B10 = new G4Isotope("B10", 5, 10);
+  G4Element* B  = new G4Element("Boron", "B", 1);
+  B->AddIsotope(B10, 100.*perCent);
+
+  G4Material* boron_material = G4Material::GetMaterial(boron_name, false);
+  boron_material = new G4Material("B10", 2.34*g/cm3,1);
+  boron_material->AddElement(B,1);
+
+  G4Tubs* boron_full_solid_vol =
+    new G4Tubs("BORON_FULL", 0., boron_diam/2., boron_length/2., 0., 360.*deg);
+  G4Tubs* boron_void_solid_vol =
+    new G4Tubs("BORON_VOID", 0., (boron_diam-2.*boron_thickn_)/2.,
+               (boron_length - 2*boron_thickn_)/2., 0., 360.*deg);
+  G4SubtractionSolid* boron_solid_vol =
+    new G4SubtractionSolid(boron_name, boron_full_solid_vol, boron_void_solid_vol); 
+
+
+  G4LogicalVolume* boron_logic_vol =
+    new G4LogicalVolume(boron_solid_vol, boron_material, boron_name);
+
+  // Setting ics visibility
+  G4VisAttributes boron_col= nexus::BlueAlpha();
+  boron_col.SetForceSolid(true);
+  boron_logic_vol->SetVisAttributes(boron_col);
+
+  new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,0.), boron_logic_vol,
+                    boron_name, gas_logic_vol, false, 0, true);
 
 
   // Vertex generator for ICS
@@ -279,7 +323,11 @@ G4LogicalVolume* NextTonScale::ConstructFieldCageAndReadout(G4LogicalVolume* mot
   G4LogicalVolume* fcage_logic_vol =
     new G4LogicalVolume(fcage_solid_vol, fcage_material, fcage_name);
 
-  if (fcage_vis_) fcage_logic_vol->SetVisAttributes(nexus::LightBlue());
+  if (fcage_vis_) {
+    G4VisAttributes fcage_col = nexus::YellowAlpha();
+    fcage_col.SetForceSolid(true);
+    fcage_logic_vol->SetVisAttributes(fcage_col);
+  }
   else fcage_logic_vol->SetVisAttributes(G4VisAttributes::GetInvisible());
 
   new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,0.), fcage_logic_vol,
@@ -322,7 +370,10 @@ G4LogicalVolume* NextTonScale::ConstructFieldCageAndReadout(G4LogicalVolume* mot
   G4LogicalVolume* cathode_logic_vol =
     new G4LogicalVolume(cathode_solid_vol, cathode_mat, cathode_name);
 
-  if (cathode_vis_) cathode_logic_vol->SetVisAttributes(nexus::CopperBrown());
+  if (cathode_vis_) {
+    G4VisAttributes cathode_col = nexus::TitaniumGreyAlpha();
+    cathode_logic_vol->SetVisAttributes(cathode_col);
+  }
   else cathode_logic_vol->SetVisAttributes(G4VisAttributes::GetInvisible());
 
   new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,0.), cathode_logic_vol,
@@ -340,7 +391,10 @@ G4LogicalVolume* NextTonScale::ConstructFieldCageAndReadout(G4LogicalVolume* mot
   G4LogicalVolume* anode_logic_vol =
     new G4LogicalVolume(anode_solid_vol, xenon_gas_, anode_name);
 
-  if (anode_vis_) anode_logic_vol->SetVisAttributes(nexus::CopperBrown());
+  if (anode_vis_) {
+    G4VisAttributes anode_col = nexus::TitaniumGreyAlpha();
+    anode_logic_vol->SetVisAttributes(anode_col);
+  }
   else anode_logic_vol->SetVisAttributes(G4VisAttributes::GetInvisible());
 
   new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,anode_posZ), anode_logic_vol,
@@ -367,7 +421,10 @@ G4LogicalVolume* NextTonScale::ConstructFieldCageAndReadout(G4LogicalVolume* mot
   G4LogicalVolume* readout_logic_vol =
     new G4LogicalVolume(readout_solid_vol, readout_material, readout_name);
 
-  if (readout_vis_) readout_logic_vol->SetVisAttributes(nexus::CopperBrown());
+  if (readout_vis_) {
+    G4VisAttributes readout_col = nexus::TitaniumGreyAlpha();
+    readout_logic_vol->SetVisAttributes(readout_col);
+  }
   else readout_logic_vol->SetVisAttributes(G4VisAttributes::GetInvisible());
 
   new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,readout_posZ), readout_logic_vol,
@@ -538,6 +595,13 @@ void NextTonScale::DefineConfigurationParameters()
   water_thickn_cmd.SetUnitCategory("Length");
   water_thickn_cmd.SetParameterName("water_thickn", false);
   water_thickn_cmd.SetRange("water_thickn>=0.");
+
+  G4GenericMessenger::Command& boron_thickn_cmd =
+    msg_->DeclareProperty("boron_thickn", boron_thickn_,
+                          "Thickness of the B10 Layer.");
+  boron_thickn_cmd.SetUnitCategory("Length");
+  boron_thickn_cmd.SetParameterName("boron_thickn", false);
+  boron_thickn_cmd.SetRange("boron_thickn>=0.");
 
   // Specific vertex in case region to shoot from is AD_HOC
   msg_->DeclarePropertyWithUnit("specific_vertex", "mm",  specific_vertex_,
