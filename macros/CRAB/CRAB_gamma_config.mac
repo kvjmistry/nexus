@@ -1,0 +1,42 @@
+# VERBOSITY
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/process/em/verbose 0
+
+#GEOMETRY
+/Geometry/CRAB/gas_pressure 10. bar
+/Geometry/CRAB/chamber_diam  15. cm
+/Geometry/CRAB/chamber_length 47.84 cm
+/Geometry/CRAB/chamber_thickn 2. mm
+#/Geometry/CRAB/SourcePosition -4.5 -4.5 -4.5 cm
+/Geometry/CRAB/SourcePosition -5.4 0 0 cm
+#/Geometry/CRAB/SourcePosition 0 0 0 cm
+
+#Active
+/Geometry/CRAB/Active_diam 8.5 cm
+/Geometry/CRAB/Active_length 45 cm
+
+#SourceEncloser
+/Geometry/CRAB/SourceEn_diam 10 mm
+/Geometry/CRAB/SourceEn_holedi 5 mm
+/Geometry/CRAB/SourceEn_offset 5.7 cm
+
+
+# GENERATOR
+/Generator/SingleParticle/max_energy 0.5 MeV
+/Generator/SingleParticle/min_energy 1 MeV
+/Generator/SingleParticle/region GAS
+/Generator/SingleParticle/particle gamma
+/Generator/SingleParticle/momentum 1 0 0
+
+#Actions
+#/Actions/DefaultEventAction/energy_threshold 1 keV
+/Actions/DefaultEventAction/max_energy 3.00 GeV
+/Actions/DefaultEventAction/min_energy 100 eV
+
+
+# PERSISTENCY
+/nexus/persistency/eventType background
+/nexus/persistency/outputFile /media/ilker/writable/CRAB/test
+/run/printProgress 2

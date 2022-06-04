@@ -1,0 +1,46 @@
+# VERBOSITY
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/process/em/verbose 0
+
+#GEOMETRY
+/Geometry/CRAB/gas_pressure 10. bar
+/Geometry/CRAB/chamber_diam  15. cm
+/Geometry/CRAB/chamber_length 47.84 cm
+/Geometry/CRAB/chamber_thickn 2. mm
+#/Geometry/CRAB/SourcePosition -4.5 -4.5 -4.5 cm
+/Geometry/CRAB/SourcePosition -5.4 0 0 cm
+#/Geometry/CRAB/SourcePosition 0 0 0 cm
+
+#Active
+/Geometry/CRAB/Active_diam 8.5 cm
+/Geometry/CRAB/Active_length 45 cm
+
+#SourceEncloser
+/Geometry/CRAB/SourceEn_diam 10 mm
+/Geometry/CRAB/SourceEn_holedi 1 mm
+/Geometry/CRAB/SourceEn_offset 5.7 cm
+
+
+
+# GENERATOR
+/Generator/CrabSourceGenerator/region GAS
+
+#Ba133
+/Generator/CrabSourceGenerator/atomic_number 56
+/Generator/CrabSourceGenerator/mass_number 133
+/Generator/CrabSourceGenerator/decay_rate 100000 nCi
+/Generator/CrabSourceGenerator/event_window 0
+#works only if event_window is zero5
+#/Generator/CrabSourceGenerator/NDecays 39
+
+#Actions
+/Actions/DefaultEventAction/energy_threshold 100 eV
+#/Actions/DefaultEventAction/max_energy 1.00 GeV
+
+# PERSISTENCY
+/nexus/persistency/eventType background
+#/nexus/persistency/outputFile Ba133_2mm222
+/nexus/persistency/outputFile /media/ilker/writable/DATA/Ba133_2mm_100000
+#/run/printProgress 100
