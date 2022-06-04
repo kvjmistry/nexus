@@ -42,10 +42,12 @@ namespace nexus {
             G4double sc_yield_;
             G4double e_lifetime_;
             G4ThreeVector vertex;
+
             void ConstructLab();
             void PlaceVolumes();
             void AssignVisuals();
             void PrintParam();
+
 
     };
 

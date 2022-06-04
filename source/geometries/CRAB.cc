@@ -163,7 +163,6 @@ namespace nexus{
         G4SDManager::GetSDMpointer()->AddNewDetector(sensdet);
 
 
-        PmtR7378A * pmt1 =new PmtR7378A();
         AssignVisuals();
         //this->SetLogicalVolume(lab_logic_volume);
         this->SetLogicalVolume(chamber_logic);
