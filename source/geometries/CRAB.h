@@ -5,7 +5,7 @@
 #ifndef NEXUS_CRAB_H
 #define NEXUS_CRAB_H
 #include "GeometryBase.h"
-
+#include "PmtR7378A.h"
 class G4GenericMessenger;
 
 namespace nexus {
@@ -42,6 +42,17 @@ namespace nexus {
             G4double sc_yield_;
             G4double e_lifetime_;
             G4ThreeVector vertex;
+            PmtR7378A *pmt1_;
+            PmtR7378A *pmt2_;
+            G4double sapphire_window_thickness_;
+            G4double sapphire_window_diam_;
+            G4double pmt_hole_length_ ;
+            G4double wndw_ring_stand_out_;
+            G4double pedot_coating_thickness_;
+            G4double optical_pad_thickness_;
+            G4double pmt_base_diam_;
+            G4double pmt_base_thickness_;
+
 
             void ConstructLab();
             void PlaceVolumes();

@@ -3,7 +3,6 @@
 //
 
 #include "CRAB.h"
-#include "PmtR7378A.h"
 #include "MaterialsList.h"
 #include "OpticalMaterialProperties.h"
 #include "UniformElectricDriftField.h"
@@ -45,8 +44,15 @@ namespace nexus{
              gas_pressure_(10. * bar),
              vtx_(0,0,0),
             sc_yield_(25510.),
-            e_lifetime_(1000. * ms)
-
+            e_lifetime_(1000. * ms),
+             pmt_hole_length_ (18.434 * cm),
+             sapphire_window_thickness_ (6. * mm),
+             sapphire_window_diam_ (85. * mm),
+             wndw_ring_stand_out_ (1.5 * mm), //how much the ring around sapph windows stands out of them
+             pedot_coating_thickness_ (200. * nanometer), // copied from NEW
+             optical_pad_thickness_ (1. * mm), // copied from NEW
+             pmt_base_diam_ (47. * mm),
+             pmt_base_thickness_ (5. * mm)
 
     {
         msg_ = new G4GenericMessenger(this, "/Geometry/CRAB/","Control commands of geometry of CRAB TPC");
@@ -89,24 +95,33 @@ namespace nexus{
         eliftime_cmd.SetParameterName("ElecLifTime", false);
         G4GenericMessenger::Command&  scinYield_cmd =msg_->DeclareProperty("scinYield",sc_yield_,"Scintilation Yield");
         scinYield_cmd.SetParameterName("scinYield", false);
+        sc_yield_=(sc_yield_* 1/MeV);
+        pmt1_=new PmtR7378A();
+        pmt2_=new PmtR7378A();
 
     }
 
     CRAB::~CRAB()
     {
-        //delete msg_;
+
+        delete msg_;
+        delete pmt1_;
+        delete pmt2_;
     }
 
     void CRAB::Construct(){
-
 
         //Constructing Lab Space
         G4String lab_name="LAB";
         G4Box * lab_solid_volume = new G4Box(lab_name,Lab_size/2,Lab_size/2,Lab_size/2);
         G4LogicalVolume * lab_logic_volume= new G4LogicalVolume(lab_solid_volume,G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR"),lab_name) ;
 
-        //lab_logic_volume->SetVisAttributes(G4VisAttributes::Invisible);
+        // PMT Holes
+        G4Tubs * pmthole=new G4Tubs("Pmthole",0,sapphire_window_diam_/2,(chamber_thickn+1*cm)/2,0,twopi);
 
+
+
+        //lab_logic_volume->SetVisAttributes(G4VisAttributes::Invisible);
 
         //Creating the Steel Cylinder that we use
         G4Tubs* chamber_solid =new G4Tubs("CHAMBER", 0., (chamber_diam/2. + chamber_thickn),(chamber_length/2. + chamber_thickn), 0.,twopi);
@@ -127,8 +142,9 @@ namespace nexus{
         //G4Material* gxe = materials::GXe(gas_pressure_);
         //gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68));
 
+
         G4Material* gxe = materials::GXe(gas_pressure_,68);
-        sc_yield_=(sc_yield_* 1/MeV);
+
         gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68,sc_yield_,e_lifetime_));
         G4LogicalVolume* gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS");
         G4LogicalVolume* Active_logic = new G4LogicalVolume(Active_solid, gxe, "ACTIVE");
@@ -144,8 +160,9 @@ namespace nexus{
         //Rotation Matrix
         G4RotationMatrix* rm = new G4RotationMatrix();
         rm->rotateY(90.*deg);
-        //rm->rotateX(-45.*deg);
+
         // Place the Volumes
+
         new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0,false,0, true);
         new G4PVPlacement(0,G4ThreeVector(0.,0.,0.) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,true);
         new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),chamber_logic, false, 0, true);
@@ -158,7 +175,6 @@ namespace nexus{
 
         // Define this volume as an ionization sensitive detector
         IonizationSD* sensdet = new IonizationSD("/CRAB/ACTIVE");
-        //IonizationSD* sensdet = new IonizationSD("/CRAB/GAS");
         Active_logic->SetSensitiveDetector(sensdet);
         G4SDManager::GetSDMpointer()->AddNewDetector(sensdet);
 

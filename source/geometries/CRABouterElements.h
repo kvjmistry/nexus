@@ -17,7 +17,7 @@ namespace nexus {
     class CRABouterElements : public GeometryBase {
     public:
         //Constructor
-        CRABouterElements{};
+        CRABouterElements();
 
         //Destructor
         ~CRABouterElements();
@@ -40,6 +40,9 @@ namespace nexus {
         G4Material *gas_;
         G4double pressure_;
         G4double temperature_;
+
+        // Messenger for the definition of control commands
+        G4GenericMessenger* msg_;
 
         // Detector parts    };
     };

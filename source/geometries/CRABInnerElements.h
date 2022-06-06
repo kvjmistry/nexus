@@ -36,8 +36,6 @@ namespace nexus{
         G4Material* gas_;
         G4double pressure_;
         //Detector parts here FieldCage
-
-
     };
 } // end namespace nexus
 
