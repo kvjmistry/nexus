@@ -3,6 +3,7 @@
 //
 
 #include "CRAB.h"
+#include "Visibilities.h"
 #include "MaterialsList.h"
 #include "OpticalMaterialProperties.h"
 #include "UniformElectricDriftField.h"
@@ -48,7 +49,7 @@ namespace nexus{
             e_lifetime_(1000. * ms),
              pmt_hole_length_ (18.434 * cm),
              sapphire_window_thickness_ (6. * mm),
-             sapphire_window_diam_ (85. * mm),
+             sapphire_window_diam_ (25.4 * mm),
              wndw_ring_stand_out_ (1.5 * mm), //how much the ring around sapph windows stands out of them
              pedot_coating_thickness_ (200. * nanometer), // copied from NEW
              optical_pad_thickness_ (1. * mm), // copied from NEW
@@ -123,16 +124,10 @@ namespace nexus{
         vacuum->SetMaterialPropertiesTable(opticalprops::Vacuum());
         gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68,sc_yield_,e_lifetime_));
 
-
-
         //Constructing Lab Space
         G4String lab_name="LAB";
         G4Box * lab_solid_volume = new G4Box(lab_name,Lab_size/2,Lab_size/2,Lab_size/2);
         G4LogicalVolume * lab_logic_volume= new G4LogicalVolume(lab_solid_volume,G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR"),lab_name) ;
-
-        // PMT Holes
-        G4Tubs * pmthole=new G4Tubs("Pmthole",0,sapphire_window_diam_/2,(chamber_thickn+1*cm)/2,0,twopi);
-
 
 
         //lab_logic_volume->SetVisAttributes(G4VisAttributes::Invisible);
@@ -140,109 +135,45 @@ namespace nexus{
         //Creating the Steel Cylinder that we need
 
         /// First Creating the Ends of the Cylinder with Proper Holes
-        G4double hole_diam=2.54*cm;
-        G4Tubs* chamber_solid_end =new G4Tubs("CHAMBER_END", hole_diam/2, (chamber_diam/2. + chamber_thickn),( chamber_thickn), 0.,twopi);
-        G4LogicalVolume* chamber_logic_end =new G4LogicalVolume(chamber_solid_end,materials::Steel(), "CHAMBER_END");
+        G4Tubs* chamber_flange_solid =new G4Tubs("CHAMBER_FLANGE", sapphire_window_diam_/2, (chamber_diam/2. + chamber_thickn),( chamber_thickn), 0.,twopi);
+        G4LogicalVolume* chamber_flange_logic =new G4LogicalVolume(chamber_flange_solid,materials::Steel(), "CHAMBER_FLANGE");
+
         // Now Creating The Chamber with Without Ends
-        G4Tubs* chamber_solid =new G4Tubs("CHAMBER", (chamber_diam/2. - chamber_thickn), (chamber_diam/2. + chamber_thickn),(chamber_length/2. + chamber_thickn), 0.,twopi);
-
+        G4Tubs* chamber_solid =new G4Tubs("CHAMBER", chamber_diam/2., (chamber_diam/2. + chamber_thickn),(chamber_length/2. + chamber_thickn), 0.,twopi);
         G4LogicalVolume* chamber_logic =new G4LogicalVolume(chamber_solid,materials::Steel(), "CHAMBER"); //
-        ///////////////////////// From Next Energy Plane ////////////////
-        /// Vacuum volume that encapsulates all elements related to PMTs. ///
-        G4double hole_length_front_,pmt_stand_out_;
 
 
-        G4double vacuum_front_length = hole_length_front_ + pmt_stand_out_+ sapphire_window_thickness_;
-        G4Tubs* vacuum_front_solid =
-                new G4Tubs("HOLE_FRONT", 0., +hole_diam/2., vacuum_front_length/2., 0., twopi);
-
-        G4Tubs* vacuum_rear_solid =
-                new G4Tubs("HOLE_REAR", 0., hole_diam_rear_/2., (hole_length_rear_+offset)/2., 0., twopi);
-
-        G4Tubs* vacuum_hut_solid =
-                new G4Tubs("HOLE_HUT", 0., hut_int_diam_/2., hut_hole_length_/2., 0., twopi);
-
-        G4UnionSolid* vacuum_solid =
-                new G4UnionSolid("EP_HOLE", vacuum_front_solid, vacuum_rear_solid, 0,
-                                 G4ThreeVector(0., 0., (vacuum_front_length+hole_length_rear_)/2.));
-
-        vacuum_solid =
-                new G4UnionSolid("EP_HOLE", vacuum_solid, vacuum_hut_solid, 0,
-                                 G4ThreeVector(0., 0., vacuum_front_length/2.+hole_length_rear_+hut_hole_length_/2.));
-
-        G4LogicalVolume* vacuum_logic = new G4LogicalVolume(vacuum_solid, vacuum, "EP_HOLE");
 
         /// Sapphire window ///
-        G4Tubs* sapphire_window_solid = new G4Tubs("SAPPHIRE_WINDOW", 0., hole_diam_front_/2.,
+        G4Tubs* sapphire_window_solid = new G4Tubs("SAPPHIRE_WINDOW", 0., sapphire_window_diam_/2.,
                                                    (sapphire_window_thickness_ )/2., 0., twopi);
-
-        G4LogicalVolume* sapphire_window_logic
-                = new G4LogicalVolume(sapphire_window_solid, Saphire, "SAPPHIRE_WINDOW");
-
-        G4double window_posz = -vacuum_front_length/2. + (sapphire_window_thickness_ )/2.;
-
-        G4VPhysicalVolume* sapphire_window_phys =
-                new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), sapphire_window_logic,
-                                  "SAPPHIRE_WINDOW", vacuum_logic, false, 0, false);
+        G4LogicalVolume* sapphire_window_logic= new G4LogicalVolume(sapphire_window_solid, Saphire, "SAPPHIRE_WINDOW");
 
 
         //////////////////////////////////////////
 
-
         // Placing the gas in the chamber
-
         G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2., 0., twopi);
+        G4LogicalVolume* gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS");
+
+        //Defining the Detection Area
         G4Tubs* Active_solid =new G4Tubs("ACTIVE", 0., Active_diam/2., Active_length/2., 0., twopi);
+        G4LogicalVolume* Active_logic = new G4LogicalVolume(Active_solid, gxe, "ACTIVE");
+
+
 
         // Radioactive Source Encloser
         //Source
         G4Tubs* SourceHolChamber_solid =new G4Tubs("SourceHolChamber", SourceEn_holedia/2, (SourceEn_diam/2. + SourceEn_thickn),(SourceEn_length/2. + SourceEn_thickn),0,twopi);
-        G4Tubs* SourceHolChamberBlock_solid =new G4Tubs("SourceHolChBlock",0,(SourceEn_holedia/2),( SourceEn_thickn/2), 0.,twopi);
-
-        //G4VSolid *SourceHolderGas_solid= new G4SubtractionSolid("SourceHolderGas",Source_Chm_solid,SourceHolder_solid);
-
-
-        //G4Material* gxe = materials::GXe(gas_pressure_);
-        //gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68));
-
-
-
-
-        G4LogicalVolume* gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS");
-        G4LogicalVolume* Active_logic = new G4LogicalVolume(Active_solid, gxe, "ACTIVE");
-
-
-        //G4LogicalVolume* SourceHolderGas_logic = new G4LogicalVolume(SourceHolderGas_solid, gxe, "SourceHolderGAS_logic");
-
         G4LogicalVolume* SourceHolChamber_logic = new G4LogicalVolume(SourceHolChamber_solid,materials::Steel(), "SourceHolChamber_logic");
+
+        G4Tubs* SourceHolChamberBlock_solid =new G4Tubs("SourceHolChBlock",0,(SourceEn_holedia/2),( SourceEn_thickn/2), 0.,twopi);
         G4LogicalVolume* SourceHolChamberBlock_logic = new G4LogicalVolume(SourceHolChamberBlock_solid,materials::Steel(), "SourceHolChBlock_logic");
 
+        //G4LogicalVolume* SourceHolderGas_logic = new G4LogicalVolume(SourceHolChamber_solid, gxe, "SourceHolderGAS_logic");
 
 
 
-
-        //Rotation Matrix
-        G4RotationMatrix* rm = new G4RotationMatrix();
-        rm->rotateY(90.*deg);
-
-
-        // Place the Volumes
-        new G4PVPlacement(0,G4ThreeVector(0,0,-((chamber_length/2-chamber_thickn))),chamber_logic_end,chamber_solid_end->GetName(),lab_logic_volume,false,0,
-                          false);
-        new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0,false,0, false);
-        new G4PVPlacement(0,G4ThreeVector(0.,0.,0.) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
-        new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),chamber_logic, false, 0, false);
-        new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), Active_logic, Active_solid->GetName(),gas_logic, false, 0, false);
-        //new G4PVPlacement(rm, G4ThreeVector(-SourceEn_offset,-SourceEn_offset,-SourceEn_offset), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
-        //new G4PVPlacement(rm, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,-SourceEn_offset-SourceEn_length/2,-SourceEn_offset), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
-        new G4PVPlacement(rm, G4ThreeVector(-SourceEn_offset,0,0), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
-        new G4PVPlacement(rm, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
-
-
-        // Define this volume as an ionization sensitive detector
-        IonizationSD* sensdet = new IonizationSD("/CRAB/ACTIVE");
-        Active_logic->SetSensitiveDetector(sensdet);
-        G4SDManager::GetSDMpointer()->AddNewDetector(sensdet);
 
 
 
@@ -251,14 +182,56 @@ namespace nexus{
         pmt1_->Construct();
         pmt2_->Construct();
 
+        // Adding Logical Volumes for PMTs
         G4LogicalVolume * pmt1_logic=pmt1_->GetLogicalVolume();
         G4LogicalVolume * pmt2_logic=pmt2_->GetLogicalVolume();
 
 
+
+        // Place the Volumes
+
+        //LAB
+        new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0,false,0, false);
+
+        //Flanges on the Chamber
+        new G4PVPlacement(0,G4ThreeVector(0,0,(chamber_length/2)),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,0,false);
+        new G4PVPlacement(0,G4ThreeVector(0,0,-(chamber_length/2)),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,1,false);
+
+        //Chamber
+        new G4PVPlacement(0,G4ThreeVector(0.,0.,0.) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
+
+        // Xenon Gas in Active Area and Non-Active Area
+        new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),lab_logic_volume, false, 0, false);
+        new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), Active_logic, Active_solid->GetName(),gas_logic, false, 0, false);
+
+
+        // Particle Source Holder
+        //Rotation Matrix
+        G4RotationMatrix* rotateHolder = new G4RotationMatrix();
+        rotateHolder->rotateY(90.*deg);
+        new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset,0,0), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
+        new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
+
+
+
+        // PMTs
+        G4double PMT_pos=(chamber_length/2)+chamber_thickn+(pmt1_->Length()/2)+sapphire_window_thickness_+0.2*cm;
         G4RotationMatrix* pmt1rotate = new G4RotationMatrix();
         pmt1rotate->rotateY(180.*deg);
-        new G4PVPlacement(0,G4ThreeVector (0,0,-((chamber_length/2)+chamber_thickn+(pmt1_->Length()/2))),pmt1_logic,"PMT1",lab_logic_volume,false,0,false);
-        new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,((chamber_length/2)+chamber_thickn+((pmt2_->Length()/2)))),pmt2_logic,"PMT2",lab_logic_volume,false,0,false);
+        new G4PVPlacement(0,G4ThreeVector (0,0,-PMT_pos),pmt1_logic,"PMT",lab_logic_volume,false,0,false);
+        new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,PMT_pos),pmt2_logic,"PMT",lab_logic_volume,false,1,false);
+
+        //  Saphire Windows
+        //G4double window_posz = chamber_length/2+chamber_thickn/2;
+        G4double window_posz = chamber_length/2;
+        new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), sapphire_window_logic,"SAPPHIRE_WINDOW", lab_logic_volume,false, 0, false);
+        new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), sapphire_window_logic,"SAPPHIRE_WINDOW", lab_logic_volume, false, 1, false);
+
+
+        // Define this volume as an ionization sensitive detector
+        IonizationSD* sensdet = new IonizationSD("/CRAB/ACTIVE");
+        Active_logic->SetSensitiveDetector(sensdet);
+        G4SDManager::GetSDMpointer()->AddNewDetector(sensdet);
 
         AssignVisuals();
         this->SetLogicalVolume(lab_logic_volume);
@@ -274,6 +247,7 @@ namespace nexus{
         G4LogicalVolume* Lab = lvStore->GetVolume("LAB");
         G4LogicalVolume* Active = lvStore->GetVolume("ACTIVE");
         G4LogicalVolume* Gas = lvStore->GetVolume("GAS");
+
 
 
         G4LogicalVolume* SourceHolder = lvStore->GetVolume("SourceHolChamber_logic");
@@ -295,6 +269,27 @@ namespace nexus{
         Gas->SetVisAttributes(GasVa);
         SourceHolderVa->SetForceSolid(true);
         //SourceHolderVa->SetForceSolid(true);
+
+        // Flange
+        G4LogicalVolume* flangeLog = lvStore->GetVolume("CHAMBER_FLANGE");
+        G4VisAttributes flangeVis=nexus::DarkGreyAlpha();
+        flangeVis.SetForceSolid(true);
+        flangeLog->SetVisAttributes(ChamberVa);
+
+
+        //PMT
+        /*G4LogicalVolume* PMTlog = lvStore->GetVolume("PMT");
+        G4VisAttributes  PMTVis=nexus::TitaniumGreyAlpha();
+        PMTVis.SetForceSolid(true);
+        PMTlog->SetVisAttributes(PMTVis);
+        */
+
+        //SaphireWindow
+        G4LogicalVolume* SaphireWindowLog = lvStore->GetVolume("SAPPHIRE_WINDOW");
+        G4VisAttributes  SaphireWindowVis=nexus::LillaAlpha();
+        SaphireWindowVis.SetForceSolid(true);
+        SaphireWindowLog->SetVisAttributes(SaphireWindowVis);
+
 
         SourceHolder->SetVisAttributes(SourceHolderVa);
         SourceHolderBlock->SetVisAttributes(SourceHolderVa);

@@ -6,7 +6,7 @@
 
 #GEOMETRY
 /Geometry/CRAB/gas_pressure 10. bar
-#/Geometry/CRAB/scinYield 1000
+/Geometry/CRAB/scinYield 10
 /Geometry/CRAB/chamber_diam  15. cm
 /Geometry/CRAB/chamber_length 47.84 cm
 /Geometry/CRAB/chamber_thickn 2. mm
