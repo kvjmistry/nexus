@@ -20,6 +20,7 @@
 #include <G4VisAttributes.hh>
 #include "G4PhysicalVolumeStore.hh"
 #include "G4LogicalVolumeStore.hh"
+#include "XenonProperties.h"
 
 #include <CLHEP/Units/SystemOfUnits.h>
 #include <CLHEP/Units/PhysicalConstants.h>
@@ -54,7 +55,8 @@ namespace nexus{
              pedot_coating_thickness_ (200. * nanometer), // copied from NEW
              optical_pad_thickness_ (1. * mm), // copied from NEW
              pmt_base_diam_ (47. * mm),
-             pmt_base_thickness_ (5. * mm)
+             pmt_base_thickness_ (5. * mm),
+             efield_(true)
 
     {
         msg_ = new G4GenericMessenger(this, "/Geometry/CRAB/","Control commands of geometry of CRAB TPC");
@@ -233,6 +235,32 @@ namespace nexus{
         Active_logic->SetSensitiveDetector(sensdet);
         G4SDManager::GetSDMpointer()->AddNewDetector(sensdet);
 
+        if(efield_){
+            /*UniformElectricDriftField * EfieldForEL=new UniformElectricDriftField();
+            EfieldForEL->SetCathodePosition(chamber_length/2);
+            EfieldForEL->SetAnodePosition(-chamber_length/2);
+            EfieldForEL->SetDriftVelocity(2.5*mm/microsecond);
+            EfieldForEL->SetTransverseDiffusion(1.*mm/sqrt(cm));
+            EfieldForEL->SetLongitudinalDiffusion(.5*mm/sqrt(cm));
+            // ELRegion->SetLightYield(xgp.ELLightYield(24.8571*kilovolt/cm));//value for E that gives Y=1160 photons per ie- in normal conditions
+            EfieldForEL->SetLightYield(XenonELLightYield(23.2857*kilovolt/cm, gas_pressure_));
+            G4Region* el_region = new G4Region("EL_REGION");
+            el_region->SetUserInformation(EfieldForEL);
+           // el_region->AddRootLogicalVolume(Active_logic);*/
+            //Define a drift field for this volume
+            UniformElectricDriftField* field = new UniformElectricDriftField();
+            field->SetCathodePosition(chamber_length/2);
+            field->SetAnodePosition(-chamber_length/2);
+            field->SetDriftVelocity(1.*mm/microsecond);
+            field->SetTransverseDiffusion(1.*mm/sqrt(cm));
+            field->SetLongitudinalDiffusion(.3*mm/sqrt(cm));
+
+            G4Region* drift_region = new G4Region("DRIFT");
+            drift_region->SetUserInformation(field);
+            drift_region->SetUserInformation(field);
+            drift_region->AddRootLogicalVolume(Active_logic);
+        }
+
         AssignVisuals();
         this->SetLogicalVolume(lab_logic_volume);
         //this->SetLogicalVolume(chamber_logic);
@@ -247,8 +275,6 @@ namespace nexus{
         G4LogicalVolume* Lab = lvStore->GetVolume("LAB");
         G4LogicalVolume* Active = lvStore->GetVolume("ACTIVE");
         G4LogicalVolume* Gas = lvStore->GetVolume("GAS");
-
-
 
         G4LogicalVolume* SourceHolder = lvStore->GetVolume("SourceHolChamber_logic");
         G4LogicalVolume* SourceHolderBlock = lvStore->GetVolume("SourceHolChBlock_logic");
