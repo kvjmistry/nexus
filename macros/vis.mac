@@ -55,8 +55,10 @@
 /vis/modeling/trajectories/drawByParticleID-0/set geantino white
 /vis/modeling/trajectories/drawByParticleID-0/set gamma blue
 /vis/modeling/trajectories/drawByParticleID-0/set alpha yellow
-/vis/modeling/trajectories/drawByParticleID-0/set GenericIon grey
+/vis/modeling/trajectories/drawByParticleID-0/set GenericIon blue
 /vis/modeling/trajectories/drawByParticleID-0/set opticalphoton green
+/vis/modeling/trajectories/drawByParticleID-0/set ie- red
+
 # Re-establish auto refreshing and verbosity:
 /vis/viewer/set/autoRefresh true
 /vis/verbose warnings

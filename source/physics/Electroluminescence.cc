@@ -28,7 +28,7 @@ using namespace CLHEP;
 Electroluminescence::Electroluminescence(const G4String& process_name,
 					                               G4ProcessType type):
   G4VDiscreteProcess(process_name, type), theFastIntegralTable_(0),
-  table_generation_(false), photons_per_point_(0)
+  table_generation_(true), photons_per_point_(0)
 {
   ParticleChange_ = new G4ParticleChange();
   pParticleChange = ParticleChange_;
@@ -76,7 +76,6 @@ Electroluminescence::PostStepDoIt(const G4Track& track, const G4Step& step)
     ParticleChange_->ProposeTrackStatus(fStopAndKill);
     return G4VDiscreteProcess::PostStepDoIt(track, step);
   }
-
   // Get the light yield from the field
   const G4double yield = field->LightYield();
   G4double step_length = step.GetStepLength();

@@ -56,7 +56,8 @@ namespace nexus{
              optical_pad_thickness_ (1. * mm), // copied from NEW
              pmt_base_diam_ (47. * mm),
              pmt_base_thickness_ (5. * mm),
-             efield_(true)
+             efield_(true),
+             HideSourceHolder_(true)
 
     {
         msg_ = new G4GenericMessenger(this, "/Geometry/CRAB/","Control commands of geometry of CRAB TPC");
@@ -101,7 +102,6 @@ namespace nexus{
         scinYield_cmd.SetParameterName("scinYield", false);
         sc_yield_=(sc_yield_* 1/MeV);
         pmt1_=new PmtR7378A();
-        pmt2_=new PmtR7378A();
 
     }
 
@@ -110,7 +110,6 @@ namespace nexus{
 
         delete msg_;
         delete pmt1_;
-        delete pmt2_;
     }
 
     void CRAB::Construct(){
@@ -152,9 +151,9 @@ namespace nexus{
         G4LogicalVolume* sapphire_window_logic= new G4LogicalVolume(sapphire_window_solid, Saphire, "SAPPHIRE_WINDOW");
 
 
-
         //////////////////////////////////////////
-
+        G4double EL_Gap=7*mm;
+        G4double FielCageGap=(160.3+21)*mm;
         // Placing the gas in the chamber
         G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2., 0., twopi);
         G4LogicalVolume* gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS");
@@ -162,6 +161,15 @@ namespace nexus{
         //Defining the Detection Area
         G4Tubs* Active_solid =new G4Tubs("ACTIVE", 0., Active_diam/2., Active_length/2., 0., twopi);
         G4LogicalVolume* Active_logic = new G4LogicalVolume(Active_solid, gxe, "ACTIVE");
+
+
+        // EL Region
+        G4Tubs* EL_solid =new G4Tubs("EL_GAP", 0., Active_diam/2.,EL_Gap/2 , 0., twopi);
+        G4LogicalVolume* EL_logic = new G4LogicalVolume(EL_solid, gxe, "EL_GAP");
+
+        //FieldCage
+        G4Tubs* FieldCage_Solid =new G4Tubs("FIELDCAGE", 0., Active_diam/2.,FielCageGap/2 , 0., twopi);
+        G4LogicalVolume* FieldCage_Logic = new G4LogicalVolume(FieldCage_Solid, gxe, "FIELDCAGE");
 
 
 
@@ -173,30 +181,24 @@ namespace nexus{
         G4Tubs* SourceHolChamberBlock_solid =new G4Tubs("SourceHolChBlock",0,(SourceEn_holedia/2),( SourceEn_thickn/2), 0.,twopi);
         G4LogicalVolume* SourceHolChamberBlock_logic = new G4LogicalVolume(SourceHolChamberBlock_solid,materials::Steel(), "SourceHolChBlock_logic");
 
+
         //G4LogicalVolume* SourceHolderGas_logic = new G4LogicalVolume(SourceHolChamber_solid, gxe, "SourceHolderGAS_logic");
-
-
-
-
-
 
 
         //Adding the PMTs in here
         pmt1_->Construct();
-        pmt2_->Construct();
 
         // Adding Logical Volumes for PMTs
         G4LogicalVolume * pmt1_logic=pmt1_->GetLogicalVolume();
-        G4LogicalVolume * pmt2_logic=pmt2_->GetLogicalVolume();
 
         // Particle Source Holder
         //Rotation Matrix
         G4RotationMatrix* rotateHolder = new G4RotationMatrix();
         rotateHolder->rotateY(90.*deg);
-        new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset,0,0), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
-        new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
-
-
+        if(!HideSourceHolder_){
+            new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset,0,0), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
+            new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
+        }
 
         // PMTs
         G4double PMT_offset=0.2*cm;
@@ -207,6 +209,7 @@ namespace nexus{
         //// PMT Covering Tube ///
         G4double PMT_Tube_Length=sapphire_window_thickness_+(pmt1_->Length()+0.5*cm)/2;
         G4double PMT_Tube_Block_Thickness=0.2*cm;
+
         G4Tubs * PMT_Tube_solid=new G4Tubs("PMT_TUBE",(sapphire_window_diam_/2),(sapphire_window_diam_/2)+0.2*cm,PMT_Tube_Length,0,twopi);
         G4LogicalVolume * PMT_Tube_Logic=new G4LogicalVolume(PMT_Tube_solid,materials::Steel(),PMT_Tube_solid->GetName());
         G4Tubs * PMT_Block_solid=new G4Tubs("PMT_TUBE_BLOCK",0,(sapphire_window_diam_/2),PMT_Tube_Block_Thickness,0,twopi);
@@ -225,21 +228,30 @@ namespace nexus{
         new G4PVPlacement(0,G4ThreeVector(0,0,-(chamber_length/2)),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,1,false);
 
         //Chamber
-        new G4PVPlacement(0,G4ThreeVector(0.,0.,0.) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
+        new G4PVPlacement(0,G4ThreeVector(0.,0.,0) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
 
         // Xenon Gas in Active Area and Non-Active Area
         new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),lab_logic_volume, false, 0, false);
         new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), Active_logic, Active_solid->GetName(),gas_logic, false, 0, false);
 
+
+        // FieldCage
+        new G4PVPlacement(0,G4ThreeVector(0,0,(109/2*mm)),FieldCage_Logic,FieldCage_Logic->GetName(),Active_logic, false,0,false);
+
+        //EL_Gap
+        G4double EL_pos=chamber_length-(326*mm);
+        new G4PVPlacement(0,G4ThreeVector(0.,0.,EL_pos),EL_logic,EL_solid->GetName(),Active_logic, false,0, false);
+
+
         // PMTs
-        new G4PVPlacement(0,G4ThreeVector (0,0,-PMT_pos),pmt1_logic,"PMT",lab_logic_volume,false,0,false);
-        new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,PMT_pos),pmt2_logic,"PMT",lab_logic_volume,false,1,false);
+        new G4PVPlacement(0,G4ThreeVector (0,0,-PMT_pos),pmt1_logic,"PMT1",lab_logic_volume,false,0,false);
+        new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,PMT_pos),pmt1_logic,"PMT2",lab_logic_volume,false,1,false);
 
         //  Saphire Windows
         //G4double window_posz = chamber_length/2+chamber_thickn/2;
         G4double window_posz = chamber_length/2;
-        new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), sapphire_window_logic,"SAPPHIRE_WINDOW", lab_logic_volume,false, 0, false);
-        new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), sapphire_window_logic,"SAPPHIRE_WINDOW", lab_logic_volume, false, 1, false);
+        new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), sapphire_window_logic,"SAPPHIRE_WINDOW1", lab_logic_volume,false, 0, false);
+        new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), sapphire_window_logic,"SAPPHIRE_WINDOW2", lab_logic_volume, false, 1, false);
 
         //PMT Tubes
         new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset),PMT_Tube_Logic,PMT_Tube_Logic->GetName(),lab_logic_volume,false,0,false);
@@ -250,7 +262,6 @@ namespace nexus{
 
 
 
-
         // Define this volume as an ionization sensitive detector
         IonizationSD* sensdet = new IonizationSD("/CRAB/ACTIVE");
         Active_logic->SetSensitiveDetector(sensdet);
@@ -258,29 +269,37 @@ namespace nexus{
 
         // Electrical Field
         if(efield_){
-            /*UniformElectricDriftField * EfieldForEL=new UniformElectricDriftField();
-            EfieldForEL->SetCathodePosition(chamber_length/2);
-            EfieldForEL->SetAnodePosition(-chamber_length/2);
-            EfieldForEL->SetDriftVelocity(2.5*mm/microsecond);
-            EfieldForEL->SetTransverseDiffusion(1.*mm/sqrt(cm));
-            EfieldForEL->SetLongitudinalDiffusion(.5*mm/sqrt(cm));
+            UniformElectricDriftField * EfieldForEL=new UniformElectricDriftField();
+
+            G4double ELpp=chamber_length/2-331.8*cm;
+            EfieldForEL->SetCathodePosition(EL_pos-EL_Gap/2);
+            EfieldForEL->SetAnodePosition(EL_pos+EL_Gap/2);
+
+            // For CRAB Assuming we have 10 bar gas and Efield is 19,298.20 V/cm
+            /// THIS NEEDS TO BE CHANGED
+            EfieldForEL->SetDriftVelocity(4.44*mm/microsecond);
+            EfieldForEL->SetTransverseDiffusion(0.243*mm/sqrt(cm));
+            EfieldForEL->SetLongitudinalDiffusion(.154*mm/sqrt(cm));
             // ELRegion->SetLightYield(xgp.ELLightYield(24.8571*kilovolt/cm));//value for E that gives Y=1160 photons per ie- in normal conditions
-            EfieldForEL->SetLightYield(XenonELLightYield(23.2857*kilovolt/cm, gas_pressure_));
+            EfieldForEL->SetLightYield(XenonELLightYield(10.571*kilovolt/cm, gas_pressure_));
             G4Region* el_region = new G4Region("EL_REGION");
             el_region->SetUserInformation(EfieldForEL);
-           // el_region->AddRootLogicalVolume(Active_logic);*/
+            el_region->AddRootLogicalVolume(EL_logic);
+            G4double cathodePosition=-chamber_length/2+12.99*cm;
+            G4double AnodePosition=-chamber_length/2+32.61*cm;
             //Define a drift field for this volume
             UniformElectricDriftField* field = new UniformElectricDriftField();
-            field->SetCathodePosition(chamber_length/2);
-            field->SetAnodePosition(-chamber_length/2);
-            field->SetDriftVelocity(1.*mm/microsecond);
-            field->SetTransverseDiffusion(1.*mm/sqrt(cm));
-            field->SetLongitudinalDiffusion(.3*mm/sqrt(cm));
+
+            field->SetCathodePosition(cathodePosition);
+            field->SetAnodePosition(EL_pos-EL_Gap/2);
+            field->SetDriftVelocity(.90*mm/microsecond);
+            field->SetTransverseDiffusion(.92*mm/sqrt(cm));
+            field->SetLongitudinalDiffusion(.36*mm/sqrt(cm));
 
             G4Region* drift_region = new G4Region("DRIFT");
             drift_region->SetUserInformation(field);
-            drift_region->SetUserInformation(field);
-            drift_region->AddRootLogicalVolume(Active_logic);
+            drift_region->AddRootLogicalVolume(FieldCage_Logic);
+
         }
         AssignVisuals();
         this->SetLogicalVolume(lab_logic_volume);
@@ -296,6 +315,7 @@ namespace nexus{
         G4LogicalVolume* Lab = lvStore->GetVolume("LAB");
         G4LogicalVolume* Active = lvStore->GetVolume("ACTIVE");
         G4LogicalVolume* Gas = lvStore->GetVolume("GAS");
+
 
         G4LogicalVolume* SourceHolder = lvStore->GetVolume("SourceHolChamber_logic");
         G4LogicalVolume* SourceHolderBlock = lvStore->GetVolume("SourceHolChBlock_logic");
@@ -339,6 +359,19 @@ namespace nexus{
         G4VisAttributes  SaphireWindowVis=nexus::LillaAlpha();
         SaphireWindowVis.SetForceSolid(true);
         SaphireWindowLog->SetVisAttributes(SaphireWindowVis);
+
+
+        // EL-Region
+        G4LogicalVolume * ELLogic=lvStore->GetVolume("EL_GAP");
+        G4VisAttributes ELVis=nexus::BloodRed();
+        ELVis.SetForceCloud(true);
+        ELLogic->SetVisAttributes(ELVis);
+
+        // FieldCage
+        G4LogicalVolume * FieldCage=lvStore->GetVolume("FIELDCAGE");
+        G4VisAttributes FielCageVis=nexus::Red();
+        FielCageVis.SetForceCloud(true);
+        FieldCage->SetVisAttributes(FielCageVis);
 
 
         SourceHolder->SetVisAttributes(SourceHolderVa);

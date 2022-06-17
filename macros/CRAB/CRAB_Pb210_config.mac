@@ -3,6 +3,8 @@
 /event/verbose 1
 /tracking/verbose 1
 /process/em/verbose 1
+## Making sure electroluminescence is turned on
+### Electroluminescence ####
 
 #GEOMETRY
 /Geometry/CRAB/gas_pressure 10. bar
@@ -39,6 +41,7 @@
 #/Actions/DefaultEventAction/energy_threshold 100 eV
 /Actions/DefaultEventAction/max_energy 1.00 GeV
 /Actions/DefaultEventAction/min_energy 100 eV
+
 # PERSISTENCY
 /nexus/persistency/eventType background
 /nexus/persistency/outputFile /media/ilker/writable/CRAB/Pb210/test

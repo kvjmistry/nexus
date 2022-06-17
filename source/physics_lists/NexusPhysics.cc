@@ -105,8 +105,8 @@ namespace nexus {
     }
 
     if (electroluminescence_) {
-      Electroluminescence* el = new Electroluminescence();
-      pmanager->AddDiscreteProcess(el);
+          Electroluminescence* el = new Electroluminescence();
+          pmanager->AddDiscreteProcess(el);
     }
 
 
@@ -119,8 +119,8 @@ namespace nexus {
       auto aParticleIterator = GetParticleIterator();
       aParticleIterator->reset();
       while ((*aParticleIterator)()) {
-        G4ParticleDefinition* particle = aParticleIterator->value();
-        pmanager = particle->GetProcessManager();
+          G4ParticleDefinition* particle = aParticleIterator->value();
+          pmanager = particle->GetProcessManager();
 
         if (clust->IsApplicable(*particle)) {
           pmanager->AddDiscreteProcess(clust);

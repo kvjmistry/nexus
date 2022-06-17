@@ -7,6 +7,7 @@
 /PhysicsList/RegisterPhysics NexusPhysics
 /PhysicsList/RegisterPhysics G4StepLimiterPhysics
 
+
 #Geometry
 /nexus/RegisterGeometry CRAB
 
@@ -20,6 +21,7 @@
 
 #Actions
 /nexus/RegisterTrackingAction OpticalTrackingAction
+#/nexus/RegisterTrackingAction LightTableTrackingAction
 /nexus/RegisterEventAction DefaultEventAction
 /nexus/RegisterRunAction DefaultRunAction
 

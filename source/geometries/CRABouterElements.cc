@@ -24,10 +24,7 @@
 #include <G4RotationMatrix.hh>
 
 namespace  nexus{
-    CRABouterElements::CRABouterElements()
-    {
-        msg_= new G4GenericMessenger(this,"/Geometry/CRAB/","Control commands of the GRAB geometry");
-    }
+
 
 
 }
