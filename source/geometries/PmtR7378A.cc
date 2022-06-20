@@ -33,6 +33,7 @@ namespace nexus {
 
   PmtR7378A::PmtR7378A(): GeometryBase()
   {
+
   }
 
 
@@ -49,7 +50,7 @@ namespace nexus {
 
     pmt_diam_   = 25.4 * mm;
     pmt_length_ = 43.0 * mm;
-
+    PmtName= GetPMTName();
     G4Tubs* pmt_solid =
       new G4Tubs("PMT_R7378A", 0., pmt_diam_/2., pmt_length_/2., 0., twopi);
 
@@ -73,12 +74,24 @@ namespace nexus {
     G4Material* quartz =
       G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
     quartz->SetMaterialPropertiesTable(opticalprops::FusedSilica());
+    G4String WindowName;
+    G4String DetName;
+      G4String SensDet;
+    if(!PmtName){
+        WindowName="PMT_WINDOW";
+        DetName="PHOTOCATHODE";
+        SensDet="/PMT_R7378A/Pmt";
+    }else{
+        WindowName=PmtName+"_WINDOW";
+        DetName=PmtName+"_PHOTOCATHODE";
+        SensDet="/PMT_R7378A/"+PmtName;
 
+    }
     G4LogicalVolume* window_logic =
-      new G4LogicalVolume(window_solid, quartz, "PMT_WINDOW");
+      new G4LogicalVolume(window_solid, quartz,WindowName );
 
     new G4PVPlacement(0, G4ThreeVector(0., 0., (pmt_length_-window_length)/2.),
-		      window_logic, "PMT_WINDOW", pmt_logic, false, 0, false);
+		      window_logic,WindowName, pmt_logic, false, 0, false);
 
     G4VisAttributes wndw_col = nexus::Blue();
     window_logic->SetVisAttributes(wndw_col);
@@ -97,10 +110,10 @@ namespace nexus {
     G4double theta = asin(phcath_diam/(2.*rmax));
 
     G4Sphere* phcath_solid =
-      new G4Sphere("PHOTOCATHODE", rmin, rmax, 0, twopi, 0, theta);
+      new G4Sphere(DetName, rmin, rmax, 0, twopi, 0, theta);
 
     G4LogicalVolume* phcath_logic =
-      new G4LogicalVolume(phcath_solid, aluminum, "PHOTOCATHODE");
+      new G4LogicalVolume(phcath_solid, aluminum, DetName);
 
     G4VisAttributes vis_solid;
     vis_solid.SetForceSolid(true);
@@ -108,10 +121,10 @@ namespace nexus {
 
     //G4PVPlacement* phcath_physi =
       new G4PVPlacement(0, G4ThreeVector(0.,0.,phcath_posz), phcath_logic,
-			"PHOTOCATHODE", window_logic, false, 0, false);
+			DetName, window_logic, false, 0, false);
 
     // Sensitive detector
-    SensorSD* pmtsd = new SensorSD("/PMT_R7378A/Pmt");
+    SensorSD* pmtsd = new SensorSD(SensDet);
     pmtsd->SetDetectorVolumeDepth(2);
     pmtsd->SetTimeBinning(100.*nanosecond);
     G4SDManager::GetSDMpointer()->AddNewDetector(pmtsd);
@@ -161,10 +174,10 @@ namespace nexus {
     phcath_mpt->AddProperty("REFLECTIVITY", ENERGIES, REFLECTIVITY, entries);
 
     G4OpticalSurface* phcath_opsur =
-      new G4OpticalSurface("PHOTOCATHODE", unified, polished, dielectric_metal);
+      new G4OpticalSurface(DetName, unified, polished, dielectric_metal);
     phcath_opsur->SetMaterialPropertiesTable(phcath_mpt);
 
-    new G4LogicalSkinSurface("PHOTOCATHODE", phcath_logic, phcath_opsur);
+    new G4LogicalSkinSurface(DetName, phcath_logic, phcath_opsur);
   }
 
 

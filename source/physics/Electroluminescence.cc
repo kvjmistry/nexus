@@ -28,7 +28,7 @@ using namespace CLHEP;
 Electroluminescence::Electroluminescence(const G4String& process_name,
 					                               G4ProcessType type):
   G4VDiscreteProcess(process_name, type), theFastIntegralTable_(0),
-  table_generation_(true), photons_per_point_(0)
+  table_generation_(false), photons_per_point_(0)
 {
   ParticleChange_ = new G4ParticleChange();
   pParticleChange = ParticleChange_;

@@ -35,12 +35,23 @@ namespace nexus {
 
     void Construct();
 
+    void SetPMTName(G4String PMTName);
+    G4String GetPMTName();
+
+
   private:
     G4double pmt_diam_, pmt_length_; ///< PMT dimensions
+
+      G4String PmtName;
+
   };
 
   inline G4double PmtR7378A::Diameter() const { return pmt_diam_; }
   inline G4double PmtR7378A::Length() const { return pmt_length_; }
+  inline void PmtR7378A::SetPMTName(G4String PMTName)  { PmtName=PMTName ; }
+  inline G4String PmtR7378A::GetPMTName()  { return PmtName ; }
+
+
 
 } // end namespace nexus
 

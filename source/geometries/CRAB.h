@@ -44,6 +44,7 @@ namespace nexus {
             G4ThreeVector vertex;
             PmtR7378A *pmt1_;
             PmtR7378A *pmt2_;
+
             G4double sapphire_window_thickness_;
             G4double sapphire_window_diam_;
             G4double pmt_hole_length_ ;
@@ -54,6 +55,7 @@ namespace nexus {
             G4double pmt_base_thickness_;
             G4bool efield_;
             G4bool HideSourceHolder_;
+            G4double max_step_size_;
 
 
             void ConstructLab();

@@ -61,7 +61,6 @@ namespace nexus {
     // If the region has no field, the particle won't move 
     // and therefore the step length is zero.
     if (!field) return step_length;
-
     // Get displacement from current position due to drift field
     xyzt_.set(track.GetGlobalTime(), track.GetPosition());
     step_length = field->Drift(xyzt_);
@@ -92,9 +91,11 @@ namespace nexus {
       else {
         const G4double attach = mpt->GetConstProperty("ATTACHMENT");
         G4double rnd = -attach * log(G4UniformRand());
-        if (xyzt_.t() > rnd) 
+        // Issue with the decays
+        /*if (xyzt_.t() > rnd)
           ParticleChange_->ProposeTrackStatus(fStopAndKill);
-      }
+      */
+         }
 
       ParticleChange_->ProposeGlobalTime(xyzt_.t());
       ParticleChange_->ProposePosition(xyzt_.vect());
