@@ -1,0 +1,35 @@
+//
+// Created by ilker on 6/28/22.
+//
+
+#ifndef NEXUS_CRABANALYSISSTEPPINGACTION_H
+#define NEXUS_CRABANALYSISSTEPPINGACTION_H
+
+#include <G4UserSteppingAction.hh>
+#include <globals.hh>
+#include <map>
+#include <G4GenericMessenger.hh>
+#include "G4String.hh"
+
+class G4Step;
+namespace nexus{
+    class CRABAnalysisSteppingAction: public  G4UserSteppingAction{
+        public:
+            // Constructor
+            CRABAnalysisSteppingAction();
+            //Destructor
+            ~CRABAnalysisSteppingAction();
+
+             virtual void UserSteppingAction(const G4Step*);
+
+        private:
+            typedef std::map<G4String, int> detectorCounts;
+            detectorCounts my_counts_;
+            G4GenericMessenger *msg_;
+            G4String filePath_;
+            int NumEvents;
+
+    };
+
+} //namespace nexus
+#endif //NEXUS_CRABANALYSISSTEPPINGACTION_H

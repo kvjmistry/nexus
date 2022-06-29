@@ -11,10 +11,10 @@
 # GENERATION
 /Generator/SingleParticle/region  FIELDCAGE
 /Generator/SingleParticle/particle opticalphoton
-/Generator/SingleParticle/min_energy 2 eV
-/Generator/SingleParticle/max_energy 10 eV
-/Generator/SingleParticle/min_costheta 1
-/Generator/SingleParticle/max_costheta 1
+/Generator/SingleParticle/min_energy 7 eV
+/Generator/SingleParticle/max_energy 7 eV
+/Generator/SingleParticle/min_costheta -1
+/Generator/SingleParticle/max_costheta -1
 /Generator/SingleParticle/min_phi 0
 /Generator/SingleParticle/max_phi 0
 
@@ -27,11 +27,11 @@
 
 #GEOMETRY
 /Geometry/CRAB/gas_pressure 10. bar
-/Geometry/CRAB/scinYield 1
+/Geometry/CRAB/scinYield 1 1/MeV
 /Geometry/CRAB/chamber_diam  15. cm
 /Geometry/CRAB/chamber_length 43.18 cm
 /Geometry/CRAB/chamber_thickn 2. mm
-/Geometry/CRAB/SourcePosition 0 0 10 cm
+/Geometry/CRAB/SourcePosition 0 0 0 cm
 #/Geometry/CRAB/SourcePosition 0 0 0 cm
 
 #Active

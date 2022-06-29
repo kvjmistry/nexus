@@ -24,7 +24,7 @@
 /nexus/RegisterTrackingAction OpticalTrackingAction
 /nexus/RegisterEventAction DefaultEventAction
 /nexus/RegisterRunAction DefaultRunAction
-/nexus/RegisterSteppingAction AnalysisSteppingAction
+/nexus/RegisterSteppingAction CRABAnalysisSteppingAction
 
 
 /nexus/RegisterMacro macros/CRAB/CRAB_SingleParticle_config.mac

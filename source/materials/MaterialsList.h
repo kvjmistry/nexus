@@ -40,6 +40,9 @@ namespace materials {
 					                          G4double temperature=STP_Temperature,
 					                          G4double pressure=STP_Pressure);
 
+  // MgF2
+  G4Material * MgF2();
+
   // Liquid xenon
   G4Material* LXe();
 

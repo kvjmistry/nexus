@@ -45,8 +45,8 @@ namespace nexus {
             PmtR7378A *pmt1_;
             PmtR7378A *pmt2_;
 
-            G4double sapphire_window_thickness_;
-            G4double sapphire_window_diam_;
+            G4double MgF2_window_thickness_;
+            G4double MgF2_window_diam_;
             G4double pmt_hole_length_ ;
             G4double wndw_ring_stand_out_;
             G4double pedot_coating_thickness_;

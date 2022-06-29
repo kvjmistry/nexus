@@ -21,6 +21,7 @@
 #include "G4PhysicalVolumeStore.hh"
 #include "G4LogicalVolumeStore.hh"
 #include "XenonProperties.h"
+#include "G4UnitsTable.hh"
 
 #include <CLHEP/Units/SystemOfUnits.h>
 #include <CLHEP/Units/PhysicalConstants.h>
@@ -48,11 +49,11 @@ namespace nexus{
              SourceEn_holedia (2. * mm),
              gas_pressure_(10. * bar),
              vtx_(0,0,0),
-            sc_yield_(25510.),
+            sc_yield_(25510./MeV),
             e_lifetime_(1000. * ms),
              pmt_hole_length_ (18.434 * cm),
-             sapphire_window_thickness_ (6. * mm),
-             sapphire_window_diam_ (25.4 * mm),
+             MgF2_window_thickness_ (6. * mm),
+             MgF2_window_diam_ (25.4 * mm),
              wndw_ring_stand_out_ (1.5 * mm), //how much the ring around sapph windows stands out of them
              pedot_coating_thickness_ (200. * nanometer), // copied from NEW
              optical_pad_thickness_ (1. * mm), // copied from NEW
@@ -101,9 +102,13 @@ namespace nexus{
 
         G4GenericMessenger::Command&  eliftime_cmd =msg_->DeclarePropertyWithUnit("ElecLifTime","ms",e_lifetime_,"Electron LifeTime");
         eliftime_cmd.SetParameterName("ElecLifTime", false);
-        G4GenericMessenger::Command&  scinYield_cmd =msg_->DeclareProperty("scinYield",sc_yield_,"Scintilation Yield");
+        new G4UnitDefinition("1/MeV","1/MeV", "1/Energy", 1/MeV);
+
+        G4GenericMessenger::Command&  scinYield_cmd =msg_->DeclareProperty("scinYield",sc_yield_,"Scintilation Yield Photons/MeV");
         scinYield_cmd.SetParameterName("scinYield", false);
-        sc_yield_=(sc_yield_* 1/MeV);
+        scinYield_cmd.SetUnitCategory("1/Energy");
+
+
         pmt1_=new PmtR7378A();
         pmt2_=new PmtR7378A();
 
@@ -122,11 +127,11 @@ namespace nexus{
 
         //Materials
         G4Material* gxe = materials::GXe(gas_pressure_,68);
-        G4Material *Saphire=materials::Sapphire();
+        G4Material *MgF2=materials::MgF2();
         G4Material *vacuum=G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic");
 
         // Optical Properties Assigned here
-        Saphire->SetMaterialPropertiesTable(opticalprops::Sapphire());
+        MgF2->SetMaterialPropertiesTable(opticalprops::MgF2());
         vacuum->SetMaterialPropertiesTable(opticalprops::Vacuum());
         gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68,sc_yield_,e_lifetime_));
 
@@ -141,7 +146,7 @@ namespace nexus{
         //Creating the Steel Cylinder that we need
 
         /// First Creating the Ends of the Cylinder with Proper Holes
-        G4Tubs* chamber_flange_solid =new G4Tubs("CHAMBER_FLANGE", sapphire_window_diam_/2, (chamber_diam/2. + chamber_thickn),( chamber_thickn), 0.,twopi);
+        G4Tubs* chamber_flange_solid =new G4Tubs("CHAMBER_FLANGE", MgF2_window_diam_/2, (chamber_diam/2. + chamber_thickn),( chamber_thickn), 0.,twopi);
         G4LogicalVolume* chamber_flange_logic =new G4LogicalVolume(chamber_flange_solid,materials::Steel(), "CHAMBER_FLANGE");
 
         // Now Creating The Chamber with Without Ends
@@ -151,9 +156,9 @@ namespace nexus{
 
 
         /// Sapphire window ///
-        G4Tubs* sapphire_window_solid = new G4Tubs("SAPPHIRE_WINDOW", 0., sapphire_window_diam_/2.,
-                                                   (sapphire_window_thickness_ )/2., 0., twopi);
-        G4LogicalVolume* sapphire_window_logic= new G4LogicalVolume(sapphire_window_solid, Saphire, "SAPPHIRE_WINDOW");
+        G4Tubs* MgF2_window_solid = new G4Tubs("MgF2_WINDOW", 0., MgF2_window_diam_/2.,
+                                                   (MgF2_window_thickness_ )/2., 0., twopi);
+        G4LogicalVolume* MgF2_window_logic= new G4LogicalVolume(MgF2_window_solid, MgF2, "MgF2_WINDOW");
 
 
         //////////////////////////////////////////
@@ -213,21 +218,21 @@ namespace nexus{
 
         // PMTs
         G4double PMT_offset=0.2*cm;
-        G4double PMT_pos=(chamber_length/2)+chamber_thickn+(pmt1_->Length()/2)+sapphire_window_thickness_+PMT_offset;
+        G4double PMT_pos=(chamber_length/2)+chamber_thickn+(pmt1_->Length()/2)+MgF2_window_thickness_+PMT_offset;
         G4RotationMatrix* pmt1rotate = new G4RotationMatrix();
         pmt1rotate->rotateY(180.*deg);
 
         //// PMT Covering Tube ///
-        G4double PMT_Tube_Length=sapphire_window_thickness_+(pmt1_->Length()+0.5*cm)/2;
+        G4double PMT_Tube_Length=MgF2_window_thickness_+(pmt1_->Length()+0.5*cm)/2;
         G4double PMT_Tube_Block_Thickness=0.2*cm;
 
-        G4Tubs * PMT_Tube_solid=new G4Tubs("PMT_TUBE",(sapphire_window_diam_/2)+0.5*cm,(sapphire_window_diam_/2)+0.7*cm,PMT_Tube_Length,0,twopi);
+        G4Tubs * PMT_Tube_solid=new G4Tubs("PMT_TUBE",(MgF2_window_diam_/2)+0.5*cm,(MgF2_window_diam_/2)+0.7*cm,PMT_Tube_Length,0,twopi);
         G4LogicalVolume * PMT_Tube_Logic=new G4LogicalVolume(PMT_Tube_solid,materials::Steel(),PMT_Tube_solid->GetName());
-        G4Tubs * PMT_Block_solid=new G4Tubs("PMT_TUBE_BLOCK",0,(sapphire_window_diam_/2+0.5*cm),PMT_Tube_Block_Thickness,0,twopi);
+        G4Tubs * PMT_Block_solid=new G4Tubs("PMT_TUBE_BLOCK",0,(MgF2_window_diam_/2+0.5*cm),PMT_Tube_Block_Thickness,0,twopi);
         G4LogicalVolume * PMT_Block_Logic=new G4LogicalVolume(PMT_Block_solid,materials::Steel(),PMT_Block_solid->GetName());
-        G4Tubs * InsideThePMT_Tube_solid0=new G4Tubs("PMT_TUBE_VACUUM0",0,(sapphire_window_diam_/2+0.4*cm),PMT_Tube_Length,0,twopi);
+        G4Tubs * InsideThePMT_Tube_solid0=new G4Tubs("PMT_TUBE_VACUUM0",0,(MgF2_window_diam_/2+0.4*cm),PMT_Tube_Length,0,twopi);
         G4LogicalVolume * InsideThePMT_Tube_Logic0=new G4LogicalVolume(InsideThePMT_Tube_solid0,vacuum,InsideThePMT_Tube_solid0->GetName());
-        G4Tubs * InsideThePMT_Tube_solid1=new G4Tubs("PMT_TUBE_VACUUM1",0,(sapphire_window_diam_/2+0.4*cm),PMT_Tube_Length,0,twopi);
+        G4Tubs * InsideThePMT_Tube_solid1=new G4Tubs("PMT_TUBE_VACUUM1",0,(MgF2_window_diam_/2+0.4*cm),PMT_Tube_Length,0,twopi);
         G4LogicalVolume * InsideThePMT_Tube_Logic1=new G4LogicalVolume(InsideThePMT_Tube_solid1,vacuum,InsideThePMT_Tube_solid1->GetName());
 
 
@@ -258,11 +263,11 @@ namespace nexus{
         new G4PVPlacement(0,G4ThreeVector(0.,0.,EL_pos/2),EL_logic,EL_solid->GetName(),gas_logic, 0,0, false);
 
 
-        //  Saphire Windows
+        //  MgF2 Windows
         //G4double window_posz = chamber_length/2+chamber_thickn/2;
         G4double window_posz = chamber_length/2;
-        new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), sapphire_window_logic,"SAPPHIRE_WINDOW1", lab_logic_volume,false, 0, false);
-        new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), sapphire_window_logic,"SAPPHIRE_WINDOW2", lab_logic_volume, false, 1, false);
+        new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
+        new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", lab_logic_volume, false, 1, false);
 
         //PMT Tubes
         new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset),PMT_Tube_Logic,PMT_Tube_Logic->GetName(),lab_logic_volume,false,0,false);
@@ -313,9 +318,9 @@ namespace nexus{
             //EfieldForEL->SetCathodePosition(EL_pos/2+EL_Gap/2);
             EfieldForEL->SetCathodePosition(EL_pos/2+EL_Gap/2);
             EfieldForEL->SetAnodePosition(EL_pos/2-EL_Gap/2);
-            EfieldForEL->SetDriftVelocity(2.5*mm/microsecond);
-            EfieldForEL->SetTransverseDiffusion(1*mm/sqrt(cm));
-            EfieldForEL->SetLongitudinalDiffusion(0.5*mm/sqrt(cm));
+            EfieldForEL->SetDriftVelocity(2.34*mm/microsecond);
+            EfieldForEL->SetTransverseDiffusion(0.347*mm/sqrt(cm));
+            EfieldForEL->SetLongitudinalDiffusion(0.194*mm/sqrt(cm));
             // ELRegion->SetLightYield(xgp.ELLightYield(24.8571*kilovolt/cm));//value for E that gives Y=1160 photons per ie- in normal conditions
             EfieldForEL->SetLightYield(XenonELLightYield(10.571*kilovolt/cm, gas_pressure_));
             //EfieldForEL->SetLightYield(1);
@@ -335,31 +340,34 @@ namespace nexus{
     void CRAB::AssignVisuals() {
         // Chamber
         G4LogicalVolumeStore* lvStore = G4LogicalVolumeStore::GetInstance();
-        G4LogicalVolume* Chamber = lvStore->GetVolume("CHAMBER");
+
+
+
+
+        // Lab
         G4LogicalVolume* Lab = lvStore->GetVolume("LAB");
-        //G4LogicalVolume* Active = lvStore->GetVolume("ACTIVE");
+        G4VisAttributes *LabVa=new G4VisAttributes(G4Colour(2,2,2));
+        LabVa->SetForceWireframe(false);
+
+        //Chamber
+        G4LogicalVolume* Chamber = lvStore->GetVolume("CHAMBER");
+        G4VisAttributes *ChamberVa=new G4VisAttributes(G4Colour(1,1,1));
+        ChamberVa->SetForceSolid(true);
+        Chamber->SetVisAttributes(G4VisAttributes::GetInvisible());
+
+
+
+        //GAS
         G4LogicalVolume* Gas = lvStore->GetVolume("GAS");
+        G4VisAttributes *GasVa=new G4VisAttributes(G4Colour(2,2,2));
+        GasVa->SetForceCloud(true);
+        Gas->SetVisAttributes(GasVa);
 
-
+        //Source Enclosure Related
         G4LogicalVolume* SourceHolder = lvStore->GetVolume("SourceHolChamber_logic");
         G4LogicalVolume* SourceHolderBlock = lvStore->GetVolume("SourceHolChBlock_logic");
         G4VisAttributes *SourceHolderVa=new G4VisAttributes(G4Colour(2,2,2));
-        G4VisAttributes *ChamberVa=new G4VisAttributes(G4Colour(1,1,1));
-        G4VisAttributes *LabVa=new G4VisAttributes(G4Colour(2,2,2));
-        //G4VisAttributes *ActiveVa=new G4VisAttributes(G4Colour(1,1,1));
-        G4VisAttributes *GasVa=new G4VisAttributes(G4Colour(2,2,2));
-        ChamberVa->SetForceSolid(true);
-        //ChamberVa->SetLineStyle(G4VisAttributes::unbroken);
-        Chamber->SetVisAttributes(G4VisAttributes::GetInvisible());
-
-        LabVa->SetForceWireframe(false);
-        //GasVa->SetForceWireframe(false);
-        GasVa->SetForceWireframe(true);
-        //ActiveVa->SetForceCloud(true);
-       // Active->SetVisAttributes(ActiveVa);
-        Gas->SetVisAttributes(GasVa);
         SourceHolderVa->SetForceSolid(true);
-        //SourceHolderVa->SetForceSolid(true);
 
         // Flange
         G4LogicalVolume* flangeLog = lvStore->GetVolume("CHAMBER_FLANGE");
@@ -370,27 +378,27 @@ namespace nexus{
 
         //PMT TUBE AND PMT BLOCK
         G4LogicalVolume * PmttubeLog=lvStore->GetVolume("PMT_TUBE");
-        PmttubeLog->SetVisAttributes(G4VisAttributes::GetInvisible());
+        PmttubeLog->SetVisAttributes(ChamberVa);
         G4LogicalVolume * PmttubeBlockLog=lvStore->GetVolume("PMT_TUBE_BLOCK");
         PmttubeBlockLog->SetVisAttributes(ChamberVa);
-        G4LogicalVolume * PmttubeVacuumLog1=lvStore->GetVolume("PMT_TUBE_VACUUM1");
+        G4LogicalVolume * PmttubeVacuumLog1=lvStore->GetVolume("PMT_TUBE_VACUUM0");
         G4LogicalVolume * PmttubeVacuumLog2=lvStore->GetVolume("PMT_TUBE_VACUUM1");
-        G4VisAttributes PmttubeVacuumVis=nexus::DirtyWhite();
-        PmttubeVacuumVis.SetForceCloud(false);
+        G4VisAttributes PmttubeVacuumVis=nexus::Yellow();
+        PmttubeVacuumVis.SetForceCloud(true);
         PmttubeVacuumLog1->SetVisAttributes(PmttubeVacuumVis);
         PmttubeVacuumLog2->SetVisAttributes(PmttubeVacuumVis);
 
 
-        //SaphireWindow
-        G4LogicalVolume* SaphireWindowLog = lvStore->GetVolume("SAPPHIRE_WINDOW");
-        G4VisAttributes  SaphireWindowVis=nexus::LillaAlpha();
-        SaphireWindowVis.SetForceSolid(true);
-        SaphireWindowLog->SetVisAttributes(SaphireWindowVis);
+        //MgF2Window
+        G4LogicalVolume* MgF2WindowLog = lvStore->GetVolume("MgF2_WINDOW");
+        G4VisAttributes  MgF2WindowVis=nexus::LillaAlpha();
+        MgF2WindowVis.SetForceSolid(true);
+        MgF2WindowLog->SetVisAttributes(MgF2WindowVis);
 
 
         // EL-Region
         G4LogicalVolume * ELLogic=lvStore->GetVolume("EL_GAP");
-        G4VisAttributes ELVis=nexus::BloodRed();
+        G4VisAttributes ELVis=nexus::BlueAlpha();
         ELVis.SetForceCloud(true);
         ELLogic->SetVisAttributes(ELVis);
 
@@ -399,6 +407,8 @@ namespace nexus{
         G4VisAttributes FielCageVis=nexus::Red();
         FielCageVis.SetForceCloud(true);
         FieldCage->SetVisAttributes(FielCageVis);
+
+
 
 
         SourceHolder->SetVisAttributes(SourceHolderVa);

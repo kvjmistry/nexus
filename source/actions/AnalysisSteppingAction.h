@@ -16,6 +16,8 @@
 #include <globals.hh>
 #include <map>
 
+
+
 class G4Step;
 
 
@@ -36,6 +38,8 @@ namespace nexus {
   private:
     typedef std::map<G4String, int> detectorCounts;
     detectorCounts my_counts_;
+
+
   };
 
 } // namespace nexus

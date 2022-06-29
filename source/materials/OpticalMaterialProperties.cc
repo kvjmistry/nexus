@@ -345,6 +345,69 @@ namespace opticalprops {
     return mpt;
   }
 
+    // Absorbtion Length https://docs.google.com/spreadsheets/d/1MtjtvoWGBKZvObom2R21wITAbv8SQGjoolY9mlpAGcs/edit?usp=sharing
+    G4MaterialPropertiesTable * MgF2(){
+        G4MaterialPropertiesTable *mpt =new G4MaterialPropertiesTable();
+        std::vector<G4double> RIndex;
+        // REFRACTIVE INDEX
+        //https://refractiveindex.info/?shelf=main&book=MgF2&page=Dodge-o
+        G4double um2 = micrometer*micrometer;
+        G4double B[3] = {0.48755108, 0.39875031	, 2.3120353};
+        G4double C[3] = {0.001882178 * um2, 0.008951888 * um2, 566.13559 * um2};
+        SellmeierEquation seq(B, C);
+
+        const G4int ri_entries = 100;
+        G4double eWidth = (optPhotMaxE_ - optPhotMinE_) / ri_entries;
+
+        std::vector<G4double> ri_energy;
+        for (int i=0; i<ri_entries; i++)
+        {
+              ri_energy.push_back(optPhotMinE_ + i * eWidth);
+              RIndex.push_back(seq.RefractiveIndex(h_Planck*c_light/ri_energy[i]));
+            //G4cout << "* MgF2 rIndex:  " << std::setw(5)
+                 // << (h_Planck*c_light/ri_energy[i])/nm << " nm -> " << RIndex[i] << G4endl;
+        }
+          mpt->AddProperty("RINDEX", ri_energy, RIndex);
+        // AbsLength
+        std::vector<G4double> AbsEnergy;
+        std::vector<G4double> AbsLength;
+
+        AbsEnergy ={
+                optPhotMinE_,10.12908497*eV,9.934294872*eV,9.746855346*eV,
+                9.566358025*eV,9.392424242*eV,9.224702381*eV,9.062865497*eV,
+                8.906609195*eV,8.755649718*eV,8.609722222*eV,8.468579235*eV,
+                8.331989247*eV,8.19973545*eV,8.071614583*eV,7.947435897*eV,
+                7.827020202*eV,7.710199005*eV,7.596813725*eV,7.486714976*eV,
+                7.379761905*eV,7.275821596*eV,7.174768519*eV,7.076484018*eV,
+                6.980855856*eV,6.887777778*eV,6.797149123*eV,6.708874459*eV,
+                6.622863248*eV,6.539029536*eV,6.457291667*eV,6.377572016*eV,
+                6.299796748*eV,6.223895582*eV,6.149801587*eV,6.07745098*eV,
+                6.006782946*eV,5.937739464*eV,5.870265152*eV,5.804307116*eV,
+                5.739814815*eV,5.676739927*eV,5.615036232*eV,5.554659498*eV,
+                5.495567376*eV,5.437719298*eV,5.381076389*eV,5.325601375*eV,
+                5.271258503*eV,5.218013468*eV
+        };
+        AbsLength={
+                noAbsLength_,0.9997156428*cm,1.023150194*cm,1.095537301*cm,
+                1.198742789*cm,1.230087996*cm,1.295952636*cm,1.385669439*cm,
+                1.441776019*cm,1.533260546*cm,1.653501605*cm,1.758907479*cm,
+                1.927668533*cm,2.156477955*cm,2.434694796*cm,2.680485538*cm,
+                2.890211545*cm,2.963750487*cm,3.114457116*cm,3.237721269*cm,
+                3.477403106*cm,3.733728206*cm,3.735969574*cm,4.107933334*cm,
+                4.261006499*cm,4.261985335*cm,4.374438824*cm,4.675033009*cm,
+                4.803096337*cm,4.854358472*cm,4.82708799*cm,4.800913383*cm,
+                4.93286516*cm,4.932614388*cm,5.371904149*cm,5.675949837*cm,
+                5.774549675*cm,5.966789612*cm,6.118068257*cm,6.243427679*cm,
+                6.573987823*cm,6.469351156*cm,6.230191574*cm,6.675112006*cm,
+                6.886663304*cm,6.274834691*cm,6.516363279*cm,6.743333512*cm,
+                7.029844878*cm,6.959183911*cm
+        };
+
+
+        mpt->AddProperty("ABSLENGTH", AbsEnergy, AbsLength);
+
+        return mpt;
+  }
 
 
   /// Sapphire ///
@@ -364,6 +427,7 @@ namespace opticalprops {
     std::vector<G4double> ri_energy;
     for (int i=0; i<ri_entries; i++) {
       ri_energy.push_back(optPhotMinE_ + i * eWidth);
+
     }
 
     std::vector<G4double> rIndex;

@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------------------
 
 #include "PmtR7378A.h"
-
+#include "FileHandling.h"
 #include "SensorSD.h"
 #include "OpticalMaterialProperties.h"
 #include "MaterialsList.h"
@@ -28,7 +28,6 @@
 #include <CLHEP/Units/SystemOfUnits.h>
 
 namespace nexus {
-
   using namespace CLHEP;
 
   PmtR7378A::PmtR7378A(): GeometryBase()
@@ -143,6 +142,7 @@ namespace nexus {
     // number of photons that reach the PMT window because
     // light is generated only in that fraction of solid angle that subtends the
     // window of the PMT.
+      G4MaterialPropertiesTable* phcath_mpt = new G4MaterialPropertiesTable();
 
     const G4int entries = 30;
 
@@ -169,9 +169,10 @@ namespace nexus {
 	0., 0., 0., 0., 0.,
 	0., 0., 0., 0., 0. };
 
-    G4MaterialPropertiesTable* phcath_mpt = new G4MaterialPropertiesTable();
     phcath_mpt->AddProperty("EFFICIENCY", ENERGIES, EFFICIENCY, entries);
     phcath_mpt->AddProperty("REFLECTIVITY", ENERGIES, REFLECTIVITY, entries);
+
+
 
     G4OpticalSurface* phcath_opsur =
       new G4OpticalSurface(DetName, unified, polished, dielectric_metal);

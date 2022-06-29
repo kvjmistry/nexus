@@ -16,12 +16,12 @@
 /Geometry/CRAB/chamber_length 43.18 cm
 /Geometry/CRAB/chamber_thickn 2. mm
 #/Geometry/CRAB/SourcePosition -4.5 -4.5 -4.5 cm
-/Geometry/CRAB/SourcePosition -4.5 0 0 cm
+/Geometry/CRAB/SourcePosition -4.3 0 0 cm
 #/Geometry/CRAB/SourcePosition 0 0 0 cm
 
 #Active
 /Geometry/CRAB/Active_diam 8.5 cm
-/Geometry/CRAB/Active_length 45 cm
+/Geometry/CRAB/Active_length 42 cm
 
 #SourceEncloser
 /Geometry/CRAB/SourceEn_diam 10 mm
