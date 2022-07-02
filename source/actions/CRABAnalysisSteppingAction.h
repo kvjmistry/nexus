@@ -27,7 +27,8 @@ namespace nexus{
             detectorCounts my_counts_;
             G4GenericMessenger *msg_;
             G4String filePath_;
-            int NumEvents;
+            int NumEvents_;
+            bool SavetoFile_;
 
     };
 

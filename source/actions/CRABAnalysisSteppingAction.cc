@@ -17,11 +17,11 @@ using namespace nexus;
 
 REGISTER_CLASS(CRABAnalysisSteppingAction, G4UserSteppingAction)
 
-CRABAnalysisSteppingAction::CRABAnalysisSteppingAction(): G4UserSteppingAction(),msg_(0),filePath_("output/")
+CRABAnalysisSteppingAction::CRABAnalysisSteppingAction(): G4UserSteppingAction(),msg_(0),filePath_("output/"),SavetoFile_(false),NumEvents_(0)
 {
     msg_=new G4GenericMessenger(this,"/Actions/CRABAnalysisSteppingAction/");
     msg_->DeclareProperty("FilePath",filePath_,"This is the path for saving some counts to text file..");
-    NumEvents=0;
+
 
 }
 
@@ -34,10 +34,11 @@ CRABAnalysisSteppingAction::~CRABAnalysisSteppingAction()
     detectorCounts::iterator it = my_counts_.begin();
     while (it != my_counts_.end()) {
         G4cout << "Detector " << it->first << ": " << it->second << " counts" << G4endl;
-        G4String str;
-        str=it->first + "," + to_string(it->second)+","+ to_string(NumEvents) ;
-        f1->SaveToTextFile("kk.txt","Detector,Counts,Total",str);
-
+        if(SavetoFile_){
+            G4String str;
+            str=it->first + "," + to_string(it->second)+","+ to_string(NumEvents_) ;
+            f1->SaveToTextFile("kk.txt","Detector,Counts,Total",str);
+        }
         total_counts += it->second;
         it ++;
     }
@@ -94,12 +95,11 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
             detectorCounts::iterator it = my_counts_.find(detector_name);
             if (it != my_counts_.end()) my_counts_[it->first] += 1;
             else my_counts_[detector_name] = 1;
-            NumEvents++;
+            NumEvents_++;
 
         }
 
     }
-
 
     return;
 }

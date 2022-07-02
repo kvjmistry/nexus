@@ -209,8 +209,10 @@ namespace nexus{
 
         // Particle Source Holder
         //Rotation Matrix
+
         G4RotationMatrix* rotateHolder = new G4RotationMatrix();
         rotateHolder->rotateY(90.*deg);
+
         if(!HideSourceHolder_){
             new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset,0,0), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
             new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
@@ -223,16 +225,30 @@ namespace nexus{
         pmt1rotate->rotateY(180.*deg);
 
         //// PMT Covering Tube ///
-        G4double PMT_Tube_Length=MgF2_window_thickness_+(pmt1_->Length()+0.5*cm)/2;
+        G4double PMT_Tube_Length1=MgF2_window_thickness_+(pmt1_->Length()+0.5*cm)/2;
+        G4double PMT_Tube_Length0=(20*cm+pmt1_->Length())/2;
         G4double PMT_Tube_Block_Thickness=0.2*cm;
+        G4double LongPMTTubeOffset=9.5*cm;
 
-        G4Tubs * PMT_Tube_solid=new G4Tubs("PMT_TUBE",(MgF2_window_diam_/2)+0.5*cm,(MgF2_window_diam_/2)+0.7*cm,PMT_Tube_Length,0,twopi);
-        G4LogicalVolume * PMT_Tube_Logic=new G4LogicalVolume(PMT_Tube_solid,materials::Steel(),PMT_Tube_solid->GetName());
-        G4Tubs * PMT_Block_solid=new G4Tubs("PMT_TUBE_BLOCK",0,(MgF2_window_diam_/2+0.5*cm),PMT_Tube_Block_Thickness,0,twopi);
-        G4LogicalVolume * PMT_Block_Logic=new G4LogicalVolume(PMT_Block_solid,materials::Steel(),PMT_Block_solid->GetName());
-        G4Tubs * InsideThePMT_Tube_solid0=new G4Tubs("PMT_TUBE_VACUUM0",0,(MgF2_window_diam_/2+0.4*cm),PMT_Tube_Length,0,twopi);
+        // Tube Away from EL
+        G4Tubs * PMT_Tube_solid0=new G4Tubs("PMT_TUBE0",(MgF2_window_diam_/2)+0.5*cm,(MgF2_window_diam_/2)+0.7*cm,PMT_Tube_Length0,0,twopi);
+        G4LogicalVolume * PMT_Tube_Logic0=new G4LogicalVolume(PMT_Tube_solid0,materials::Steel(),PMT_Tube_solid0->GetName());
+
+        G4Tubs * PMT_Block_solid0=new G4Tubs("PMT_TUBE_BLOCK0",0,(MgF2_window_diam_/2+0.5*cm),PMT_Tube_Block_Thickness,0,twopi);
+        G4LogicalVolume * PMT_Block_Logic0=new G4LogicalVolume(PMT_Block_solid0,materials::Steel(),PMT_Block_solid0->GetName());
+        // Vacuum for PMT TUBE0
+        G4Tubs * InsideThePMT_Tube_solid0=new G4Tubs("PMT_TUBE_VACUUM0",0,(MgF2_window_diam_/2+0.4*cm),PMT_Tube_Length0,0,twopi);
         G4LogicalVolume * InsideThePMT_Tube_Logic0=new G4LogicalVolume(InsideThePMT_Tube_solid0,vacuum,InsideThePMT_Tube_solid0->GetName());
-        G4Tubs * InsideThePMT_Tube_solid1=new G4Tubs("PMT_TUBE_VACUUM1",0,(MgF2_window_diam_/2+0.4*cm),PMT_Tube_Length,0,twopi);
+
+        // Tube Close to EL
+        G4Tubs * PMT_Tube_solid1=new G4Tubs("PMT_TUBE1",(MgF2_window_diam_/2)+0.5*cm,(MgF2_window_diam_/2)+0.7*cm,PMT_Tube_Length1,0,twopi);
+        G4LogicalVolume * PMT_Tube_Logic1=new G4LogicalVolume(PMT_Tube_solid1,materials::Steel(),PMT_Tube_solid1->GetName());
+        G4Tubs * PMT_Block_solid1=new G4Tubs("PMT_TUBE_BLOCK1",0,(MgF2_window_diam_/2+0.5*cm),PMT_Tube_Block_Thickness,0,twopi);
+        G4LogicalVolume * PMT_Block_Logic=new G4LogicalVolume(PMT_Block_solid1,materials::Steel(),PMT_Block_solid1->GetName());
+
+        // Vacuum for PMT TUBE1
+
+        G4Tubs * InsideThePMT_Tube_solid1=new G4Tubs("PMT_TUBE_VACUUM1",0,(MgF2_window_diam_/2+0.4*cm),PMT_Tube_Length1,0,twopi);
         G4LogicalVolume * InsideThePMT_Tube_Logic1=new G4LogicalVolume(InsideThePMT_Tube_solid1,vacuum,InsideThePMT_Tube_solid1->GetName());
 
 
@@ -270,16 +286,16 @@ namespace nexus{
         new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", lab_logic_volume, false, 1, false);
 
         //PMT Tubes
-        new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset),PMT_Tube_Logic,PMT_Tube_Logic->GetName(),lab_logic_volume,false,0,false);
-        new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset)),PMT_Tube_Logic,PMT_Tube_Logic->GetName(),lab_logic_volume,false,1,false);
+        new G4PVPlacement(0,G4ThreeVector(0,0,0),PMT_Tube_Logic0,PMT_Tube_Logic0->GetName(),lab_logic_volume,false,0,false);
+        new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,0),PMT_Tube_Logic1,PMT_Tube_Logic1->GetName(),lab_logic_volume,false,0,false);
         //PMT Tube Vacuum
 
-        new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset),InsideThePMT_Tube_Logic0,"PMT_TUBE_VACUUM0",lab_logic_volume,false,0,false);
+        new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset+LongPMTTubeOffset),InsideThePMT_Tube_Logic0,"PMT_TUBE_VACUUM0",lab_logic_volume,false,0,false);
         new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset)),InsideThePMT_Tube_Logic1,"PMT_TUBE_VACUUM1",lab_logic_volume,false,0,false);
 
         // PMT Tube Block
-        new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset+PMT_Tube_Length-PMT_Tube_Block_Thickness/2),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,0,false);
-        new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset+PMT_Tube_Length-PMT_Tube_Block_Thickness/2)),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,1,false);
+        new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset+PMT_Tube_Length0-PMT_Tube_Block_Thickness/2+LongPMTTubeOffset),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,0,false);
+        new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset+PMT_Tube_Length1-PMT_Tube_Block_Thickness/2)),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,1,false);
 
         // PMTs
         new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,0),pmt1_logic,pmt1_->GetPMTName(),InsideThePMT_Tube_Logic0,true,0,false);
@@ -377,10 +393,14 @@ namespace nexus{
 
 
         //PMT TUBE AND PMT BLOCK
-        G4LogicalVolume * PmttubeLog=lvStore->GetVolume("PMT_TUBE");
-        PmttubeLog->SetVisAttributes(ChamberVa);
-        G4LogicalVolume * PmttubeBlockLog=lvStore->GetVolume("PMT_TUBE_BLOCK");
-        PmttubeBlockLog->SetVisAttributes(ChamberVa);
+        G4LogicalVolume * PmttubeLog0=lvStore->GetVolume("PMT_TUBE0");
+        PmttubeLog0->SetVisAttributes(G4VisAttributes::GetInvisible());
+        G4LogicalVolume * PmttubeBlockLog0=lvStore->GetVolume("PMT_TUBE_BLOCK0");
+        G4LogicalVolume * PmttubeLog1=lvStore->GetVolume("PMT_TUBE1");
+        PmttubeLog1->SetVisAttributes(G4VisAttributes::GetInvisible());
+        G4LogicalVolume * PmttubeBlockLog1=lvStore->GetVolume("PMT_TUBE_BLOCK1");
+        PmttubeBlockLog0->SetVisAttributes(ChamberVa);
+        PmttubeBlockLog1->SetVisAttributes(ChamberVa);
         G4LogicalVolume * PmttubeVacuumLog1=lvStore->GetVolume("PMT_TUBE_VACUUM0");
         G4LogicalVolume * PmttubeVacuumLog2=lvStore->GetVolume("PMT_TUBE_VACUUM1");
         G4VisAttributes PmttubeVacuumVis=nexus::Yellow();

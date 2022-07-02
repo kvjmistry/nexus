@@ -66,10 +66,22 @@ namespace nexus{
         G4int counter=0;
 
         // Checking to see if something written in the file, if it is skip labels
-        getline(fstfile,val);
-        if(!labels.empty()){
-            if(val.size()==0)
-                fstfile << labels;
+        if(fstfile.peek()==std::fstream::traits_type::eof()) {
+
+            // These are needed to point to the begining of the empty page
+            fstfile.seekp(std::ios::beg);
+            fstfile.seekg(std::ios::beg);
+
+            //////////////////////////////////////////////////////////////////////////
+
+
+            // Just a Warning
+            G4Exception("FileHandling","[SaveToTextFile]",JustWarning,"Empty File!");
+
+            // If the labels are not present,  just add them
+            if(!labels.empty()){
+                fstfile << labels +"\n";
+            }
         }
 
         if (data.size()==0) G4Exception("FileHandling","[SaveToTextFile]",FatalException,"Data array is empty!");
@@ -101,11 +113,23 @@ namespace nexus{
         stringstream sline(labels);
         G4int counter=0;
 
-        // Checking to see if something written in the file, if it is skip labels
-        getline(fstfile,val);
+        // Checking to see if File is Empty
+        if(fstfile.peek()==std::fstream::traits_type::eof()) {
 
-        if(!labels.empty()){
-            if(val.empty()) fstfile << labels;
+            // These are needed to point to the begining of the empty page
+            fstfile.seekp(std::ios::beg);
+            fstfile.seekg(std::ios::beg);
+
+            //////////////////////////////////////////////////////////////////////////
+
+
+            // Just a Warning
+            G4Exception("FileHandling","[SaveToTextFile]",JustWarning,"Empty File!");
+
+            // If the labels are not present,  just add them
+            if(!labels.empty()){
+                fstfile << labels +"\n";
+            }
         }
 
 
