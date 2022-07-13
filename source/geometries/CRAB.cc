@@ -226,9 +226,9 @@ namespace nexus{
 
         //// PMT Covering Tube ///
         G4double PMT_Tube_Length1=MgF2_window_thickness_+(pmt1_->Length()+0.5*cm)/2;
-        G4double PMT_Tube_Length0=(20*cm+pmt1_->Length())/2;
+        G4double PMT_Tube_Length0=(17*cm+pmt1_->Length())/2;
         G4double PMT_Tube_Block_Thickness=0.2*cm;
-        G4double LongPMTTubeOffset=9.5*cm;
+        G4double LongPMTTubeOffset=7.5*cm;
 
         // Tube Away from EL
         G4Tubs * PMT_Tube_solid0=new G4Tubs("PMT_TUBE0",(MgF2_window_diam_/2)+0.5*cm,(MgF2_window_diam_/2)+0.7*cm,PMT_Tube_Length0,0,twopi);
