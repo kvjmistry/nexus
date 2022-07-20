@@ -340,7 +340,7 @@ namespace nexus{
             EfieldForEL->SetLongitudinalDiffusion(0.17*mm/sqrt(cm));
             // ELRegion->SetLightYield(xgp.ELLightYield(24.8571*kilovolt/cm));//value for E that gives Y=1160 photons per ie- in normal conditions
             //EfieldForEL->SetLightYield(XenonELLightYield(20*kilovolt/cm, gas_pressure_));
-            EfieldForEL->SetLightYield(1697/cm);
+            EfieldForEL->SetLightYield(1697.5/cm);
              //EfieldForEL->SetLightYield(10/cm);
             G4Region* el_region = new G4Region("EL_REGION");
             el_region->SetUserInformation(EfieldForEL);
