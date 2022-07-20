@@ -128,13 +128,15 @@ namespace nexus{
         //Materials
         G4Material* gxe = materials::GXe(gas_pressure_,68);
         G4Material *MgF2=materials::MgF2();
+        G4Material *Steel=materials::Steel();
         G4Material *vacuum=G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic");
+
+
 
         // Optical Properties Assigned here
         MgF2->SetMaterialPropertiesTable(opticalprops::MgF2());
         vacuum->SetMaterialPropertiesTable(opticalprops::Vacuum());
         gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68,sc_yield_,e_lifetime_));
-
         //Constructing Lab Space
         G4String lab_name="LAB";
         G4Box * lab_solid_volume = new G4Box(lab_name,Lab_size/2,Lab_size/2,Lab_size/2);
@@ -162,7 +164,7 @@ namespace nexus{
 
 
         //////////////////////////////////////////
-        G4double EL_Gap=7*mm;
+        G4double EL_Gap=5*mm;
         G4double FielCageGap=(160.3+29.55)*mm;
         // Placing the gas in the chamber
         G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2., 0., twopi);
@@ -294,7 +296,7 @@ namespace nexus{
         new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset)),InsideThePMT_Tube_Logic1,"PMT_TUBE_VACUUM1",lab_logic_volume,false,0,false);
 
         // PMT Tube Block
-        new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset+PMT_Tube_Length0-PMT_Tube_Block_Thickness/2+LongPMTTubeOffset),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,0,false);
+        new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset+PMT_Tube_Length0-PMT_Tube_Block_Thickness/2+LongPMTTubeOffset),PMT_Block_Logic0,PMT_Block_Logic->GetName(),lab_logic_volume,false,0,false);
         new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset+PMT_Tube_Length1-PMT_Tube_Block_Thickness/2)),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,1,false);
 
         // PMTs
@@ -311,22 +313,21 @@ namespace nexus{
         G4SDManager::GetSDMpointer()->AddNewDetector(sensdet);
 
 
-        UniformElectricDriftField* field = new UniformElectricDriftField();
-
-        field->SetCathodePosition(FieldCagePos/2+FielCageGap/2);
-        field->SetAnodePosition(EL_pos/2+EL_Gap/2);
-        //field->SetAnodePosition(EL_pos/2);
-        field->SetDriftVelocity(.90*mm/microsecond);
-        field->SetTransverseDiffusion(.92*mm/sqrt(cm));
-        field->SetLongitudinalDiffusion(.36*mm/sqrt(cm));
-        G4Region* drift_region = new G4Region("DRIFT");
-
-        drift_region->SetUserInformation(field);
-        drift_region->AddRootLogicalVolume(FieldCage_Logic);
-
         // Electrical Field
         if(efield_){
 
+            UniformElectricDriftField* field = new UniformElectricDriftField();
+
+            field->SetCathodePosition(FieldCagePos/2+FielCageGap/2);
+            field->SetAnodePosition(EL_pos/2+EL_Gap/2);
+            //field->SetAnodePosition(EL_pos/2);
+            field->SetDriftVelocity(.90*mm/microsecond);
+            field->SetTransverseDiffusion(.92*mm/sqrt(cm));
+            field->SetLongitudinalDiffusion(.36*mm/sqrt(cm));
+            G4Region* drift_region = new G4Region("DRIFT");
+
+            drift_region->SetUserInformation(field);
+            drift_region->AddRootLogicalVolume(FieldCage_Logic);
             // For CRAB Assuming we have 10 bar gas and Efield is 19,298.20 V/cm
             /// THIS NEEDS TO BE CHANGED
 
@@ -334,12 +335,13 @@ namespace nexus{
             //EfieldForEL->SetCathodePosition(EL_pos/2+EL_Gap/2);
             EfieldForEL->SetCathodePosition(EL_pos/2+EL_Gap/2);
             EfieldForEL->SetAnodePosition(EL_pos/2-EL_Gap/2);
-            EfieldForEL->SetDriftVelocity(2.34*mm/microsecond);
-            EfieldForEL->SetTransverseDiffusion(0.347*mm/sqrt(cm));
-            EfieldForEL->SetLongitudinalDiffusion(0.194*mm/sqrt(cm));
+            EfieldForEL->SetDriftVelocity(4.61*mm/microsecond);
+            EfieldForEL->SetTransverseDiffusion(0.24*mm/sqrt(cm));
+            EfieldForEL->SetLongitudinalDiffusion(0.17*mm/sqrt(cm));
             // ELRegion->SetLightYield(xgp.ELLightYield(24.8571*kilovolt/cm));//value for E that gives Y=1160 photons per ie- in normal conditions
-            EfieldForEL->SetLightYield(XenonELLightYield(10.571*kilovolt/cm, gas_pressure_));
-            //EfieldForEL->SetLightYield(1);
+            //EfieldForEL->SetLightYield(XenonELLightYield(20*kilovolt/cm, gas_pressure_));
+            EfieldForEL->SetLightYield(1697/cm);
+             //EfieldForEL->SetLightYield(10/cm);
             G4Region* el_region = new G4Region("EL_REGION");
             el_region->SetUserInformation(EfieldForEL);
             el_region->AddRootLogicalVolume(EL_logic);

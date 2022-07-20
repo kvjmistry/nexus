@@ -17,7 +17,7 @@ using namespace nexus;
 
 REGISTER_CLASS(CRABAnalysisSteppingAction, G4UserSteppingAction)
 
-CRABAnalysisSteppingAction::CRABAnalysisSteppingAction(): G4UserSteppingAction(),msg_(0),filePath_("output/"),SavetoFile_(false),NumEvents_(0),FileName_("photoncount.txt")
+CRABAnalysisSteppingAction::CRABAnalysisSteppingAction(): G4UserSteppingAction(),msg_(0),filePath_(""),SavetoFile_(false),NumEvents_(0),FileName_("photoncount.txt")
 {
     msg_=new G4GenericMessenger(this,"/Actions/CRABAnalysisSteppingAction/");
     msg_->DeclareProperty("FilePath",filePath_,"This is the path for saving some counts to text file..");

@@ -76,6 +76,7 @@ Electroluminescence::PostStepDoIt(const G4Track& track, const G4Step& step)
     ParticleChange_->ProposeTrackStatus(fStopAndKill);
     return G4VDiscreteProcess::PostStepDoIt(track, step);
   }
+
   // Get the light yield from the field
   const G4double yield = field->LightYield();
   G4double step_length = step.GetStepLength();
@@ -118,19 +119,22 @@ Electroluminescence::PostStepDoIt(const G4Track& track, const G4Step& step)
 
   // Energy is sampled from integral (like it is
   // done in G4Scintillation)
-  G4Material* mat = step.GetPostStepPoint()->GetTouchable()->GetVolume()->GetLogicalVolume()->GetMaterial();
-  G4MaterialPropertiesTable* mpt = mat->GetMaterialPropertiesTable();
+    G4Material* mat = step.GetPostStepPoint()->GetTouchable()->GetVolume()->GetLogicalVolume()->GetMaterial();
+    //G4cout<<mat->GetName()<<G4endl;
+    //G4cout<<"Pos "<<position[0]<<" "<<position[1]<<" "<<position[2]<<G4endl;
+
+    G4MaterialPropertiesTable* mpt = mat->GetMaterialPropertiesTable();
+  //Fixes the crush if materialproperties is not found
+  if(!mpt) return G4VDiscreteProcess::PostStepDoIt(track, step);
   const G4MaterialPropertyVector* spectrum = mpt->GetProperty("ELSPECTRUM");
-
   if (!spectrum) return G4VDiscreteProcess::PostStepDoIt(track, step);
-
-  G4PhysicsOrderedFreeVector* spectrum_integral =
+    G4PhysicsOrderedFreeVector* spectrum_integral =
     (G4PhysicsOrderedFreeVector*)(*theFastIntegralTable_)(mat->GetIndex());
 
 
-  G4double sc_max = spectrum_integral->GetMaxValue();
+    G4double sc_max = spectrum_integral->GetMaxValue();
 
-  for (G4int i=0; i<num_photons; i++) {
+    for (G4int i=0; i<num_photons; i++) {
     // Generate a random direction for the photon
     // (EL is supposed isotropic)
     G4double cos_theta = 1. - 2.*G4UniformRand();
@@ -171,6 +175,7 @@ Electroluminescence::PostStepDoIt(const G4Track& track, const G4Step& step)
     // Determine photon energy
     G4double sc_value = G4UniformRand()*sc_max;
     G4double sampled_energy = spectrum_integral->GetEnergy(sc_value);
+    //G4cout<<sampled_energy<<G4endl;
     photon->SetKineticEnergy(sampled_energy);
 
     G4LorentzVector xyzt =
@@ -182,7 +187,6 @@ Electroluminescence::PostStepDoIt(const G4Track& track, const G4Step& step)
     ParticleChange_->AddSecondary(secondary);
 
   }
-
   return G4VDiscreteProcess::PostStepDoIt(track, step);
 }
 

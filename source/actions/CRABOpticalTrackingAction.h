@@ -1,0 +1,14 @@
+//
+// Created by ilker on 7/19/22.
+//
+
+#ifndef NEXUS_CRABOPTICALTRACKINGACTION_H
+#define NEXUS_CRABOPTICALTRACKINGACTION_H
+
+
+class CRABOpticalTrackingAction {
+
+};
+
+
+#endif //NEXUS_CRABOPTICALTRACKINGACTION_H
