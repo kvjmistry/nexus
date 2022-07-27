@@ -89,8 +89,7 @@ namespace nexus {
 
 
 
-  G4LorentzVector UniformElectricDriftField::GeneratePointAlongDriftLine(
-									 const G4LorentzVector& origin, const G4LorentzVector& end)
+  G4LorentzVector UniformElectricDriftField::GeneratePointAlongDriftLine(const G4LorentzVector& origin, const G4LorentzVector& end)
   {
 
     // if (origin != rnd_->GetPrePoint()) {

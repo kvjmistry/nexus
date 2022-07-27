@@ -5,9 +5,9 @@
 /process/em/verbose 1
 ## Making sure electroluminescence is turned on
 ## Nexus Physics List
-/PhysicsList/Nexus/clustering           false
-/PhysicsList/Nexus/drift                false
-/PhysicsList/Nexus/electroluminescence  false
+/PhysicsList/Nexus/clustering           true
+/PhysicsList/Nexus/drift                true
+/PhysicsList/Nexus/electroluminescence  true
 
 #GEOMETRY
 /Geometry/CRAB/gas_pressure 10. bar
@@ -16,10 +16,13 @@
 /Geometry/CRAB/chamber_length 43.18 cm
 /Geometry/CRAB/chamber_thickn 2. mm
 #/Geometry/CRAB/SourcePosition -4.5 -4.5 -4.5 cm
-/Geometry/CRAB/SourcePosition -3 0 -4 cm
+/Geometry/CRAB/SourcePosition -1.6 0 -4 cm
 #/Geometry/CRAB/SourcePosition 0 0 0 cm
-/Actions/CRABAnalysisSteppingAction/FileSave false
-/Actions/CRABAnalysisSteppingAction/FileName test.txt
+/Geometry/CRAB/ElecLifTime 100 ms
+/Geometry/CRAB/ELGap 7 mm
+
+/Actions/CRABAnalysisSteppingAction/FileSave true
+/Actions/CRABAnalysisSteppingAction/FileName 100ms.txt
 
 
 #Active
@@ -50,5 +53,5 @@
 
 # PERSISTENCY
 /nexus/persistency/eventType background
-/nexus/persistency/outputFile /media/ilker/Ilker/CRAB/Simulation/For_Nick/single_Pb210
+/nexus/persistency/outputFile /media/ilker/Ilker/CRAB/Simulation/For_Nick/single_Pb210_1001ms
 #/run/printProgress 100

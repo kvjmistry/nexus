@@ -61,7 +61,8 @@ namespace nexus{
              pmt_base_thickness_ (5. * mm),
              efield_(true),
              HideSourceHolder_(true),
-             max_step_size_(1.*mm)
+             max_step_size_(1.*mm),
+             ElGap_(7*mm)
 
     {
         msg_ = new G4GenericMessenger(this, "/Geometry/CRAB/","Control commands of geometry of CRAB TPC");
@@ -108,6 +109,8 @@ namespace nexus{
         scinYield_cmd.SetParameterName("scinYield", false);
         scinYield_cmd.SetUnitCategory("1/Energy");
 
+        G4GenericMessenger::Command&  ELGap_cmd =msg_->DeclarePropertyWithUnit("ELGap","mm",ElGap_,"Gap which electroluminesence happens");
+        Active_length_cmd.SetParameterName("ELGap", false);
 
         pmt1_=new PmtR7378A();
         pmt2_=new PmtR7378A();
@@ -164,7 +167,7 @@ namespace nexus{
 
 
         //////////////////////////////////////////
-        G4double EL_Gap=5*mm;
+
         G4double FielCageGap=(160.3+29.55)*mm;
         // Placing the gas in the chamber
         G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2., 0., twopi);
@@ -176,7 +179,7 @@ namespace nexus{
 
 
         // EL Region
-        G4Tubs* EL_solid =new G4Tubs("EL_GAP", 0., Active_diam/2.,EL_Gap/2 , 0., twopi);
+        G4Tubs* EL_solid =new G4Tubs("EL_GAP", 0., Active_diam/2.,ElGap_/2 , 0., twopi);
         G4LogicalVolume* EL_logic = new G4LogicalVolume(EL_solid, gxe, "EL_GAP");
         //EL_logic->SetUserLimits(new G4UserLimits(1*mm));
 
@@ -272,8 +275,8 @@ namespace nexus{
 
 
         // FieldCage
-        G4double FieldCagePos=chamber_length/2-((129)*mm)-FielCageGap/2-EL_Gap/2;
-        G4double EL_pos=chamber_length/2-FielCageGap/2-((326)*mm)-EL_Gap/2;
+        G4double FieldCagePos=chamber_length/2-((129)*mm)-FielCageGap/2-ElGap_/2;
+        G4double EL_pos=chamber_length/2-FielCageGap/2-((326)*mm)-ElGap_/2;
 
         new G4PVPlacement(0,G4ThreeVector(0,0,FieldCagePos/2),FieldCage_Logic,FieldCage_Logic->GetName(),gas_logic, 0,0,false);
 
@@ -319,7 +322,7 @@ namespace nexus{
             UniformElectricDriftField* field = new UniformElectricDriftField();
 
             field->SetCathodePosition(FieldCagePos/2+FielCageGap/2);
-            field->SetAnodePosition(EL_pos/2+EL_Gap/2);
+            field->SetAnodePosition(EL_pos/2+ElGap_/2);
             //field->SetAnodePosition(EL_pos/2);
             field->SetDriftVelocity(.90*mm/microsecond);
             field->SetTransverseDiffusion(.92*mm/sqrt(cm));
@@ -333,8 +336,8 @@ namespace nexus{
 
             UniformElectricDriftField * EfieldForEL=new UniformElectricDriftField();
             //EfieldForEL->SetCathodePosition(EL_pos/2+EL_Gap/2);
-            EfieldForEL->SetCathodePosition(EL_pos/2+EL_Gap/2);
-            EfieldForEL->SetAnodePosition(EL_pos/2-EL_Gap/2);
+            EfieldForEL->SetCathodePosition(EL_pos/2+ElGap_/2);
+            EfieldForEL->SetAnodePosition(EL_pos/2-ElGap_/2);
             EfieldForEL->SetDriftVelocity(4.61*mm/microsecond);
             EfieldForEL->SetTransverseDiffusion(0.24*mm/sqrt(cm));
             EfieldForEL->SetLongitudinalDiffusion(0.17*mm/sqrt(cm));

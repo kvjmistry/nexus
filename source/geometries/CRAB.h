@@ -41,6 +41,7 @@ namespace nexus {
             G4double Active_length;
             G4double sc_yield_;
             G4double e_lifetime_;
+            G4double ElGap_;
             G4ThreeVector vertex;
             PmtR7378A *pmt1_;
             PmtR7378A *pmt2_;

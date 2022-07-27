@@ -62,7 +62,7 @@ namespace nexus {
     // and therefore the step length is zero.
     if (!field) return step_length;
     // Get displacement from current position due to drift field
-    xyzt_.set(track.GetGlobalTime(), track.GetPosition());
+    xyzt_.set(track.GetLocalTime(), track.GetPosition());
     step_length = field->Drift(xyzt_);
     
     return step_length;
@@ -91,13 +91,17 @@ namespace nexus {
       else {
         const G4double attach = mpt->GetConstProperty("ATTACHMENT");
         G4double rnd = -attach * log(G4UniformRand());
-        // Issue with the decays
-        /*if (xyzt_.t() > rnd)
+        //G4cout<<"Time = "<< xyzt_.t() / CLHEP::second<< " Rnd " << rnd/ CLHEP::second<<G4endl;
+          // Issue with the decays
+        if (xyzt_.t() > rnd)
           ParticleChange_->ProposeTrackStatus(fStopAndKill);
-      */
-         }
+          G4cout <<"Stopped !!" << G4endl;
+          G4cout<<"Time = "<< xyzt_.t() / CLHEP::second<< " Rnd " << rnd/ CLHEP::second<<G4endl;
 
-      ParticleChange_->ProposeGlobalTime(xyzt_.t());
+
+      }
+
+      ParticleChange_->ProposeLocalTime(xyzt_.t());
       ParticleChange_->ProposePosition(xyzt_.vect());
     }
     else {
