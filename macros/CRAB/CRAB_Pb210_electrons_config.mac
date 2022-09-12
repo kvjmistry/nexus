@@ -19,7 +19,7 @@
 /Geometry/CRAB/chamber_length 43.18 cm
 /Geometry/CRAB/chamber_thickn 2. mm
 #/Geometry/CRAB/SourcePosition -4.5 -4.5 -4.5 cm
-#/Geometry/CRAB/SourcePosition -3 0 -4 cm
+#/Geometry/CRAB/SourcePosition -3 0 -5 cm
 #/Geometry/CRAB/SourcePosition 0 0 0 cm
 /Actions/CRABAnalysisSteppingAction/FileSave true
 /Actions/CRABAnalysisSteppingAction/FileName test.txt

@@ -9,8 +9,8 @@
 
 
 # GENERATION
-/Generator/SingleParticle/region  FIELDCAGE
-/Generator/SingleParticle/particle e-
+/Generator/SingleParticle/region FIELDCAGE
+/Generator/SingleParticle/particle opticalphoton
 /Generator/SingleParticle/min_energy 10 eV
 /Generator/SingleParticle/max_energy 10 eV
 #/Generator/SingleParticle/min_costheta -1
@@ -33,8 +33,12 @@
 /Geometry/CRAB/chamber_diam  15. cm
 /Geometry/CRAB/chamber_length 43.18 cm
 /Geometry/CRAB/chamber_thickn 2. mm
-/Geometry/CRAB/SourcePosition 0 0 0 cm
+/Geometry/CRAB/SourcePosition -1.6 0 -5 cm
 #/Geometry/CRAB/SourcePosition 0 0 0 cm
+/Geometry/CRAB/ElecLifTime 100 ms
+/Geometry/CRAB/ELGap 7 mm
+
+
 
 #Active
 /Geometry/CRAB/Active_diam 8.5 cm

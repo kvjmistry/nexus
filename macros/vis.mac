@@ -63,11 +63,17 @@
 /vis/viewer/set/autoRefresh true
 /vis/verbose warnings
 ## visuals
-/vis/scene/add/scale 8.5 cm x 0 1 0 manual 0 1 22.5 cm  # Simple scale line
-/vis/scene/add/scale 15 cm x 0 1 0 manual 0 -2 22.5 cm  # Simple scale line
-/vis/scene/add/scale 10 cm z 0 0 1 manual 0 -2 26.8 cm  # Simple scale line
-
-/vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
+## visuals
+/vis/scene/add/scale 8.5 cm x 1 0 1 manual 0 1 22.5 cm  # Simple scale line
+/vis/scene/add/scale 15 cm x 1 0 1 manual 0 -2 22.5 cm  # Simple scale line
+/vis/scene/add/scale 10.6 cm z 1 0 1 manual -5 +2 -16.1 cm  # Simple scale line ### EL to the Flange
+/vis/scene/add/scale 0.7 cm z 1 0 1 manual -5 0 -10.40 cm  # Simple scale line ### EL GAP
+/vis/scene/add/scale 19 cm z 1 0 1 manual -5 0 -0.6 cm ### Drift Region
+/vis/scene/add/scale 12.4 cm z 1 0 1 manual -5 0 +15.1  cm  ## Left Flange to Starting of the drift Region
+/vis/scene/add/scale 5 cm z 1 0 1 manual -3 0 -7.5  cm  ## Source Position
+/vis/scene/add/scale 8.1 cm z 1 0 1 manual 0 -2 25.8 cm  # Position of the PMT3
+/vis/scene/add/scale 5.5 mm z 1 0 1 manual 0 -2 -22.1 cm  # Position of the PMT1
+#/vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
 #/vis/scene/add/text 0 0 0 mm 40 -100 -200 LogVol:Absorber
 #
 # Requests viewer to accumulate hits, tracks, etc. at end of event.
