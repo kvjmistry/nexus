@@ -53,7 +53,7 @@ namespace nexus{
             e_lifetime_(1000. * ms),
              pmt_hole_length_ (18.434 * cm),
              MgF2_window_thickness_ (6. * mm),
-             MgF2_window_diam_ (25.4 * mm),
+             MgF2_window_diam_ (20 * mm),
              wndw_ring_stand_out_ (1.5 * mm), //how much the ring around sapph windows stands out of them
              pedot_coating_thickness_ (200. * nanometer), // copied from NEW
              optical_pad_thickness_ (1. * mm), // copied from NEW
@@ -62,7 +62,9 @@ namespace nexus{
              efield_(true),
              HideSourceHolder_(true),
              max_step_size_(1.*mm),
-             ElGap_(7*mm)
+             ElGap_(7*mm),
+             PMT1_Pos_(0),
+             PMT3_Pos_(0)
 
     {
         msg_ = new G4GenericMessenger(this, "/Geometry/CRAB/","Control commands of geometry of CRAB TPC");
@@ -223,6 +225,9 @@ namespace nexus{
             new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
         }
 
+
+        // PMT1 and PMT3
+
         // PMTs
         G4double PMT_offset=0.2*cm;
         G4double PMT_pos=(chamber_length/2)+chamber_thickn+(pmt1_->Length()/2)+MgF2_window_thickness_+PMT_offset;
@@ -230,30 +235,33 @@ namespace nexus{
         pmt1rotate->rotateY(180.*deg);
 
         //// PMT Covering Tube ///
-        G4double PMT_Tube_Length1=MgF2_window_thickness_+(pmt1_->Length()+0.5*cm)/2;
-        G4double PMT_Tube_Length0=(17*cm+pmt1_->Length())/2;
+        G4double offset=1.65*cm;
+        G4double PMT_Tube_Length1=MgF2_window_thickness_+(pmt1_->Length()+0.5*cm)/2 + offset ;
+        G4double PMT_Tube_Length0=(17*cm+pmt1_->Length())/2 - 3.87*cm;
         G4double PMT_Tube_Block_Thickness=0.2*cm;
-        G4double LongPMTTubeOffset=7.5*cm;
+        G4double LongPMTTubeOffset=7.5*cm-3.8*cm;
+        G4double PMTTubeDiam=2.54*cm;
 
         // Tube Away from EL
-        G4Tubs * PMT_Tube_solid0=new G4Tubs("PMT_TUBE0",(MgF2_window_diam_/2)+0.5*cm,(MgF2_window_diam_/2)+0.7*cm,PMT_Tube_Length0,0,twopi);
+        G4Tubs * PMT_Tube_solid0=new G4Tubs("PMT_TUBE0",(PMTTubeDiam/2)+0.5*cm,(PMTTubeDiam/2)+0.7*cm,PMT_Tube_Length0,0,twopi);
         G4LogicalVolume * PMT_Tube_Logic0=new G4LogicalVolume(PMT_Tube_solid0,materials::Steel(),PMT_Tube_solid0->GetName());
 
-        G4Tubs * PMT_Block_solid0=new G4Tubs("PMT_TUBE_BLOCK0",0,(MgF2_window_diam_/2+0.5*cm),PMT_Tube_Block_Thickness,0,twopi);
+        G4Tubs * PMT_Block_solid0=new G4Tubs("PMT_TUBE_BLOCK0",0,(PMTTubeDiam/2+0.5*cm),PMT_Tube_Block_Thickness,0,twopi);
         G4LogicalVolume * PMT_Block_Logic0=new G4LogicalVolume(PMT_Block_solid0,materials::Steel(),PMT_Block_solid0->GetName());
         // Vacuum for PMT TUBE0
-        G4Tubs * InsideThePMT_Tube_solid0=new G4Tubs("PMT_TUBE_VACUUM0",0,(MgF2_window_diam_/2+0.4*cm),PMT_Tube_Length0,0,twopi);
+        /// add 2.54*cm to config file
+        G4Tubs * InsideThePMT_Tube_solid0=new G4Tubs("PMT_TUBE_VACUUM0",0,(PMTTubeDiam/2+0.4*cm),PMT_Tube_Length0,0,twopi);
         G4LogicalVolume * InsideThePMT_Tube_Logic0=new G4LogicalVolume(InsideThePMT_Tube_solid0,vacuum,InsideThePMT_Tube_solid0->GetName());
 
         // Tube Close to EL
-        G4Tubs * PMT_Tube_solid1=new G4Tubs("PMT_TUBE1",(MgF2_window_diam_/2)+0.5*cm,(MgF2_window_diam_/2)+0.7*cm,PMT_Tube_Length1,0,twopi);
+        G4Tubs * PMT_Tube_solid1=new G4Tubs("PMT_TUBE1",(PMTTubeDiam/2)+0.5*cm,(PMTTubeDiam/2)+0.7*cm,PMT_Tube_Length1,0,twopi);
         G4LogicalVolume * PMT_Tube_Logic1=new G4LogicalVolume(PMT_Tube_solid1,materials::Steel(),PMT_Tube_solid1->GetName());
-        G4Tubs * PMT_Block_solid1=new G4Tubs("PMT_TUBE_BLOCK1",0,(MgF2_window_diam_/2+0.5*cm),PMT_Tube_Block_Thickness,0,twopi);
+        G4Tubs * PMT_Block_solid1=new G4Tubs("PMT_TUBE_BLOCK1",0,(PMTTubeDiam/2+0.5*cm),PMT_Tube_Block_Thickness,0,twopi);
         G4LogicalVolume * PMT_Block_Logic=new G4LogicalVolume(PMT_Block_solid1,materials::Steel(),PMT_Block_solid1->GetName());
 
         // Vacuum for PMT TUBE1
 
-        G4Tubs * InsideThePMT_Tube_solid1=new G4Tubs("PMT_TUBE_VACUUM1",0,(MgF2_window_diam_/2+0.4*cm),PMT_Tube_Length1,0,twopi);
+        G4Tubs * InsideThePMT_Tube_solid1=new G4Tubs("PMT_TUBE_VACUUM1",0,(PMTTubeDiam/2+0.4*cm),PMT_Tube_Length1,0,twopi);
         G4LogicalVolume * InsideThePMT_Tube_Logic1=new G4LogicalVolume(InsideThePMT_Tube_solid1,vacuum,InsideThePMT_Tube_solid1->GetName());
 
 
@@ -296,11 +304,11 @@ namespace nexus{
         //PMT Tube Vacuum
 
         new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset+LongPMTTubeOffset),InsideThePMT_Tube_Logic0,"PMT_TUBE_VACUUM0",lab_logic_volume,false,0,false);
-        new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset)),InsideThePMT_Tube_Logic1,"PMT_TUBE_VACUUM1",lab_logic_volume,false,0,false);
+        new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset)-offset),InsideThePMT_Tube_Logic1,"PMT_TUBE_VACUUM1",lab_logic_volume,false,0,false);
 
         // PMT Tube Block
         new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset+PMT_Tube_Length0-PMT_Tube_Block_Thickness/2+LongPMTTubeOffset),PMT_Block_Logic0,PMT_Block_Logic->GetName(),lab_logic_volume,false,0,false);
-        new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset+PMT_Tube_Length1-PMT_Tube_Block_Thickness/2)),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,1,false);
+        new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset+PMT_Tube_Length1-PMT_Tube_Block_Thickness/2)-offset),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,1,false);
 
         // PMTs
         new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,0),pmt1_logic,pmt1_->GetPMTName(),InsideThePMT_Tube_Logic0,true,0,false);
@@ -343,8 +351,8 @@ namespace nexus{
             EfieldForEL->SetLongitudinalDiffusion(0.17*mm/sqrt(cm));
             // ELRegion->SetLightYield(xgp.ELLightYield(24.8571*kilovolt/cm));//value for E that gives Y=1160 photons per ie- in normal conditions
             //EfieldForEL->SetLightYield(XenonELLightYield(20*kilovolt/cm, gas_pressure_));
-            EfieldForEL->SetLightYield(1697.5/cm);
-             //EfieldForEL->SetLightYield(10/cm);
+            //EfieldForEL->SetLightYield(970/cm);
+            EfieldForEL->SetLightYield(1.43/cm);
             G4Region* el_region = new G4Region("EL_REGION");
             el_region->SetUserInformation(EfieldForEL);
             el_region->AddRootLogicalVolume(EL_logic);

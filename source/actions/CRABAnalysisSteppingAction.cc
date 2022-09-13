@@ -24,7 +24,6 @@ CRABAnalysisSteppingAction::CRABAnalysisSteppingAction(): G4UserSteppingAction()
     msg_->DeclareProperty("FileSave",SavetoFile_,"Save Counts to File");
     msg_->DeclareProperty("FileName",FileName_,"FileName To save count information");
 
-
 }
 
 
@@ -60,6 +59,21 @@ CRABAnalysisSteppingAction::~CRABAnalysisSteppingAction()
     int count=0;
 
     G4cout << "TOTAL COUNTS: " << total_counts << G4endl;
+
+
+    detectorCounts::iterator Absit = ObservedPhotons.begin();
+    G4int TotalAbsPhotons=0;
+    G4cout <<"########### Observed Photons ########"<<G4endl;
+    while (Absit != ObservedPhotons.end()) {
+        G4cout << "Detector " << Absit->first << ": " << Absit->second << " counts" << G4endl;
+
+        TotalAbsPhotons += Absit->second;
+        Absit ++;
+    }
+    G4cout << "Abosrved Photons " <<TotalAbsPhotons<<G4endl;
+    G4cout << "Total Produced Photons " <<TotalPhotons<<G4endl;
+
+
 }
 
 
@@ -87,6 +101,21 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
     G4String proc_name = step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
     G4int copy_no = step->GetPostStepPoint()->GetTouchable()->GetReplicaNumber(1);
     */
+    G4Track* track = step->GetTrack();
+    G4int tid = track->GetTrackID();
+    G4int pid = track->GetParentID();
+
+    PhotonCount ::iterator tit = Photons.find(tid);
+    PhotonCount ::iterator pit = Parents.find(pid);
+
+    if(tit==Photons.end()) {
+        Photons[tid]=1;
+        TotalPhotons++;
+
+    } else {
+        Photons[tid]+=1;
+    }
+
 
     // Retrieve the pointer to the optical boundary process.
     // We do this only once per run defining our local pointer as static.
@@ -109,7 +138,6 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
             //G4cout << "##### Sensitive Volume: " << detector_name << G4endl;
             detectorCounts::iterator it = my_counts_.find(detector_name);
             DepositedEnergy ::iterator deit = PhotonEnergy_.find(detector_name);
-
             if(DisplayPhotonEnergy_){
                 if(deit!=PhotonEnergy_.end())   PhotonEnergy_[it->first].push_back(step->GetTotalEnergyDeposit()/CLHEP::eV);
                 else  PhotonEnergy_[detector_name].push_back(step->GetTotalEnergyDeposit()/CLHEP::eV);
@@ -125,9 +153,15 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
 
 
 
+        } else if(boundary->GetStatus()==Absorption) {
+            G4String detector_name = step->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetName();
+            detectorCounts::iterator Absit=ObservedPhotons.find(detector_name);
+
+            if (Absit != ObservedPhotons.end())  ObservedPhotons[Absit->first] += 1;
+
+            else ObservedPhotons[detector_name] = 1;
         }
 
     }
 
-    return;
 }
