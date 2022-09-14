@@ -53,7 +53,7 @@ namespace nexus{
             e_lifetime_(1000. * ms),
              pmt_hole_length_ (18.434 * cm),
              MgF2_window_thickness_ (6. * mm),
-             MgF2_window_diam_ (20 * mm),
+             MgF2_window_diam_ (10 * mm),
              wndw_ring_stand_out_ (1.5 * mm), //how much the ring around sapph windows stands out of them
              pedot_coating_thickness_ (200. * nanometer), // copied from NEW
              optical_pad_thickness_ (1. * mm), // copied from NEW
