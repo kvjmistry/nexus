@@ -21,11 +21,13 @@
 /nexus/RegisterPersistencyManager PersistencyManager
 
 #Actions
-#/nexus/RegisterTrackingAction OpticalTrackingAction
-/nexus/RegisterTrackingAction DefaultTrackingAction
+/nexus/RegisterTrackingAction OpticalTrackingAction
+#/nexus/RegisterTrackingAction DefaultTrackingAction
 /nexus/RegisterEventAction DefaultEventAction
 /nexus/RegisterRunAction DefaultRunAction
 /nexus/RegisterSteppingAction CRABAnalysisSteppingAction
+#/nexus/RegisterSteppingAction SaveAllSteppingAction
+
 
 
 

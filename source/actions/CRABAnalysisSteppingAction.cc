@@ -82,16 +82,16 @@ CRABAnalysisSteppingAction::~CRABAnalysisSteppingAction()
         TotalAbsPhotons += Absit->second;
         Absit ++;
     }
-
-    str="Total_Detected," + to_string(total_counts);
-    f1->SaveToTextFile(Path,"Detector,Counts",str);
-    str="Absorption_Photons," + to_string(TotalAbsPhotons);
-    f1->SaveToTextFile(Path,"Detector,Counts",str);
-    str="Total_Produced_Photons," + to_string(TotalPhotons);
-    f1->SaveToTextFile(Path,"Detector,Counts",str);
-    str="Total_Produced_ie," + to_string(TotalIonizationElectron);
-    f1->SaveToTextFile(Path,"Detector,Counts",str);
-
+    if(SavetoFile_){
+        str="Total_Detected," + to_string(total_counts);
+        f1->SaveToTextFile(Path,"Detector,Counts",str);
+        str="Absorption_Photons," + to_string(TotalAbsPhotons);
+        f1->SaveToTextFile(Path,"Detector,Counts",str);
+        str="Total_Produced_Photons," + to_string(TotalPhotons);
+        f1->SaveToTextFile(Path,"Detector,Counts",str);
+        str="Total_Produced_ie," + to_string(TotalIonizationElectron);
+        f1->SaveToTextFile(Path,"Detector,Counts",str);
+    }
     G4cout << "Abosrved Photons " <<TotalAbsPhotons<<G4endl;
     G4cout << "Total Produced Photons " <<TotalPhotons<<G4endl;
     G4cout << "Total Produced iElectrons " <<TotalIonizationElectron<<G4endl;

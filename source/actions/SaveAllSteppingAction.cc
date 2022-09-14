@@ -87,7 +87,7 @@ void SaveAllSteppingAction::AddSelectedParticle(G4String particle_name)
   G4ParticleDefinition* pdef = G4ParticleTable::GetParticleTable()->FindParticle(particle_name);
   if (!pdef) {
     G4String msg = "No particle description was found for particle name " + particle_name;
-    G4Exception("[SaveAllSteppingAction]", "AddSelectedParticle()", FatalException, msg);
+    G4Exception("[SaveAllSteppingAction]", "AddSelectedParticle()", JustWarning, msg);
   }
   selected_particles_.push_back(pdef);
 }
