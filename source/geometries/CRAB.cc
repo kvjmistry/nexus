@@ -63,6 +63,7 @@ namespace nexus{
              HideSourceHolder_(true),
              max_step_size_(1.*mm),
              ElGap_(7*mm),
+             ELyield_(970/cm),
              PMT1_Pos_(0),
              PMT3_Pos_(0)
 
@@ -113,6 +114,11 @@ namespace nexus{
 
         G4GenericMessenger::Command&  ELGap_cmd =msg_->DeclarePropertyWithUnit("ELGap","mm",ElGap_,"Gap which electroluminesence happens");
         Active_length_cmd.SetParameterName("ELGap", false);
+
+        new G4UnitDefinition("1/cm","1/cm", "1/cm", 1/cm);
+        G4GenericMessenger::Command&  ELYield_cmd =msg_->DeclareProperty("ELYield",ELyield_,"EL Yield photons/cm");
+        ELYield_cmd.SetParameterName("ELYield", false);
+        ELYield_cmd.SetUnitCategory("1/cm");
 
         pmt1_=new PmtR7378A();
         pmt2_=new PmtR7378A();
@@ -236,10 +242,10 @@ namespace nexus{
 
         //// PMT Covering Tube ///
         G4double offset=1.65*cm;
-        G4double PMT_Tube_Length1=MgF2_window_thickness_+(pmt1_->Length()+0.5*cm)/2 + offset ;
-        G4double PMT_Tube_Length0=(17*cm+pmt1_->Length())/2 - 3.87*cm;
+        G4double PMT_Tube_Length1=MgF2_window_thickness_+(pmt1_->Length()+0.5*cm)/2 + offset -PMT_offset-0.05*cm ;
+        G4double PMT_Tube_Length0=(17*cm+pmt1_->Length())/2 - 3.87*cm-PMT_offset;
         G4double PMT_Tube_Block_Thickness=0.2*cm;
-        G4double LongPMTTubeOffset=7.5*cm-3.8*cm;
+        G4double LongPMTTubeOffset=7.5*cm-3.9*cm;
         G4double PMTTubeDiam=2.54*cm;
 
         // Tube Away from EL
@@ -303,7 +309,7 @@ namespace nexus{
         new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,0),PMT_Tube_Logic1,PMT_Tube_Logic1->GetName(),lab_logic_volume,false,0,false);
         //PMT Tube Vacuum
 
-        new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset+LongPMTTubeOffset),InsideThePMT_Tube_Logic0,"PMT_TUBE_VACUUM0",lab_logic_volume,false,0,false);
+        new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos+LongPMTTubeOffset),InsideThePMT_Tube_Logic0,"PMT_TUBE_VACUUM0",lab_logic_volume,false,0,false);
         new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset)-offset),InsideThePMT_Tube_Logic1,"PMT_TUBE_VACUUM1",lab_logic_volume,false,0,false);
 
         // PMT Tube Block
@@ -351,8 +357,7 @@ namespace nexus{
             EfieldForEL->SetLongitudinalDiffusion(0.17*mm/sqrt(cm));
             // ELRegion->SetLightYield(xgp.ELLightYield(24.8571*kilovolt/cm));//value for E that gives Y=1160 photons per ie- in normal conditions
             //EfieldForEL->SetLightYield(XenonELLightYield(20*kilovolt/cm, gas_pressure_));
-            //EfieldForEL->SetLightYield(970/cm);
-            EfieldForEL->SetLightYield(1.43/cm);
+            EfieldForEL->SetLightYield(ELyield_);
             G4Region* el_region = new G4Region("EL_REGION");
             el_region->SetUserInformation(EfieldForEL);
             el_region->AddRootLogicalVolume(EL_logic);

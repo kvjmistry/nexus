@@ -4,18 +4,24 @@
 #SBATCH -p run         # Partition
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --mem=50GB         # Memory request (Mb)
+#SBATCH --mem=10GB         # Memory request (Mb)
 #SBATCH -t 5-10:08           # Maximum execution time (D-HH:MM)
-#SBATCH -o %A_%a.out        # Standard output                                                                                                                                                                                          
-#SBATCH -e %A_%a.err        # Standard error
+#SBATCH -o /dev/null        # Standard output
+#SBATCH -e /dev/null        # Standard error
+
+##SBATCH -o %A_%a.out        # Standard output
+##SBATCH -e %A_%a.err        # Standard error
 ## Job options                                                                                                                                                                                                                         
 JOBNUMBER=${SLURM_ARRAY_TASK_ID}
 SEED=`echo "scale = 2;  $JOBNUMBER" | bc`
 
 ## Path to output files and G4Executable
-outputDir="/home/argon/Projects/Ilker/CRAB0/S2"
-PathToG4Executable="/home/argon/Projects/Ilker/CRAB0/build/nexus"
+#outputDir="/home/argon/Projects/Ilker/CRAB0/S2"
+#PathToG4Executable="/home/argon/Projects/Ilker/CRAB0/build/nexus"
 
+
+outputDir="/media/ilker/Ilker/SimResults/Sim/S2"
+PathToG4Executable="/home/ilker/Projects/latest_CRAB0/build/nexus"
 ## Events
 NumberOfEvents=1
 
@@ -31,10 +37,13 @@ Run=S2
 ###Info
 ANumber=82
 Mass=210
-
+Syield=25510   ## 1/MeV
+ELYield=970    ## photons/cm*electron		
+ELifeTime=1000 
+ELGap=7
 
 ## Source Position
-pos="-3 0 -4"
+pos="-1.6 0 -5"
 ## Naming Macro and Root Files
 NAME="${Run}_${SEED}"
 OUT="${NAME}_${Pressure}_bar"
@@ -56,7 +65,11 @@ config_MACRO="${outputDir}/macros/${configMACRO}"
 ## Counts 
 PathToCounts="${outputDir}/counts"
 
-
+echo "Removing Older Files ..."
+rm $init_MACRO
+rm $config_MACRO
+rm $PathToCounts/$PhotonFile
+rm "$RootFile.h5"
 
 echo $init_MACRO
 
@@ -87,7 +100,6 @@ echo "/nexus/RegisterMacro ${config_MACRO}"  >>${init_MACRO}
 
 
 ## Remove the Config File if it exists
-rm $config_MACRO
 echo $config_MACRO
 
 ## Configurations
@@ -106,7 +118,7 @@ echo "/PhysicsList/Nexus/electroluminescence ${EL}"  >>${config_MACRO}
 
 #GEOMETRY
 echo "/Geometry/CRAB/gas_pressure 10. bar"  >>${config_MACRO}
-echo "#/Geometry/CRAB/scinYield 0 1/MeV"  >>${config_MACRO}
+
 echo "/Geometry/CRAB/chamber_diam  15. cm"  >>${config_MACRO}
 echo "/Geometry/CRAB/chamber_length 43.18 cm"  >>${config_MACRO}
 echo "/Geometry/CRAB/chamber_thickn 2. mm"  >>${config_MACRO}
@@ -116,6 +128,13 @@ echo "#/Geometry/CRAB/SourcePosition 0 0 0 cm"  >>${config_MACRO}
 echo "/Actions/CRABAnalysisSteppingAction/FileSave true"  >>${config_MACRO}
 echo "/Actions/CRABAnalysisSteppingAction/FileName ${PhotonFile}"  >>${config_MACRO}
 echo "/Actions/CRABAnalysisSteppingAction/FilePath ${PathToCounts}"  >>${config_MACRO}
+
+echo "/Geometry/CRAB/scinYield ${Syield}  1/MeV"  >>${config_MACRO}
+echo "/Geometry/CRAB/ELYield ${ELYield} 1/cm"  >>${config_MACRO}
+
+
+echo "/Geometry/CRAB/ElecLifTime ${ELifeTime} ms"  >>${config_MACRO}
+echo "/Geometry/CRAB/ELGap ${ELGap} mm"  >>${config_MACRO}  
 
 ## Randomizing
 echo "/nexus/random_seed ${SEED}" >> ${config_MACRO}

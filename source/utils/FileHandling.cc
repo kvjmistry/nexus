@@ -136,7 +136,7 @@ namespace nexus{
         if (data.size()==0) G4Exception("FileHandling","[SaveToTextFile]",FatalException,"Data array is empty!");
         fstfile << data <<"\n";
 
-        G4cout<<data << " is written to file "<<G4endl;
+        G4cout<<data << " is written to "<< file <<G4endl;
         fstfile.close();
     }
 

@@ -25,14 +25,17 @@ namespace nexus{
         private:
             typedef std::map<G4String, int> detectorCounts;
             typedef std::map<G4int, int> PhotonCount;
+            typedef std::map<G4int, int> ieCount;
 
-            typedef std::map<G4String,std::vector<double>> DepositedEnergy;
+
+        typedef std::map<G4String,std::vector<double>> DepositedEnergy;
             detectorCounts my_counts_;
             detectorCounts ObservedPhotons;
 
             PhotonCount Photons;
             PhotonCount Parents;
             int TotalPhotons;
+            int TotalIonizationElectron;
             DepositedEnergy PhotonEnergy_;
 
             G4GenericMessenger *msg_;

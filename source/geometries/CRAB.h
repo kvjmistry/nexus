@@ -59,6 +59,7 @@ namespace nexus {
             G4bool efield_;
             G4bool HideSourceHolder_;
             G4double max_step_size_;
+            G4double ELyield_;
 
 
             void ConstructLab();

@@ -13,7 +13,8 @@
 ## 291826.7857142857142857*970*0.7*0.105*((0.5)^2/(4(35)^2)
 #GEOMETRY
 /Geometry/CRAB/gas_pressure 9.7 bar
-#/Geometry/CRAB/scinYield 10 1/MeV
+/Geometry/CRAB/scinYield 25510 1/MeV
+/Geometry/CRAB/ELYield 1.43 1/cm
 /Geometry/CRAB/chamber_diam  15. cm
 /Geometry/CRAB/chamber_length 43.18 cm
 /Geometry/CRAB/chamber_thickn 2. mm
@@ -42,6 +43,7 @@
 /Generator/CrabSourceGenerator/atomic_number 82
 /Generator/CrabSourceGenerator/mass_number 210
 
+/nexus/random_seed -2
 
 /Generator/CrabSourceGenerator/decay_rate 100000 nCi
 #/Generator/CrabSourceGenerator/event_window 13

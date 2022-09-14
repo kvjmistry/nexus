@@ -4,7 +4,7 @@
 #SBATCH -p run         # Partition
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --mem=50GB         # Memory request (Mb)
+#SBATCH --mem=10GB         # Memory request (Mb)
 #SBATCH -t 0-1:08           # Maximum execution time (D-HH:MM)
 #SBATCH -o %A_%a.out        # Standard output                                                                                                                                                                                          
 #SBATCH -e %A_%a.err        # Standard error
@@ -14,8 +14,12 @@ JOBNUMBER=${SLURM_ARRAY_TASK_ID}
 SEED=`echo "scale = 2;  $JOBNUMBER" | bc`
 
 ## Path to output files and G4Executable
-outputDir="/home/argon/Projects/Ilker/CRAB0/S1"
-PathToG4Executable="/home/argon/Projects/Ilker/CRAB0/build/nexus"
+#outputDir="/home/argon/Projects/Ilker/CRAB0/S1"
+#PathToG4Executable="/home/argon/Projects/Ilker/CRAB0/build/nexus"
+
+outputDir="/media/ilker/Ilker/SimResults/Sim/S1"
+PathToG4Executable="/home/ilker/Projects/latest_CRAB0/build/nexus"
+
 
 ## Events
 NumberOfEvents=1
@@ -32,16 +36,19 @@ Run=S1
 ###Info
 ANumber=82
 Mass=210
-
-
+Syield=25510   ## 1/MeV
+ELYield=970    ## photons/cm*electron		
+ELifeTime=1000 
+ELGap=7
 ## Source Position
-pos="-3 0 -4"
+pos="-1.6 0 -5"
 ## Naming Macro and Root Files
 NAME="${Run}_${SEED}"
 OUT="${NAME}_${Pressure}_bar"
 InitMACRO="${NAME}_${Pressure}_bar_init.mac"
 configMACRO="${NAME}_${Pressure}_bar_config.mac"
 PhotonFile="Photon_${NAME}.txt"
+
 ## Paths to the Filles
 
 RootFile="${outputDir}/output/${OUT}"
@@ -56,8 +63,11 @@ config_MACRO="${outputDir}/macros/${configMACRO}"
 
 ## Counts 
 PathToCounts="${outputDir}/counts"
-
-
+echo "Removing Older Files ..."
+rm $init_MACRO
+rm $config_MACRO
+rm $PathToCounts/$PhotonFile
+rm "$RootFile.h5"
 
 echo $init_MACRO
 
@@ -88,7 +98,6 @@ echo "/nexus/RegisterMacro ${config_MACRO}"  >>${init_MACRO}
 
 
 ## Remove the Config File if it exists
-rm $config_MACRO
 echo $config_MACRO
 
 ## Configurations
@@ -107,35 +116,45 @@ echo "/PhysicsList/Nexus/electroluminescence ${EL}"  >>${config_MACRO}
 
 
 #GEOMETRY
-echo "/Geometry/CRAB/gas_pressure 10. bar"  >>${config_MACRO}
-echo "#/Geometry/CRAB/scinYield 0 1/MeV"  >>${config_MACRO}
+
+echo "/Geometry/CRAB/gas_pressure ${Pressure} bar"  >>${config_MACRO}
 echo "/Geometry/CRAB/chamber_diam  15. cm"  >>${config_MACRO}
 echo "/Geometry/CRAB/chamber_length 43.18 cm"  >>${config_MACRO}
 echo "/Geometry/CRAB/chamber_thickn 2. mm"  >>${config_MACRO}
 echo "#/Geometry/CRAB/SourcePosition -4.5 -4.5 -4.5 cm"  >>${config_MACRO}
 echo "/Geometry/CRAB/SourcePosition ${pos} cm"  >>${config_MACRO}
 echo "#/Geometry/CRAB/SourcePosition 0 0 0 cm"  >>${config_MACRO}
+
+echo "/Geometry/CRAB/scinYield ${Syield}  1/MeV"  >>${config_MACRO}
+echo "/Geometry/CRAB/ELYield ${ELYield} 1/cm"  >>${config_MACRO}
+
+
+echo "/Geometry/CRAB/ElecLifTime ${ELifeTime} ms"  >>${config_MACRO}
+echo "/Geometry/CRAB/ELGap ${ELGap} mm"  >>${config_MACRO}  
+
+###  Active
+echo "/Geometry/CRAB/Active_diam 8.5 cm"  >>${config_MACRO}
+echo "/Geometry/CRAB/Active_length 42 cm"  >>${config_MACRO}
+
+### SourceEncloser
+echo "/Geometry/CRAB/SourceEn_diam 10 mm"  >>${config_MACRO}
+echo "/Geometry/CRAB/SourceEn_holedi 5 mm"  >>${config_MACRO}
+echo "/Geometry/CRAB/SourceEn_offset 5.7 cm"  >>${config_MACRO}
+
+
+#ACTIONS
 echo "/Actions/CRABAnalysisSteppingAction/FileSave true"  >>${config_MACRO}
 echo "/Actions/CRABAnalysisSteppingAction/FileName ${PhotonFile}"  >>${config_MACRO}
 echo "/Actions/CRABAnalysisSteppingAction/FilePath ${PathToCounts}"  >>${config_MACRO}
 
 
-#Active
-echo "/Geometry/CRAB/Active_diam 8.5 cm"  >>${config_MACRO}
-echo "/Geometry/CRAB/Active_length 42 cm"  >>${config_MACRO}
-
-#SourceEncloser
-echo "/Geometry/CRAB/SourceEn_diam 10 mm"  >>${config_MACRO}
-echo "/Geometry/CRAB/SourceEn_holedi 5 mm"  >>${config_MACRO}
-echo "/Geometry/CRAB/SourceEn_offset 5.7 cm"  >>${config_MACRO}
 
 # GENERATOR
 echo "/Generator/CrabSourceGenerator/region FIELDCAGE"  >>${config_MACRO}
+
 #Pb_210
 echo "/Generator/CrabSourceGenerator/atomic_number ${ANumber}"  >>${config_MACRO}
 echo "/Generator/CrabSourceGenerator/mass_number ${Mass}"  >>${config_MACRO}
-
-
 echo "/Generator/CrabSourceGenerator/decay_rate 100000 nCi"  >>${config_MACRO}
 echo "#/Generator/CrabSourceGenerator/event_window 13"  >>${config_MACRO}
 echo "#works only if event_window is zero"  >>${config_MACRO}
