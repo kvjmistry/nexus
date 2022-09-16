@@ -5,7 +5,7 @@
 /process/em/verbose 0
 
 #GEOMETRY
-/Geometry/CRAB/gas_pressure 10. bar
+/Geometry/CRAB/gas_pressure . bar
 /Geometry/CRAB/chamber_diam  15. cm
 /Geometry/CRAB/chamber_length 25. cm
 /Geometry/CRAB/chamber_thickn 2. mm

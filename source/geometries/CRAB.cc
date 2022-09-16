@@ -64,8 +64,8 @@ namespace nexus{
              max_step_size_(1.*mm),
              ElGap_(7*mm),
              ELyield_(970/cm),
-             PMT1_Pos_(0),
-             PMT3_Pos_(0)
+             PMT1_Pos_(2.32*cm),
+             PMT3_Pos_(3.52*cm)
 
     {
         msg_ = new G4GenericMessenger(this, "/Geometry/CRAB/","Control commands of geometry of CRAB TPC");
@@ -119,6 +119,11 @@ namespace nexus{
         G4GenericMessenger::Command&  ELYield_cmd =msg_->DeclareProperty("ELYield",ELyield_,"EL Yield photons/cm");
         ELYield_cmd.SetParameterName("ELYield", false);
         ELYield_cmd.SetUnitCategory("1/cm");
+
+        G4GenericMessenger::Command&  PMT1_Pos_cmd =msg_->DeclarePropertyWithUnit("PMT1_Pos","cm",PMT1_Pos_,"PMT1 Pos");
+        PMT1_Pos_cmd.SetParameterName("PMT1_Pos", false);
+        G4GenericMessenger::Command&  PMT3_Pos_cmd =msg_->DeclarePropertyWithUnit("PMT3_Pos","cm",PMT3_Pos_,"PMT3 Pos");
+        PMT3_Pos_cmd.SetParameterName("PMT3_Pos", false);
 
         pmt1_=new PmtR7378A();
         pmt2_=new PmtR7378A();
@@ -317,8 +322,8 @@ namespace nexus{
         new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset+PMT_Tube_Length1-PMT_Tube_Block_Thickness/2)-offset),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,1,false);
 
         // PMTs
-        new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,0),pmt1_logic,pmt1_->GetPMTName(),InsideThePMT_Tube_Logic0,true,0,false);
-        new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,0),pmt2_logic,pmt2_->GetPMTName(),InsideThePMT_Tube_Logic1,true,0,false);
+        new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,((PMT3_Pos_)-pmt1_->Length()/2-PMT_Tube_Length1/2-MgF2_window_thickness_/2)),pmt1_logic,pmt1_->GetPMTName(),InsideThePMT_Tube_Logic0,true,0,false);
+        new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,(PMT1_Pos_-pmt1_->Length()/2-MgF2_window_thickness_/2)),pmt2_logic,pmt2_->GetPMTName(),InsideThePMT_Tube_Logic1,true,0,false);
 
 
 
