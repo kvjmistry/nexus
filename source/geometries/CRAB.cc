@@ -27,6 +27,9 @@
 #include <CLHEP/Units/PhysicalConstants.h>
 #include <G4UnionSolid.hh>
 #include <G4UserLimits.hh>
+#include <G4OpticalSurface.hh>
+#include <G4LogicalSkinSurface.hh>
+#include <G4LogicalBorderSurface.hh>
 
 
 
@@ -153,6 +156,7 @@ namespace nexus{
         MgF2->SetMaterialPropertiesTable(opticalprops::MgF2());
         vacuum->SetMaterialPropertiesTable(opticalprops::Vacuum());
         gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68,sc_yield_,e_lifetime_));
+        //Steel->SetMaterialPropertiesTable(opticalprops::STEEL());
         //Constructing Lab Space
         G4String lab_name="LAB";
         G4Box * lab_solid_volume = new G4Box(lab_name,Lab_size/2,Lab_size/2,Lab_size/2);
@@ -279,17 +283,18 @@ namespace nexus{
         // Place the Volumes
 
         //LAB
+
         new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0,false,0, false);
 
         //Flanges on the Chamber
-        new G4PVPlacement(0,G4ThreeVector(0,0,(chamber_length/2)),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,0,false);
-        new G4PVPlacement(0,G4ThreeVector(0,0,-(chamber_length/2)),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,1,false);
+        G4VPhysicalVolume *Left_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0,(chamber_length/2)),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,0,false);
+        G4VPhysicalVolume *Right_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0,-(chamber_length/2)),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,1,false);
 
         //Chamber
-        new G4PVPlacement(0,G4ThreeVector(0.,0.,0) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
+        G4VPhysicalVolume * chamber_phys=  new G4PVPlacement(0,G4ThreeVector(0.,0.,0) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
 
         // Xenon Gas in Active Area and Non-Active Area
-        new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),lab_logic_volume, false, 0, false);
+        G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),lab_logic_volume, false, 0, false);
         //new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), Active_logic, Active_solid->GetName(),gas_logic, false, 0, false);
 
 
@@ -370,6 +375,15 @@ namespace nexus{
 
         }
         AssignVisuals();
+
+        /// OpticalSurface
+        G4OpticalSurface * OpSteelSurf=new G4OpticalSurface("SteelSurface",unified,polished,dielectric_metal);
+        OpSteelSurf->SetMaterialPropertiesTable(opticalprops::STEEL());
+        new G4LogicalBorderSurface("SteelSurface",gas_phys,chamber_phys,OpSteelSurf);
+        new G4LogicalBorderSurface("SteelSurface",gas_phys,Left_Flange_phys,OpSteelSurf);
+        new G4LogicalBorderSurface("SteelSurface",gas_phys,Right_Flange_phys,OpSteelSurf);
+
+        //G4Optic
         this->SetLogicalVolume(lab_logic_volume);
         //this->SetLogicalVolume(chamber_logic);
 

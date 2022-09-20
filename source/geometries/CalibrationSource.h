@@ -35,6 +35,7 @@ namespace nexus {
 
     G4double GetSourceZpos();
 
+
   private:
 
     // Messenger for the definition of control commands

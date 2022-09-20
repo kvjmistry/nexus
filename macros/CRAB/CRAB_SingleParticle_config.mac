@@ -10,9 +10,12 @@
 
 # GENERATION
 /Generator/SingleParticle/region FIELDCAGE
-/Generator/SingleParticle/particle opticalphoton
-/Generator/SingleParticle/min_energy 7.295 eV
-/Generator/SingleParticle/max_energy 7.295 eV
+#/Generator/SingleParticle/particle opticalphoton
+#/Generator/SingleParticle/min_energy 7.295 eV
+#/Generator/SingleParticle/max_energy 7.295 eV
+/Generator/SingleParticle/particle e-
+/Generator/SingleParticle/min_energy 1.161 MeV
+/Generator/SingleParticle/max_energy 1.161 MeV
 #/Generator/SingleParticle/min_costheta -1
 #/Generator/SingleParticle/max_costheta -1
 #/Generator/SingleParticle/min_phi 0
@@ -58,5 +61,5 @@
 
 # PERSISTENCY
 /nexus/persistency/eventType background
-/nexus/persistency/outputFile test2
+/nexus/persistency/outputFile /media/ilker/Ilker/CRAB/Simulation/Betas
 #/run/printProgress 100
