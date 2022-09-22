@@ -24,6 +24,9 @@ CRABAnalysisSteppingAction::CRABAnalysisSteppingAction(): G4UserSteppingAction()
     msg_->DeclareProperty("FilePath",filePath_,"This is the path for saving some counts to text file..");
     msg_->DeclareProperty("FileSave",SavetoFile_,"Save Counts to File");
     msg_->DeclareProperty("FileName",FileName_,"FileName To save count information");
+    Names={"Pb210","Bi210[46.539]","Bi210","Po210"};
+    TotalPhotons=0;
+    TotalIonizationElectron=0;
 
 }
 
@@ -41,7 +44,7 @@ CRABAnalysisSteppingAction::~CRABAnalysisSteppingAction()
         Path=FileName_;
     else Path=filePath_+"/"+FileName_;
 
-    while (it != my_counts_.end()) {
+   /* while (it != my_counts_.end()) {
         G4cout << "Detector " << it->first << ": " << it->second << " counts" << G4endl;
         if(SavetoFile_){
 
@@ -56,6 +59,25 @@ CRABAnalysisSteppingAction::~CRABAnalysisSteppingAction()
 
         total_counts += it->second;
         it ++;
+    }*/
+
+    G4cout<<"#### Detected Photons ####"<<G4endl;
+    DetailedPhotonCounts ::iterator DDetectors=DPhotonCounts.begin();
+    while (DDetectors!=DPhotonCounts.end()){
+        detectorCounts ::iterator DPhotons=DDetectors->second.begin();
+        while(DPhotons!=DDetectors->second.end()){
+            G4cout<< DDetectors->first<<","<<DPhotons->first<<" :"<<DPhotons->second<<G4endl;
+            if(SavetoFile_){
+
+                str=DDetectors->first + "," +DPhotons->first +","+to_string(DPhotons->second) ;
+                f1->SaveToTextFile(Path,"Detector,Source,Counts",str);
+            }
+            total_counts=total_counts+DPhotons->second;
+
+            DPhotons++;
+        }
+
+        DDetectors++;
     }
 
     int count=0;
@@ -64,15 +86,15 @@ CRABAnalysisSteppingAction::~CRABAnalysisSteppingAction()
     G4cout << "Total_Detected: " << total_counts << G4endl;
 
 
-    detectorCounts::iterator Absit = ObservedPhotons.begin();
+    //detectorCounts::iterator Absit = ObservedPhotons.begin();
     G4int TotalAbsPhotons=0;
 
-    G4cout <<"------------ Observed Photons ----"<<G4endl;
+    G4cout <<"------------ Absorbed Photons ----"<<G4endl;
 
     if(filePath_.empty())
         Path="Extra_"+FileName_;
     else Path=filePath_+"/"+"Extra_"+FileName_;
-
+    /*
     while (Absit != ObservedPhotons.end()) {
         G4cout << "Detector " << Absit->first << ": " << Absit->second << " counts" << G4endl;
         if(SavetoFile_){
@@ -81,20 +103,54 @@ CRABAnalysisSteppingAction::~CRABAnalysisSteppingAction()
         }
         TotalAbsPhotons += Absit->second;
         Absit ++;
+    }*/
+    G4cout<<"#### Absorbed Photons ####"<<G4endl;
+
+    DetailedPhotonCounts ::iterator DAbsDetectors=DAbsPhotonCounts.begin();
+    while (DAbsDetectors!=DAbsPhotonCounts.end()){
+        detectorCounts ::iterator DAbsPhotons=DAbsDetectors->second.begin();
+        while(DAbsPhotons!=DAbsDetectors->second.end()){
+            G4cout<<DAbsDetectors->first<<","<<DAbsPhotons->first<<" :"<<DAbsPhotons->second<<G4endl;
+            if(SavetoFile_){
+
+                str=DAbsDetectors->first + "," +DAbsPhotons->first +","+to_string(DAbsPhotons->second) ;
+                f1->SaveToTextFile(Path,"Detector,Source,Counts",str);
+            }
+            TotalAbsPhotons=TotalAbsPhotons+DAbsPhotons->second;
+            DAbsPhotons++;
+        }
+
+        DAbsDetectors++;
     }
+
+
     if(SavetoFile_){
-        str="Total_Detected," + to_string(total_counts);
-        f1->SaveToTextFile(Path,"Detector,Counts",str);
-        str="Absorption_Photons," + to_string(TotalAbsPhotons);
-        f1->SaveToTextFile(Path,"Detector,Counts",str);
-        str="Total_Produced_Photons," + to_string(TotalPhotons);
-        f1->SaveToTextFile(Path,"Detector,Counts",str);
-        str="Total_Produced_ie," + to_string(TotalIonizationElectron);
-        f1->SaveToTextFile(Path,"Detector,Counts",str);
+        str="Total_Detected,None," + to_string(total_counts);
+        f1->SaveToTextFile(Path,"Detector,Source,Counts",str);
+        str="Absorption_Photons,None,"+ to_string(TotalAbsPhotons);
+        f1->SaveToTextFile(Path,"Detector,Source,Counts",str);
+        str="Total_Produced_Photons,None," + to_string(TotalPhotons);
+        f1->SaveToTextFile(Path,"Detector,Source,Counts",str);
+        str="Total_Produced_ie,None," + to_string(TotalIonizationElectron);
+        f1->SaveToTextFile(Path,"Detector,Source,Counts",str);
     }
+
+    G4cout<<"#### Electrons ####"<<G4endl;
+    DetailedElectronCounts::iterator Die=DElectronCounts.begin();
+    while (Die!=DElectronCounts.end()){
+        G4cout<<Die->first<<" :"<<Die->second<<G4endl;
+        Die++;
+    }
+
+
+
+
+
     G4cout << "Abosrved Photons " <<TotalAbsPhotons<<G4endl;
     G4cout << "Total Produced Photons " <<TotalPhotons<<G4endl;
     G4cout << "Total Produced iElectrons " <<TotalIonizationElectron<<G4endl;
+
+
 
 
 
@@ -107,10 +163,22 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
     G4ParticleDefinition* pdef = step->GetTrack()->GetDefinition();
 
 
+    if(std::find(Names.begin(),Names.end(),pdef->GetParticleName())!=Names.end() ){
+        TempTrackID=step->GetTrack()->GetTrackID();
+        TempName=pdef->GetParticleName();
+        return;
+    }
+
     if(pdef == IonizationElectron::Definition()){
+        DetailedElectronCounts::iterator Die=DElectronCounts.find(TempName);
         G4Track* track = step->GetTrack();
-        if(track->GetTrackStatus()==fStopAndKill)
+        if(track->GetTrackStatus()==fStopAndKill){
+
             TotalIonizationElectron++;
+            if(Die!=DElectronCounts.end()) DElectronCounts[Die->first]++;
+            else DElectronCounts[TempName]++;
+
+        }
         return;
     }
 
@@ -151,8 +219,10 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
         Photons[tid]+=1;
     }*/
 
-    if(track->GetTrackStatus()==fStopAndKill)
+    if(track->GetTrackStatus()==fStopAndKill){
         TotalPhotons++;
+    }
+
 
     // Retrieve the pointer to the optical boundary process.
     // We do this only once per run defining our local pointer as static.
@@ -175,6 +245,7 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
             //G4cout << "##### Sensitive Volume: " << detector_name << G4endl;
             detectorCounts::iterator it = my_counts_.find(detector_name);
             DepositedEnergy ::iterator deit = PhotonEnergy_.find(detector_name);
+            DetailedPhotonCounts ::iterator DPhoton=DPhotonCounts.find(detector_name);
             if(DisplayPhotonEnergy_){
                 if(deit!=PhotonEnergy_.end())   PhotonEnergy_[it->first].push_back(step->GetTotalEnergyDeposit()/CLHEP::eV);
                 else  PhotonEnergy_[detector_name].push_back(step->GetTotalEnergyDeposit()/CLHEP::eV);
@@ -185,18 +256,42 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
             if (it != my_counts_.end())  my_counts_[it->first] += 1;
 
             else my_counts_[detector_name] = 1;
-            NumEvents_++;
 
+            if(DPhoton!=DPhotonCounts.end()) {
+                detectorCounts ::iterator ddphoton=DPhoton->second.find(TempName);
+                ddphoton!=DPhoton->second.end() ?  DPhoton->second[ddphoton->first]+=1 :  DPhoton->second[TempName]=1;
 
+            }else{
+                detectorCounts tempP;
+                tempP[TempName]=1;
+                DPhotonCounts[detector_name]=tempP;
+            }
 
 
         } else if(boundary->GetStatus()==Absorption ) {
             G4String detector_name = step->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetName();
-            detectorCounts::iterator Absit=ObservedPhotons.find(detector_name);
 
+            if(!(detector_name=="S1_PHOTOCATHODE" || detector_name=="S2_PHOTOCATHODE")){
+                return;
+            }
+            detectorCounts::iterator Absit=ObservedPhotons.find(detector_name);
             if (Absit != ObservedPhotons.end())  ObservedPhotons[Absit->first] += 1;
 
             else ObservedPhotons[detector_name] = 1;
+
+            DetailedPhotonCounts ::iterator DAbsPhoton=DAbsPhotonCounts.find(detector_name);
+            if(DAbsPhoton!=DAbsPhotonCounts.end()) {
+                detectorCounts ::iterator ddAbsphoton=DAbsPhoton->second.find(TempName);
+                ddAbsphoton!=DAbsPhoton->second.end() ?  DAbsPhoton->second[ddAbsphoton->first]+=1 :  DAbsPhoton->second[TempName]=1;
+
+            }else{
+                detectorCounts tempAbsP;
+                tempAbsP[TempName]=1;
+                DAbsPhotonCounts[detector_name]=tempAbsP;
+            }
+
+
+
         }
 
     }

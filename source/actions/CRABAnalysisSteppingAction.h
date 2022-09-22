@@ -28,10 +28,22 @@ namespace nexus{
             typedef std::map<G4int, int> ieCount;
 
 
-        typedef std::map<G4String,std::vector<double>> DepositedEnergy;
+            typedef std::map<G4String,std::vector<double>> DepositedEnergy;
+            typedef std::map<G4String,detectorCounts> DetailedPhotonCounts;
+            typedef std::map<G4String,int> DetailedElectronCounts;
+
             detectorCounts my_counts_;
             detectorCounts ObservedPhotons;
+            G4double Bi210_FinalTime;
+            G4double Alpha_FinalTime;
+            G4int TempTrackID;
+            DetailedPhotonCounts DPhotonCounts;
+            DetailedPhotonCounts DAbsPhotonCounts;
 
+            DetailedElectronCounts DElectronCounts;
+
+            G4String TempName;
+            std::vector<G4String> Names;
             PhotonCount Photons;
             PhotonCount Parents;
             int TotalPhotons;

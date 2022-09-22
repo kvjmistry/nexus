@@ -95,8 +95,8 @@ namespace nexus {
           // Issue with the decays
         if (xyzt_.t() > rnd)
           ParticleChange_->ProposeTrackStatus(fStopAndKill);
-          G4cout <<"Stopped !!" << G4endl;
-          G4cout<<"Time = "<< xyzt_.t() / CLHEP::second<< " Rnd " << rnd/ CLHEP::second<<G4endl;
+          //G4cout <<"Stopped !!" << G4endl;
+          //G4cout<<"Time = "<< xyzt_.t() / CLHEP::second<< " Rnd " << rnd/ CLHEP::second<<G4endl;
 
 
       }
