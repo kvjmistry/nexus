@@ -1,24 +1,28 @@
 #!/bin/bash                                                                                                                                                                                                                            
 
-#SBATCH -J Qpix_Diffusion      # A single job name for the array
+#SBATCH -J CRAB0      # A single job name for the array
 #SBATCH -p run         # Partition
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --mem=10GB         # Memory request (Mb)
-#SBATCH -t 0-1:08           # Maximum execution time (D-HH:MM)
-#SBATCH -o %A_%a.out        # Standard output                                                                                                                                                                                          
-#SBATCH -e %A_%a.err        # Standard error
+#SBATCH -t 5-10:08           # Maximum execution time (D-HH:MM)
+#SBATCH -o /dev/null        # Standard output
+#SBATCH -e /dev/null        # Standard error
 
-## Job options 
+##SBATCH -o %A_%a.out        # Standard output
+##SBATCH -e %A_%a.err        # Standard error
+
+## Job options
 JOBNUMBER=${SLURM_ARRAY_TASK_ID}
 SEED=`echo "scale = 2;  $JOBNUMBER" | bc`
 
 ## Path to output files and G4Executable
-#outputDir="/home/argon/Projects/Ilker/CRAB0/S1"
-#PathToG4Executable="/home/argon/Projects/Ilker/CRAB0/build/nexus"
+#outputDir="/media/argon/Ilker/CRAB/Sim/new/S1"
+#outputDir="/media/argon/Ilker/CRAB/Sim/Isotropic"
+PathToG4Executable="/home/argon/Projects/Ilker/latest_nexus/build/nexus"
 
 outputDir="/media/ilker/Ilker/SimResults/Sim/S1"
-PathToG4Executable="/home/ilker/Projects/latest_CRAB0/build/nexus"
+#PathToG4Executable="/home/ilker/Projects/latest_CRAB0/build/nexus"
 
 
 ## Events
@@ -37,8 +41,8 @@ Run=S1
 ANumber=82
 Mass=210
 Syield=25510   ## 1/MeV
-ELYield=970    ## photons/cm*electron		
-ELifeTime=1000 
+ELYield=970    ## photons/cm*electron
+ELifeTime=1000
 ELGap=7
 ## Source Position
 pos="-1.6 0 -5"
@@ -61,7 +65,7 @@ init_MACRO="${outputDir}/macros/${InitMACRO}"
 ## making the macro
 config_MACRO="${outputDir}/macros/${configMACRO}"
 
-## Counts 
+## Counts
 PathToCounts="${outputDir}/counts"
 echo "Removing Older Files ..."
 rm $init_MACRO
@@ -130,7 +134,7 @@ echo "/Geometry/CRAB/ELYield ${ELYield} 1/cm"  >>${config_MACRO}
 
 
 echo "/Geometry/CRAB/ElecLifTime ${ELifeTime} ms"  >>${config_MACRO}
-echo "/Geometry/CRAB/ELGap ${ELGap} mm"  >>${config_MACRO}  
+echo "/Geometry/CRAB/ELGap ${ELGap} mm"  >>${config_MACRO}
 
 ###  Active
 echo "/Geometry/CRAB/Active_diam 8.5 cm"  >>${config_MACRO}
@@ -146,6 +150,7 @@ echo "/Geometry/CRAB/SourceEn_offset 5.7 cm"  >>${config_MACRO}
 echo "/Actions/CRABAnalysisSteppingAction/FileSave true"  >>${config_MACRO}
 echo "/Actions/CRABAnalysisSteppingAction/FileName ${PhotonFile}"  >>${config_MACRO}
 echo "/Actions/CRABAnalysisSteppingAction/FilePath ${PathToCounts}"  >>${config_MACRO}
+echo "/Actions/CRABAnalysisSteppingAction/isLead210 true "  >>${config_MACRO}
 
 
 
