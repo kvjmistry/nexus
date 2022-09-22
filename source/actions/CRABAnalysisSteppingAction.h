@@ -56,6 +56,7 @@ namespace nexus{
             bool SavetoFile_;
             bool DisplayPhotonEnergy_;
             G4String FileName_;
+            bool isLead210Decay_;
 
     };
 

@@ -13,8 +13,8 @@
 ## 291826.7857142857142857*970*0.7*0.105*((0.5)^2/(4(35)^2)
 #GEOMETRY
 /Geometry/CRAB/gas_pressure 9.7 bar
-#/Geometry/CRAB/scinYield 25510 1/MeV
-/Geometry/CRAB/scinYield 0 1/MeV
+/Geometry/CRAB/scinYield 25510 1/MeV
+#/Geometry/CRAB/scinYield 0 1/MeV
 #/Geometry/CRAB/ELYield 970 1/cm
 /Geometry/CRAB/ELYield 1.43 1/cm
 /Geometry/CRAB/chamber_diam  15. cm
@@ -56,8 +56,9 @@
 #/Actions/DefaultEventAction/max_energy 1.00 GeV
 #/Actions/DefaultEventAction/min_energy 100 eV
 
-/Actions/CRABAnalysisSteppingAction/FileSave false
-/Actions/CRABAnalysisSteppingAction/FileName 1000mms.txt
+/Actions/CRABAnalysisSteppingAction/FileSave true
+/Actions/CRABAnalysisSteppingAction/FileName lead210.txt
+/Actions/CRABAnalysisSteppingAction/isLead210 true
 
 
 #/Actions/SaveAllSteppingAction/select_particle e-
