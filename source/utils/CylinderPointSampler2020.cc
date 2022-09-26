@@ -52,6 +52,7 @@ namespace nexus {
 
   CylinderPointSampler2020::~CylinderPointSampler2020()
   {
+
   }
 
 

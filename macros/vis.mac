@@ -73,7 +73,7 @@
 /vis/scene/add/scale 5 cm z 1 0 1 manual -3 0 -7.5  cm  ## Source Position
 /vis/scene/add/scale 4.2 cm z 1 1 0 manual 0 -2 24  cm  # Position of the PMT3
 /vis/scene/add/scale 2.2 cm z 1 0 0 manual 0 -2 -22.9 cm   # Position of the PMT1
-#/vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
+/vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
 #/vis/scene/add/text 0 0 0 mm 40 -100 -200 LogVol:Absorber
 #
 # Requests viewer to accumulate hits, tracks, etc. at end of event.

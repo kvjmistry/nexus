@@ -158,7 +158,7 @@ namespace nexus {
         ENERGIES[kk]=t[0][kk]*eV;
         EFFICIENCY[kk]=t[1][kk];
         REFLECTIVITY[kk]=0.;
-        G4cout<<ENERGIES[kk]<<" "<<EFFICIENCY[kk]<<G4endl;
+        //G4cout<<ENERGIES[kk]<<" "<<EFFICIENCY[kk]<<G4endl;
     }
 
     /*

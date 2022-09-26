@@ -1,0 +1,14 @@
+//
+// Created by ilker on 9/25/22.
+//
+
+#ifndef NEXUS_CRABNEEDLESOURCEGENERATOR_H
+#define NEXUS_CRABNEEDLESOURCEGENERATOR_H
+
+
+class CRABNeedleSourceGenerator {
+
+};
+
+
+#endif //NEXUS_CRABNEEDLESOURCEGENERATOR_H

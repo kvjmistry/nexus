@@ -30,6 +30,7 @@
 #include <G4OpticalSurface.hh>
 #include <G4LogicalSkinSurface.hh>
 #include <G4LogicalBorderSurface.hh>
+#include <G4UnionSolid.hh>
 
 
 
@@ -52,8 +53,8 @@ namespace nexus{
              SourceEn_holedia (2. * mm),
              gas_pressure_(10. * bar),
              vtx_(0,0,0),
-            sc_yield_(25510./MeV),
-            e_lifetime_(1000. * ms),
+             sc_yield_(25510./MeV),
+             e_lifetime_(1000. * ms),
              pmt_hole_length_ (18.434 * cm),
              MgF2_window_thickness_ (6. * mm),
              MgF2_window_diam_ (10 * mm),
@@ -128,6 +129,9 @@ namespace nexus{
         G4GenericMessenger::Command&  PMT3_Pos_cmd =msg_->DeclarePropertyWithUnit("PMT3_Pos","cm",PMT3_Pos_,"PMT3 Pos");
         PMT3_Pos_cmd.SetParameterName("PMT3_Pos", false);
 
+        G4GenericMessenger::Command&  HideSourceHolder_cmd =msg_->DeclareProperty("HideSource",HideSourceHolder_,"this is for Hiding the needle");
+        HideSourceHolder_cmd.SetParameterName("HideSource", false);
+
         pmt1_=new PmtR7378A();
         pmt2_=new PmtR7378A();
 
@@ -142,6 +146,7 @@ namespace nexus{
     }
 
     void CRAB::Construct(){
+
 
 
         //Materials
@@ -215,9 +220,39 @@ namespace nexus{
         G4LogicalVolume* SourceHolChamberBlock_logic = new G4LogicalVolume(SourceHolChamberBlock_solid,materials::Steel(), "SourceHolChBlock_logic");
 
 
+        /// Needle Source
+        G4double NeedleyepRMin=0;
+        G4double NeedleyepRMax=(0.42)*mm;
+        G4double NeedleyepDz=( 2/2)*mm;
+        G4double NeedleHalfLength=(2.56/2)*cm;
+        G4double NeedleTailDiam=(0.6/2)*mm;
+        G4double NeedleOffset=1*mm;
+
+        G4Tubs* NeedleEye =new G4Tubs("NeedleEye",NeedleyepRMin,NeedleyepRMax,NeedleyepDz, 0.,twopi);
+        G4Tubs* NeedleTail =new G4Tubs("NeedleTail",NeedleyepRMin,NeedleTailDiam,NeedleHalfLength, 0.,twopi);
+
+        G4Tubs *Collimator=new G4Tubs("Collimator",(5.74/2)*mm,(11.5/2)*mm,0.5*cm, 0.,twopi);
+        G4Tubs * CollimatorBlock=new G4Tubs("CollimatorBlock",NeedleTailDiam,(5.74/2)*mm,0.2*cm, 0.,twopi);
+        //Combining them to create the Needle
+        G4VSolid * Needle=new G4UnionSolid("Needle",NeedleEye,NeedleTail,0,G4ThreeVector(0,0,NeedleHalfLength));
+        G4VSolid * CollimatorWithBlock=new G4UnionSolid("CollimatorWithBlock",Collimator,CollimatorBlock,0,G4ThreeVector(0,0,0.5*cm-0.2*cm));
+        //G4VSolid * NeedleWithCollimator=new G4UnionSolid("NeedleWithCollimator",Needle,Collimator,0,G4ThreeVector(0,0,+5*mm));
+
+        //G4LogicalVolume * Needle_Logic=new G4LogicalVolume(Needle,materials::Steel(),"Needle");
+        G4LogicalVolume * Needle_Logic=new G4LogicalVolume(Needle,materials::Steel(),"Needle");
+        G4LogicalVolume * Coll_Logic=new G4LogicalVolume(CollimatorWithBlock,materials::PEEK(),"Collimator_logic");
+
+
+
+
         //G4LogicalVolume* SourceHolderGas_logic = new G4LogicalVolume(SourceHolChamber_solid, gxe, "SourceHolderGAS_logic");
 
 
+
+
+
+
+        ///
         //Adding the PMTs in here
         pmt1_->SetPMTName("S1");
         pmt2_->SetPMTName("S2");
@@ -228,17 +263,6 @@ namespace nexus{
         // Adding Logical Volumes for PMTs
         G4LogicalVolume * pmt1_logic=pmt1_->GetLogicalVolume();
         G4LogicalVolume * pmt2_logic=pmt2_->GetLogicalVolume();
-
-        // Particle Source Holder
-        //Rotation Matrix
-
-        G4RotationMatrix* rotateHolder = new G4RotationMatrix();
-        rotateHolder->rotateY(90.*deg);
-
-        if(!HideSourceHolder_){
-            new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset,0,0), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
-            new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
-        }
 
 
         // PMT1 and PMT3
@@ -332,6 +356,8 @@ namespace nexus{
 
 
 
+
+
         // Define this volume as an ionization sensitive detector
         FieldCage_Logic->SetUserLimits(new G4UserLimits(1*mm));
         IonizationSD* sensdet = new IonizationSD("/CRAB/FIELDCAGE");
@@ -374,7 +400,40 @@ namespace nexus{
 
 
         }
-        AssignVisuals();
+
+
+        // Source Holder
+
+
+        if(!HideSourceHolder_){
+            // Particle Source Holder
+            //Rotation Matrix
+
+
+
+            // Needle Solid
+
+            G4RotationMatrix* NeedleRotate = new G4RotationMatrix();
+            NeedleRotate->rotateY(90.*deg);
+            //NeedleRotate->rotateX(+10*deg);
+            G4ThreeVector NeedlePos={vtx_[0]-NeedleOffset,vtx_[1],vtx_[2]};
+            G4ThreeVector CollPosition={NeedlePos[0]-5*mm,NeedlePos[1],NeedlePos[2]};
+
+            new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),gas_logic,true,0,false);
+            new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),gas_logic,true,0,false);
+
+            G4RotationMatrix* rotateHolder = new G4RotationMatrix();
+            rotateHolder->rotateY(90.*deg);
+
+            //new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset,0,0), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
+            //new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
+            NeedleEyePointSample=new CylinderPointSampler2020(NeedleyepRMin,NeedleyepRMax+2*nm,NeedleyepDz,0,twopi, rotateHolder,NeedlePos);
+
+
+        }
+
+
+
 
         /// OpticalSurface
         G4OpticalSurface * OpSteelSurf=new G4OpticalSurface("SteelSurface",unified,polished,dielectric_metal);
@@ -385,6 +444,11 @@ namespace nexus{
         //new G4LogicalBorderSurface("SteelSurface_PMT3_Enclosing",PMT_Tube_Vacuum_Phys0,PMT_Tube_Phys0,OpSteelSurf);
         //new G4LogicalBorderSurface("SteelSurface_PMT1_Enclosing",PMT_Tube_Vacuum_Phys1,PMT_Tube_Phys1,OpSteelSurf);
 
+
+
+        // Visuals
+
+        AssignVisuals();
         //G4Optic
         this->SetLogicalVolume(lab_logic_volume);
         //this->SetLogicalVolume(chamber_logic);
@@ -420,6 +484,17 @@ namespace nexus{
 
         //Source Enclosure Related
         G4LogicalVolume* SourceHolder = lvStore->GetVolume("SourceHolChamber_logic");
+        G4LogicalVolume* Needle = lvStore->GetVolume("Needle");
+        G4LogicalVolume* Collimator = lvStore->GetVolume("Collimator_logic");
+        G4VisAttributes *CollimatorVa=new G4VisAttributes(nexus::YellowAlpha());
+        CollimatorVa->SetForceSolid(true);
+
+        Collimator->SetVisAttributes(CollimatorVa);
+
+
+
+        Needle->SetVisAttributes(ChamberVa);
+
         G4LogicalVolume* SourceHolderBlock = lvStore->GetVolume("SourceHolChBlock_logic");
         G4VisAttributes *SourceHolderVa=new G4VisAttributes(G4Colour(2,2,2));
         SourceHolderVa->SetForceSolid(true);
@@ -484,12 +559,24 @@ namespace nexus{
     G4ThreeVector CRAB::GenerateVertex(const G4String& region) const
     {
 
-        if(!(region=="LAB" || region=="GAS" || region=="ACTIVE" || region=="SourceHolChamber" || region=="FIELDCAGE")){
+            G4ThreeVector pos;
+            if((region=="LAB" || region=="GAS" || region=="ACTIVE" || region=="FIELDCAGE")){
 
-            G4Exception("[CRAB]", "GenerateVertex()", FatalException,
-                        "Unknown vertex generation region.");
-        }
-        return vtx_;
+                pos= vtx_;
+
+            }else if((region=="OUTER_SURFACE" || region=="CENTER" || region=="INNER_SURFACE" || region=="VOLUME") && !HideSourceHolder_ ) {
+
+                pos=NeedleEyePointSample->GenerateVertex(region);
+            }else{
+                G4Exception("[CRAB]", "GenerateVertex()", FatalException,
+                            "Unknown vertex generation region.");
+
+            }
+        return pos;
+
+
+
+
     }
 
 

@@ -6,10 +6,11 @@
 #define NEXUS_CRAB_H
 #include "GeometryBase.h"
 #include "PmtR7378A.h"
+#include "CylinderPointSampler2020.h"
 class G4GenericMessenger;
 
 namespace nexus {
-
+    class CylinderPointSampler2020;
     class CRAB: public GeometryBase
     {
         public:
@@ -56,11 +57,12 @@ namespace nexus {
             G4double optical_pad_thickness_;
             G4double pmt_base_diam_;
             G4double pmt_base_thickness_;
+
             G4bool efield_;
             G4bool HideSourceHolder_;
             G4double max_step_size_;
             G4double ELyield_;
-
+            CylinderPointSampler2020 * NeedleEyePointSample;
 
             void ConstructLab();
             void PlaceVolumes();
