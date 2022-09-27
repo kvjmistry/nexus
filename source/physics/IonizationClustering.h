@@ -58,6 +58,8 @@ namespace nexus {
   private:
     G4ParticleChange* ParticleChange_;
     SegmentPointSampler* rnd_;
+
+
   };
 
 } // end namespace nexus

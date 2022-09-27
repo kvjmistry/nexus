@@ -29,6 +29,7 @@ namespace nexus {
     pParticleChange = ParticleChange_;
 
     nav_ = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
+
   }
   
   
@@ -53,7 +54,12 @@ namespace nexus {
     
     // Get current region
     G4Region* region = track.GetVolume()->GetLogicalVolume()->GetRegion();
-    
+   // G4String VolumeName=track.GetVolume()->GetLogicalVolume()->GetName();
+
+    /*if(VolumeName=="Needle" || VolumeName=="CollimatorWithBlock" ) {
+        return step_length;
+    }*/
+
     // Get the drift field attached to this region
     BaseDriftField* field = 
       dynamic_cast<BaseDriftField*>(region->GetUserInformation());
@@ -64,7 +70,6 @@ namespace nexus {
     // Get displacement from current position due to drift field
     xyzt_.set(track.GetLocalTime(), track.GetPosition());
     step_length = field->Drift(xyzt_);
-    
     return step_length;
   }
   
@@ -77,38 +82,40 @@ namespace nexus {
     // the corresponding members in the track).
     ParticleChange_->Initialize(track);
 
-    if (step.GetStepLength() > 0) {
+      if (step.GetStepLength() > 0) {
 
-      // Simulate attachment by impurities
-      
-      G4MaterialPropertiesTable* mpt = 
-        track.GetMaterial()->GetMaterialPropertiesTable();
+          // Simulate attachment by impurities
 
-      if (!mpt || !(mpt->ConstPropertyExists("ATTACHMENT"))) { 
-        G4Exception("[IonizationDrift]", "AlongStepDoIt()", JustWarning,
-          "No material properties table found. Assuming no attachment.");
+          G4MaterialPropertiesTable *mpt =
+                  track.GetMaterial()->GetMaterialPropertiesTable();
+
+          if (!mpt || !(mpt->ConstPropertyExists("ATTACHMENT"))) {
+              G4Exception("[IonizationDrift]", "AlongStepDoIt()", JustWarning,
+                          "No material properties table found. Assuming no attachment.");
+              ParticleChange_->ProposeTrackStatus(fStopAndKill);
+              // step.GetTrack()->SetTrackStatus(fStopAndKill);
+
+          } else {
+              const G4double attach = mpt->GetConstProperty("ATTACHMENT");
+              G4double rnd = -attach * log(G4UniformRand());
+              //G4cout<<"Time = "<< xyzt_.t() / CLHEP::second<< " Rnd " << rnd/ CLHEP::second<<G4endl;
+              // Issue with the decays
+              if (xyzt_.t() > rnd)
+                  ParticleChange_->ProposeTrackStatus(fStopAndKill);
+              //G4cout <<"Stopped !!" << G4endl;
+              //G4cout<<"Time = "<< xyzt_.t() / CLHEP::second<< " Rnd " << rnd/ CLHEP::second<<G4endl;
+
+
+          }
+          ParticleChange_->ProposeLocalTime(xyzt_.t());
+          ParticleChange_->ProposePosition(xyzt_.vect());
+
       }
-      else {
-        const G4double attach = mpt->GetConstProperty("ATTACHMENT");
-        G4double rnd = -attach * log(G4UniformRand());
-        //G4cout<<"Time = "<< xyzt_.t() / CLHEP::second<< " Rnd " << rnd/ CLHEP::second<<G4endl;
-          // Issue with the decays
-        if (xyzt_.t() > rnd)
-          ParticleChange_->ProposeTrackStatus(fStopAndKill);
-          //G4cout <<"Stopped !!" << G4endl;
-          //G4cout<<"Time = "<< xyzt_.t() / CLHEP::second<< " Rnd " << rnd/ CLHEP::second<<G4endl;
-
-
-      }
-
-      ParticleChange_->ProposeLocalTime(xyzt_.t());
-      ParticleChange_->ProposePosition(xyzt_.vect());
-    }
     else {
       // Kill the particle (it didn't move)
       ParticleChange_->ProposeTrackStatus(fStopAndKill);
     }
-    
+
     return G4VContinuousDiscreteProcess::AlongStepDoIt(track, step);
   }
   
@@ -150,7 +157,9 @@ namespace nexus {
       const_cast<G4Material*>(new_volume->GetLogicalVolume()->GetMaterial());
     
     ParticleChange_->SetMaterialInTouchable(new_material);
-       
+    //G4cout<<"Testtttt ->> "<<new_volume->GetLogicalVolume()->GetName()<<G4endl;
+
+
     return G4VContinuousDiscreteProcess::PostStepDoIt(track, step);
   }
 

@@ -48,6 +48,9 @@ namespace nexus {
     if (!CheckCoordinate(xyzt[axis_]))
       return 0.;
 
+    // Stopping the drift
+
+
     // Set the offset according to relative anode-cathode pos
     G4double secmargin = -1. * micrometer;
     if (anode_pos_ > cathode_pos_) secmargin = -secmargin;
@@ -55,7 +58,7 @@ namespace nexus {
     // Calculate drift time and distance to anode
     G4double drift_length = fabs(xyzt[axis_] - anode_pos_);
     G4double drift_time = drift_length / drift_velocity_;
-
+    //G4cout<<"Drift_Length --> "<<drift_length<<G4endl;
     // Calculate longitudinal and transversal deviation due to diffusion
     G4double transv_sigma = transv_diff_ * sqrt(drift_length);
     G4double longit_sigma = longit_diff_ * sqrt(drift_length);
@@ -83,7 +86,6 @@ namespace nexus {
 
     // Set the new time and position of the drifting charge
     xyzt.set(time, position);
-
     return step_length;
   }
 

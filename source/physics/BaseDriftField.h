@@ -25,6 +25,7 @@ namespace nexus {
   class BaseDriftField: public G4VUserRegionInformation
   {
   public:
+
     /// Constructor
     BaseDriftField();
     /// Destructor
@@ -40,8 +41,10 @@ namespace nexus {
 
     virtual G4double LightYield() const;
 
+
   private:
     void Print() const;
+
   };
 
   // INLINE DEFINITIONS //////////////////////////////////////////////
@@ -53,6 +56,7 @@ namespace nexus {
   inline G4double BaseDriftField::LightYield() const {return 0.;}
 
   inline void BaseDriftField::Print() const {}
+
 
 } // end namespace nexus
 

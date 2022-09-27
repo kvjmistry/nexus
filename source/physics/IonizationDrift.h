@@ -48,6 +48,7 @@ namespace nexus {
 
   private:
     G4LorentzVector xyzt_;
+    G4LorentzVector tempxyzt;
     G4ParticleChangeForTransport* ParticleChange_;
     G4Navigator* nav_; ///< Pointer to the G4 navigator for tracking
   };

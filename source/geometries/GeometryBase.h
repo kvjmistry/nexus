@@ -78,6 +78,7 @@ namespace nexus {
     /// Assignment operator (hidden)
     const GeometryBase& operator=(const GeometryBase&);
 
+
   private:
     G4LogicalVolume* logicVol_; ///< Pointer to the logical volume
     G4double span_; ///< Maximum dimension of the geometry

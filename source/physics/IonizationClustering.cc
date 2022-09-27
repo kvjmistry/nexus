@@ -18,6 +18,8 @@
 #include <Randomize.hh>
 #include <G4LorentzVector.hh>
 #include <G4Gamma.hh>
+#include "G4PhysicalVolumeStore.hh"
+#include "G4LogicalVolumeStore.hh"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -37,6 +39,7 @@ namespace nexus {
 
     // Create a segment point sample
     rnd_ = new SegmentPointSampler();
+
   }
 
 
@@ -98,6 +101,7 @@ namespace nexus {
     BaseDriftField* field =
       dynamic_cast<BaseDriftField*>(region->GetUserInformation());
 
+
     if (!field) return G4VRestDiscreteProcess::PostStepDoIt(track, step);
 
     //////////////////////////////////////////////////////////////////
@@ -150,7 +154,9 @@ namespace nexus {
     rnd_->SetPoints(pre_point, post_point);
 
 
-    for (G4int i=0; i<num_charges; i++) {
+
+
+      for (G4int i=0; i<num_charges; i++) {
 
       G4DynamicParticle* ionielectron =
         new G4DynamicParticle(IonizationElectron::Definition(),
@@ -168,6 +174,10 @@ namespace nexus {
 
       aSecondaryTrack->
         SetTouchableHandle(step.GetPreStepPoint()->GetTouchableHandle());
+     // G4String Volname=step.GetPreStepPoint()->GetPhysicalVolume()->GetName();
+     //G4cout<<"Position = "<<point.v()[0]<<" , "<<point.v()[1]<<" , "<<point.v()[2]<<G4endl;
+
+
 
       ParticleChange_->AddSecondary(aSecondaryTrack);
     }
