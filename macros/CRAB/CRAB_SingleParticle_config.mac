@@ -38,17 +38,16 @@
 ## Nexus Physics List
 /PhysicsList/Nexus/clustering           true
 /PhysicsList/Nexus/drift                true
-/PhysicsList/Nexus/electroluminescence  false
+/PhysicsList/Nexus/electroluminescence  true
 
 #GEOMETRY
 /Geometry/CRAB/gas_pressure 9.7 bar
 /Geometry/CRAB/scinYield 0 1/MeV
-/Geometry/CRAB/ELYield 1.43 1/cm
+/Geometry/CRAB/ELYield 2.43 1/cm
 /Geometry/CRAB/chamber_diam  15. cm
 /Geometry/CRAB/chamber_length 43.18 cm
 /Geometry/CRAB/chamber_thickn 2. mm
 /Geometry/CRAB/SourcePosition -1.6 0 -5 cm
-#/Geometry/CRAB/SourcePosition 0 0 0 cm
 
 #/Geometry/CRAB/SourcePosition 0 0 -10.43 cm
 /Geometry/CRAB/ElecLifTime 1000 ms

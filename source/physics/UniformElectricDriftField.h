@@ -63,6 +63,9 @@ namespace nexus {
 
     void SetNumberOfPhotons(G4double);
     G4double GetNumberOfPhotons() const;
+    virtual G4double GetStepLimit() const;
+    void SetStepLimit(G4double,G4double ) ;
+
 
   private:
     /// Returns true if coordinate is between anode and cathode
@@ -85,6 +88,10 @@ namespace nexus {
     G4double num_ph_;
 
     SegmentPointSampler* rnd_;
+    G4double steplimit_;
+    G4double steplimitCount_;
+    G4double tempAnodePos_;
+    G4double steps_;
 
   };
 
@@ -135,6 +142,16 @@ namespace nexus {
 
   inline void UniformElectricDriftField::SetNumberOfPhotons(G4double nph)
   { num_ph_ = nph; }
+
+  // This funcitons are added to so that we will have fine steps in 5mm gap this way if electrons get git a volume they are discarded
+  inline void UniformElectricDriftField::SetStepLimit(G4double stlm,G4double steps)
+  {
+      steplimit_ = stlm;
+      steps_ = steps;
+  }
+
+  inline G4double UniformElectricDriftField::GetStepLimit() const { return steplimit_; }
+
 
 
 

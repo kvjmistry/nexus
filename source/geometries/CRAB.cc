@@ -253,8 +253,8 @@ namespace nexus{
 
         ///
         //Adding the PMTs in here
-        pmt1_->SetPMTName("S1");
-        pmt2_->SetPMTName("S2");
+        pmt1_->SetPMTName("S2");
+        pmt2_->SetPMTName("S1");
         pmt1_->Construct();
         pmt2_->Construct();
 
@@ -288,7 +288,7 @@ namespace nexus{
         G4LogicalVolume * PMT_Block_Logic0=new G4LogicalVolume(PMT_Block_solid0,materials::Steel(),PMT_Block_solid0->GetName());
         // Vacuum for PMT TUBE0
         /// add 2.54*cm to config file
-        G4Tubs * InsideThePMT_Tube_solid0=new G4Tubs("PMT_TUBE_VACUUM0",0,(PMTTubeDiam/2+0.4*cm),PMT_Tube_Length0,0,twopi);
+        G4Tubs * InsideThePMT_Tube_solid0=new G4Tubs("PMT_TUBE_VACUUM0",0,(PMTTubeDiam/2+0.5*cm),PMT_Tube_Length0,0,twopi);
         G4LogicalVolume * InsideThePMT_Tube_Logic0=new G4LogicalVolume(InsideThePMT_Tube_solid0,vacuum,InsideThePMT_Tube_solid0->GetName());
 
         // Tube Close to EL
@@ -299,7 +299,7 @@ namespace nexus{
 
         // Vacuum for PMT TUBE1
 
-        G4Tubs * InsideThePMT_Tube_solid1=new G4Tubs("PMT_TUBE_VACUUM1",0,(PMTTubeDiam/2+0.4*cm),PMT_Tube_Length1,0,twopi);
+        G4Tubs * InsideThePMT_Tube_solid1=new G4Tubs("PMT_TUBE_VACUUM1",0,(PMTTubeDiam/2+0.5*cm),PMT_Tube_Length1,0,twopi);
         G4LogicalVolume * InsideThePMT_Tube_Logic1=new G4LogicalVolume(InsideThePMT_Tube_solid1,vacuum,InsideThePMT_Tube_solid1->GetName());
 
 
@@ -346,7 +346,7 @@ namespace nexus{
         G4VPhysicalVolume *PMT_Tube_Vacuum_Phys1=new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset)-offset),InsideThePMT_Tube_Logic1,"PMT_TUBE_VACUUM1",lab_logic_volume,false,0,false);
 
         // PMT Tube Block
-        new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset+PMT_Tube_Length0-PMT_Tube_Block_Thickness/2+LongPMTTubeOffset),PMT_Block_Logic0,PMT_Block_Logic->GetName(),lab_logic_volume,false,0,false);
+        new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset+PMT_Tube_Length0-PMT_Tube_Block_Thickness/2+LongPMTTubeOffset),PMT_Block_Logic0,PMT_Block_Logic0->GetName(),lab_logic_volume,false,0,false);
         new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset+PMT_Tube_Length1-PMT_Tube_Block_Thickness/2)-offset),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,1,false);
 
         // PMTs
@@ -376,7 +376,14 @@ namespace nexus{
             field->SetDriftVelocity(.90*mm/microsecond);
             field->SetTransverseDiffusion(.92*mm/sqrt(cm));
             field->SetLongitudinalDiffusion(.36*mm/sqrt(cm));
+            if(!HideSourceHolder_){
+
+                if(!HideCollimator_) field->SetStepLimit(3*mm,0.3*mm);
+                else field->SetStepLimit(1*mm,0.2*mm);
+            }
+
             G4Region* drift_region = new G4Region("DRIFT");
+
 
 
             drift_region->SetUserInformation(field);
@@ -398,7 +405,6 @@ namespace nexus{
             el_region->SetUserInformation(EfieldForEL);
             el_region->AddRootLogicalVolume(EL_logic);
 
-
         }
 
 
@@ -415,7 +421,7 @@ namespace nexus{
             NeedleRotate->rotateY(90.*deg);
             //NeedleRotate->rotateX(+10*deg);
             G4ThreeVector NeedlePos={vtx_[0]-NeedleOffset,vtx_[1],vtx_[2]-FieldCagePos/2};
-            G4ThreeVector CollPosition={NeedlePos[0]-3*mm,NeedlePos[1],NeedlePos[2]};
+            G4ThreeVector CollPosition={NeedlePos[0]-5*mm,NeedlePos[1],NeedlePos[2]};
 
             Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),FieldCage_Logic,true,0,false);
             if(!HideCollimator_) {
@@ -504,10 +510,10 @@ namespace nexus{
 
         //PMT TUBE AND PMT BLOCK
         G4LogicalVolume * PmttubeLog0=lvStore->GetVolume("PMT_TUBE0");
-        PmttubeLog0->SetVisAttributes(G4VisAttributes::GetInvisible());
+        PmttubeLog0->SetVisAttributes(ChamberVa);
         G4LogicalVolume * PmttubeBlockLog0=lvStore->GetVolume("PMT_TUBE_BLOCK0");
         G4LogicalVolume * PmttubeLog1=lvStore->GetVolume("PMT_TUBE1");
-        PmttubeLog1->SetVisAttributes(G4VisAttributes::GetInvisible());
+        PmttubeLog1->SetVisAttributes(ChamberVa);
         G4LogicalVolume * PmttubeBlockLog1=lvStore->GetVolume("PMT_TUBE_BLOCK1");
         PmttubeBlockLog0->SetVisAttributes(ChamberVa);
         PmttubeBlockLog1->SetVisAttributes(ChamberVa);
@@ -544,7 +550,6 @@ namespace nexus{
         Lab->SetVisAttributes(G4VisAttributes::GetInvisible());
 
     }
-
 
     void CRAB::PrintParam() {
 

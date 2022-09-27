@@ -30,6 +30,9 @@ namespace nexus {
     // initialize random generator with dummy values
     rnd_ = new SegmentPointSampler(G4LorentzVector(0.,0.,0.,-999.),
                                    G4LorentzVector(0.,0.,0.,-999.));
+    steplimitCount_=0;
+    tempAnodePos_=0;
+
   }
 
 
@@ -56,7 +59,25 @@ namespace nexus {
     if (anode_pos_ > cathode_pos_) secmargin = -secmargin;
 
     // Calculate drift time and distance to anode
-    G4double drift_length = fabs(xyzt[axis_] - anode_pos_);
+    //G4double drift_length = fabs(xyzt[axis_] - anode_pos_);
+    G4double drift_length;
+    if (steplimit_==0) {
+        drift_length= fabs(xyzt[axis_] - anode_pos_);
+        tempAnodePos_=anode_pos_;
+
+    }
+    else {
+        // This portion is added for making sure that electrons will stop and killed if they are in  a physical volume
+        if( xyzt.t()==0) steplimitCount_=0;
+
+        if(steplimitCount_<steplimit_) {
+            steplimitCount_ += steps_;
+            tempAnodePos_ = xyzt[axis_] - steps_;
+        }else{
+            tempAnodePos_=anode_pos_;
+        }
+        drift_length=fabs(xyzt[axis_] - tempAnodePos_);
+    }
     G4double drift_time = drift_length / drift_velocity_;
     //G4cout<<"Drift_Length --> "<<drift_length<<G4endl;
     // Calculate longitudinal and transversal deviation due to diffusion
@@ -72,7 +93,8 @@ namespace nexus {
         position[i] = G4RandGauss::shoot(xyzt[i], transv_sigma);
       }
       else { // Longitudinal coordinate
-        position[i] = anode_pos_ + secmargin;
+        //position[i] = anode_pos_ + secmargin;
+        position[i] = tempAnodePos_ + secmargin;
         G4double deltat = G4RandGauss::shoot(0, time_sigma);
         time = xyzt.t() + drift_time + deltat;
         if (time < 0.) time = xyzt.t() + drift_time;

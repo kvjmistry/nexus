@@ -69,8 +69,11 @@ namespace nexus {
     if (!field) return step_length;
     // Get displacement from current position due to drift field
     xyzt_.set(track.GetLocalTime(), track.GetPosition());
+    //G4cout<<" Continuous Step Before Position = "<< xyzt_.vect()[0] << xyzt_.vect()[1]<< xyzt_.vect()[2]<<G4endl;
     step_length = field->Drift(xyzt_);
-    return step_length;
+      //G4cout<<" Continuous Step After Position = "<< xyzt_.vect()[0] << xyzt_.vect()[1]<< xyzt_.vect()[2]<<G4endl;
+
+      return step_length;
   }
   
   
@@ -91,9 +94,8 @@ namespace nexus {
 
           if (!mpt || !(mpt->ConstPropertyExists("ATTACHMENT"))) {
               G4Exception("[IonizationDrift]", "AlongStepDoIt()", JustWarning,
-                          "No material properties table found. Assuming no attachment.");
+                          "No material properties table found. Assuming particle absorbed.");
               ParticleChange_->ProposeTrackStatus(fStopAndKill);
-              // step.GetTrack()->SetTrackStatus(fStopAndKill);
 
           } else {
               const G4double attach = mpt->GetConstProperty("ATTACHMENT");
@@ -102,11 +104,10 @@ namespace nexus {
               // Issue with the decays
               if (xyzt_.t() > rnd)
                   ParticleChange_->ProposeTrackStatus(fStopAndKill);
-              //G4cout <<"Stopped !!" << G4endl;
-              //G4cout<<"Time = "<< xyzt_.t() / CLHEP::second<< " Rnd " << rnd/ CLHEP::second<<G4endl;
-
 
           }
+         // G4cout<<" AlongStep Position = "<< xyzt_.vect()[0] << xyzt_.vect()[1]<< xyzt_.vect()[2]<<G4endl;
+
           ParticleChange_->ProposeLocalTime(xyzt_.t());
           ParticleChange_->ProposePosition(xyzt_.vect());
 
@@ -157,7 +158,6 @@ namespace nexus {
       const_cast<G4Material*>(new_volume->GetLogicalVolume()->GetMaterial());
     
     ParticleChange_->SetMaterialInTouchable(new_material);
-    //G4cout<<"Testtttt ->> "<<new_volume->GetLogicalVolume()->GetName()<<G4endl;
 
 
     return G4VContinuousDiscreteProcess::PostStepDoIt(track, step);
