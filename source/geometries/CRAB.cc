@@ -30,7 +30,6 @@
 #include <G4OpticalSurface.hh>
 #include <G4LogicalSkinSurface.hh>
 #include <G4LogicalBorderSurface.hh>
-#include <G4UnionSolid.hh>
 
 
 
@@ -69,7 +68,8 @@ namespace nexus{
              ElGap_(7*mm),
              ELyield_(970/cm),
              PMT1_Pos_(2.32*cm),
-             PMT3_Pos_(3.52*cm)
+             PMT3_Pos_(3.52*cm),
+             HideCollimator_(true)
 
     {
         msg_ = new G4GenericMessenger(this, "/Geometry/CRAB/","Control commands of geometry of CRAB TPC");
@@ -131,6 +131,8 @@ namespace nexus{
 
         G4GenericMessenger::Command&  HideSourceHolder_cmd =msg_->DeclareProperty("HideSource",HideSourceHolder_,"this is for Hiding the needle");
         HideSourceHolder_cmd.SetParameterName("HideSource", false);
+        G4GenericMessenger::Command&  HideCollimator_cmd =msg_->DeclareProperty("HideCollimator",HideCollimator_,"this is for Hiding the Collimator on the Needle");
+        HideCollimator_cmd.SetParameterName("HideSource", false);
 
         pmt1_=new PmtR7378A();
         pmt2_=new PmtR7378A();
@@ -194,7 +196,7 @@ namespace nexus{
         // Placing the gas in the chamber
         G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2., 0., twopi);
         G4LogicalVolume* gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS");
-
+        //gas_logic->SetUserLimits(new G4UserLimits(50*mm));
         //Defining the Detection Area
         //G4Tubs* Active_solid =new G4Tubs("ACTIVE", 0., Active_diam/2., Active_length/2., 0., twopi);
         //G4LogicalVolume* Active_logic = new G4LogicalVolume(Active_solid, gxe, "ACTIVE");
@@ -203,12 +205,12 @@ namespace nexus{
         // EL Region
         G4Tubs* EL_solid =new G4Tubs("EL_GAP", 0., Active_diam/2.,ElGap_/2 , 0., twopi);
         G4LogicalVolume* EL_logic = new G4LogicalVolume(EL_solid, gxe, "EL_GAP");
-        //EL_logic->SetUserLimits(new G4UserLimits(1*mm));
+        //EL_logic->SetUserLimits(new G4UserLimits(50*mm));
 
         //FieldCage
         G4Tubs* FieldCage_Solid =new G4Tubs("FIELDCAGE", 0., Active_diam/2.,FielCageGap/2 , 0., twopi);
         G4LogicalVolume* FieldCage_Logic = new G4LogicalVolume(FieldCage_Solid, gxe, "FIELDCAGE");
-        //FieldCage_Logic->SetUserLimits(new G4UserLimits(1*mm));
+        //FieldCage_Logic->SetUserLimits(new G4UserLimits(50*mm));
 
 
         // Radioactive Source Encloser
@@ -240,14 +242,11 @@ namespace nexus{
 
         //G4LogicalVolume * Needle_Logic=new G4LogicalVolume(Needle,materials::Steel(),"Needle");
         G4LogicalVolume * Needle_Logic=new G4LogicalVolume(Needle,materials::Steel(),"Needle");
-        G4LogicalVolume * Coll_Logic=new G4LogicalVolume(CollimatorWithBlock,materials::PEEK(),"Collimator_logic");
-
+        G4LogicalVolume * Coll_Logic=new G4LogicalVolume(CollimatorWithBlock,materials::PEEK(),"CollimatorWithBlock");
 
 
 
         //G4LogicalVolume* SourceHolderGas_logic = new G4LogicalVolume(SourceHolChamber_solid, gxe, "SourceHolderGAS_logic");
-
-
 
 
 
@@ -325,8 +324,8 @@ namespace nexus{
         // FieldCage
         G4double FieldCagePos=chamber_length/2-((129)*mm)-FielCageGap/2-ElGap_/2;
         G4double EL_pos=chamber_length/2-FielCageGap/2-((326)*mm)-ElGap_/2;
-
-        new G4PVPlacement(0,G4ThreeVector(0,0,FieldCagePos/2),FieldCage_Logic,FieldCage_Logic->GetName(),gas_logic, 0,0,false);
+        G4VPhysicalVolume *FieldCage_Phys;
+        FieldCage_Phys=new G4PVPlacement(0,G4ThreeVector(0,0,FieldCagePos/2),FieldCage_Logic,FieldCage_Logic->GetName(),gas_logic, 0,0,false);
 
         //EL_Gap
         new G4PVPlacement(0,G4ThreeVector(0.,0.,EL_pos/2),EL_logic,EL_solid->GetName(),gas_logic, 0,0, false);
@@ -359,7 +358,7 @@ namespace nexus{
 
 
         // Define this volume as an ionization sensitive detector
-        FieldCage_Logic->SetUserLimits(new G4UserLimits(1*mm));
+        //FieldCage_Logic->SetUserLimits(new G4UserLimits(1*mm));
         IonizationSD* sensdet = new IonizationSD("/CRAB/FIELDCAGE");
         //Active_logic->SetSensitiveDetector(sensdet);
         FieldCage_Logic->SetSensitiveDetector(sensdet);
@@ -378,6 +377,7 @@ namespace nexus{
             field->SetTransverseDiffusion(.92*mm/sqrt(cm));
             field->SetLongitudinalDiffusion(.36*mm/sqrt(cm));
             G4Region* drift_region = new G4Region("DRIFT");
+
 
             drift_region->SetUserInformation(field);
             drift_region->AddRootLogicalVolume(FieldCage_Logic);
@@ -404,35 +404,32 @@ namespace nexus{
 
         // Source Holder
 
-
+        G4VPhysicalVolume * Needle_Phys;
         if(!HideSourceHolder_){
             // Particle Source Holder
             //Rotation Matrix
-
-
 
             // Needle Solid
 
             G4RotationMatrix* NeedleRotate = new G4RotationMatrix();
             NeedleRotate->rotateY(90.*deg);
             //NeedleRotate->rotateX(+10*deg);
-            G4ThreeVector NeedlePos={vtx_[0]-NeedleOffset,vtx_[1],vtx_[2]};
-            G4ThreeVector CollPosition={NeedlePos[0]-5*mm,NeedlePos[1],NeedlePos[2]};
+            G4ThreeVector NeedlePos={vtx_[0]-NeedleOffset,vtx_[1],vtx_[2]-FieldCagePos/2};
+            G4ThreeVector CollPosition={NeedlePos[0]-3*mm,NeedlePos[1],NeedlePos[2]};
 
-            new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),gas_logic,true,0,false);
-            new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),gas_logic,true,0,false);
-
+            Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),FieldCage_Logic,true,0,false);
+            if(!HideCollimator_) {
+                new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),FieldCage_Logic,true,0,false);
+            }
             G4RotationMatrix* rotateHolder = new G4RotationMatrix();
             rotateHolder->rotateY(90.*deg);
 
             //new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset,0,0), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
             //new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
-            NeedleEyePointSample=new CylinderPointSampler2020(NeedleyepRMin,NeedleyepRMax+2*nm,NeedleyepDz,0,twopi, rotateHolder,NeedlePos);
 
+            NeedleEyePointSample=new CylinderPointSampler2020(NeedleyepRMin,NeedleyepRMax+2*nm,NeedleyepDz,0,twopi, rotateHolder,G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+FieldCagePos/2));
 
         }
-
-
 
 
         /// OpticalSurface
@@ -441,9 +438,11 @@ namespace nexus{
         new G4LogicalBorderSurface("SteelSurface_Chamber",gas_phys,chamber_phys,OpSteelSurf);
         new G4LogicalBorderSurface("SteelSurface_LeftFlange",gas_phys,Left_Flange_phys,OpSteelSurf);
         new G4LogicalBorderSurface("SteelSurface_RightFlange",gas_phys,Right_Flange_phys,OpSteelSurf);
-        //new G4LogicalBorderSurface("SteelSurface_PMT3_Enclosing",PMT_Tube_Vacuum_Phys0,PMT_Tube_Phys0,OpSteelSurf);
-        //new G4LogicalBorderSurface("SteelSurface_PMT1_Enclosing",PMT_Tube_Vacuum_Phys1,PMT_Tube_Phys1,OpSteelSurf);
-
+        new G4LogicalBorderSurface("SteelSurface_PMT3_Enclosing",PMT_Tube_Vacuum_Phys0,PMT_Tube_Phys0,OpSteelSurf);
+        new G4LogicalBorderSurface("SteelSurface_PMT1_Enclosing",PMT_Tube_Vacuum_Phys1,PMT_Tube_Phys1,OpSteelSurf);
+        if(!HideSourceHolder_ && !HideCollimator_){
+            new G4LogicalBorderSurface("SteelSurface_Needle",FieldCage_Phys,Needle_Phys,OpSteelSurf);
+        }
 
 
         // Visuals
@@ -461,13 +460,10 @@ namespace nexus{
         G4LogicalVolumeStore* lvStore = G4LogicalVolumeStore::GetInstance();
 
 
-
-
         // Lab
         G4LogicalVolume* Lab = lvStore->GetVolume("LAB");
         G4VisAttributes *LabVa=new G4VisAttributes(G4Colour(2,2,2));
         LabVa->SetForceWireframe(false);
-
         //Chamber
         G4LogicalVolume* Chamber = lvStore->GetVolume("CHAMBER");
         G4VisAttributes *ChamberVa=new G4VisAttributes(G4Colour(1,1,1));
@@ -485,7 +481,7 @@ namespace nexus{
         //Source Enclosure Related
         G4LogicalVolume* SourceHolder = lvStore->GetVolume("SourceHolChamber_logic");
         G4LogicalVolume* Needle = lvStore->GetVolume("Needle");
-        G4LogicalVolume* Collimator = lvStore->GetVolume("Collimator_logic");
+        G4LogicalVolume* Collimator = lvStore->GetVolume("CollimatorWithBlock");
         G4VisAttributes *CollimatorVa=new G4VisAttributes(nexus::YellowAlpha());
         CollimatorVa->SetForceSolid(true);
 
@@ -541,8 +537,6 @@ namespace nexus{
         G4VisAttributes FielCageVis=nexus::Red();
         FielCageVis.SetForceCloud(true);
         FieldCage->SetVisAttributes(FielCageVis);
-
-
 
 
         SourceHolder->SetVisAttributes(SourceHolderVa);

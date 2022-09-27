@@ -187,12 +187,18 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
     if(pdef == IonizationElectron::Definition()){
         DetailedElectronCounts::iterator Die=DElectronCounts.find(TempName);
         G4Track* track = step->GetTrack();
+
+        G4String volume = step->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetName();
+        if (volume=="Needle" || volume=="CollimatorWithBlock" ){
+            track->SetTrackStatus(fStopAndKill);
+            return;
+        }
+
         if(track->GetTrackStatus()==fStopAndKill){
 
             TotalIonizationElectron++;
             if(Die!=DElectronCounts.end()) DElectronCounts[Die->first]++;
             else DElectronCounts[TempName]++;
-
         }
         return;
     }

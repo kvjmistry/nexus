@@ -57,6 +57,7 @@ namespace nexus {
             G4double optical_pad_thickness_;
             G4double pmt_base_diam_;
             G4double pmt_base_thickness_;
+            G4bool  HideCollimator_;
 
             G4bool efield_;
             G4bool HideSourceHolder_;
