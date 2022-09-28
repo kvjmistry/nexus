@@ -33,6 +33,8 @@ NumberOfEvents=1
 drift=false
 EL=false
 cluster=false
+HideNeddle=false
+HideCollimator=false
 
 Pressure=9.7
 Run=S1
@@ -140,10 +142,15 @@ echo "/Geometry/CRAB/ELGap ${ELGap} mm"  >>${config_MACRO}
 echo "/Geometry/CRAB/Active_diam 8.5 cm"  >>${config_MACRO}
 echo "/Geometry/CRAB/Active_length 42 cm"  >>${config_MACRO}
 
+
+
+
+
 ### SourceEncloser
-echo "/Geometry/CRAB/SourceEn_diam 10 mm"  >>${config_MACRO}
-echo "/Geometry/CRAB/SourceEn_holedi 5 mm"  >>${config_MACRO}
-echo "/Geometry/CRAB/SourceEn_offset 5.7 cm"  >>${config_MACRO}
+echo "/Geometry/CRAB/HideSource ${HideNeddle}"  >>${config_MACRO}
+echo "/Geometry/CRAB/HideCollimator ${HideCollimator}"  >>${config_MACRO}
+echo "/Generator/SingleParticle/region OUTER_SURFACE"  >>${config_MACRO}
+echo "#/Generator/SingleParticle/region FIELDCAGE"  >>${config_MACRO}
 
 
 #ACTIONS

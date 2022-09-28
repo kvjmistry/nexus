@@ -38,7 +38,7 @@
 ## Nexus Physics List
 /PhysicsList/Nexus/clustering           true
 /PhysicsList/Nexus/drift                true
-/PhysicsList/Nexus/electroluminescence  true
+/PhysicsList/Nexus/electroluminescence  false
 
 #GEOMETRY
 /Geometry/CRAB/gas_pressure 9.7 bar

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash  
 #SBATCH -J CRAB0      # A single job name for the array
 #SBATCH -p run         # Partition
 #SBATCH --ntasks=1
@@ -10,7 +10,7 @@
 
 ##SBATCH -o %A_%a.out        # Standard output
 ##SBATCH -e %A_%a.err        # Standard error
-## Job options
+## Job options                                                                                                                                                                                                                         
 JOBNUMBER=${SLURM_ARRAY_TASK_ID}
 SEED=`echo "scale = 2;  $JOBNUMBER" | bc`
 
@@ -30,8 +30,6 @@ NumberOfEvents=1
 drift=true
 EL=true
 cluster=true
-HideNeddle=false
-HideCollimator=false
 
 Pressure=9.7
 Run=S2
@@ -40,8 +38,8 @@ Run=S2
 ANumber=82
 Mass=210
 Syield=25510   ## 1/MeV
-ELYield=970    ## photons/cm*electron
-ELifeTime=1000
+ELYield=970    ## photons/cm*electron		
+ELifeTime=1000 
 ELGap=7
 
 ## Source Position
@@ -64,7 +62,7 @@ init_MACRO="${outputDir}/macros/${InitMACRO}"
 ## making the macro
 config_MACRO="${outputDir}/macros/${configMACRO}"
 
-## Counts
+## Counts 
 PathToCounts="${outputDir}/counts"
 
 echo "Removing Older Files ..."
@@ -127,18 +125,16 @@ echo "/Geometry/CRAB/chamber_thickn 2. mm"  >>${config_MACRO}
 echo "#/Geometry/CRAB/SourcePosition -4.5 -4.5 -4.5 cm"  >>${config_MACRO}
 echo "/Geometry/CRAB/SourcePosition ${pos} cm"  >>${config_MACRO}
 echo "#/Geometry/CRAB/SourcePosition 0 0 0 cm"  >>${config_MACRO}
-
 echo "/Actions/CRABAnalysisSteppingAction/FileSave true"  >>${config_MACRO}
 echo "/Actions/CRABAnalysisSteppingAction/FileName ${PhotonFile}"  >>${config_MACRO}
 echo "/Actions/CRABAnalysisSteppingAction/FilePath ${PathToCounts}"  >>${config_MACRO}
-echo "/Actions/CRABAnalysisSteppingAction/isLead210 true "  >>${config_MACRO}
 
 echo "/Geometry/CRAB/scinYield ${Syield}  1/MeV"  >>${config_MACRO}
 echo "/Geometry/CRAB/ELYield ${ELYield} 1/cm"  >>${config_MACRO}
 
 
 echo "/Geometry/CRAB/ElecLifTime ${ELifeTime} ms"  >>${config_MACRO}
-echo "/Geometry/CRAB/ELGap ${ELGap} mm"  >>${config_MACRO}
+echo "/Geometry/CRAB/ELGap ${ELGap} mm"  >>${config_MACRO}  
 
 ## Randomizing
 echo "/nexus/random_seed ${SEED}" >> ${config_MACRO}
@@ -147,11 +143,10 @@ echo "/nexus/random_seed ${SEED}" >> ${config_MACRO}
 echo "/Geometry/CRAB/Active_diam 8.5 cm"  >>${config_MACRO}
 echo "/Geometry/CRAB/Active_length 42 cm"  >>${config_MACRO}
 
-### SourceEncloser
-echo "/Geometry/CRAB/HideSource ${HideNeddle}"  >>${config_MACRO}
-echo "/Geometry/CRAB/HideCollimator ${HideCollimator}"  >>${config_MACRO}
-echo "/Generator/SingleParticle/region OUTER_SURFACE"  >>${config_MACRO}
-echo "#/Generator/SingleParticle/region FIELDCAGE"  >>${config_MACRO}
+#SourceEncloser
+echo "/Geometry/CRAB/SourceEn_diam 10 mm"  >>${config_MACRO}
+echo "/Geometry/CRAB/SourceEn_holedi 5 mm"  >>${config_MACRO}
+echo "/Geometry/CRAB/SourceEn_offset 5.7 cm"  >>${config_MACRO}
 
 # GENERATOR
 echo "/Generator/CrabSourceGenerator/region FIELDCAGE"  >>${config_MACRO}
