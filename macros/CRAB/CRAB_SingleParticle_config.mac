@@ -11,16 +11,16 @@
 # GENERATION
 
 ## This is for emmiting particles from outter surface of needle
-/Geometry/CRAB/HideSource false
-/Geometry/CRAB/HideCollimator false
+/Geometry/CRAB/HideSource true
+/Geometry/CRAB/HideCollimator true
 #/Generator/SingleParticle/region FIELDCAGE
 /Generator/SingleParticle/region OUTER_SURFACE
 #/Generator/SingleParticle/particle opticalphoton
 #/Generator/SingleParticle/min_energy 7.295 eV
 #/Generator/SingleParticle/max_energy 7.295 eV
 /Generator/SingleParticle/particle alpha
-/Generator/SingleParticle/min_energy 22.4 eV
-/Generator/SingleParticle/max_energy 22.4 eV
+/Generator/SingleParticle/min_energy 1 keV
+/Generator/SingleParticle/max_energy 1 keV
 /Generator/SingleParticle/min_costheta -1
 /Generator/SingleParticle/max_costheta -1
 /Generator/SingleParticle/min_phi 0
@@ -38,7 +38,7 @@
 ## Nexus Physics List
 /PhysicsList/Nexus/clustering           true
 /PhysicsList/Nexus/drift                true
-/PhysicsList/Nexus/electroluminescence  false
+/PhysicsList/Nexus/electroluminescence  true
 
 #GEOMETRY
 /Geometry/CRAB/gas_pressure 9.7 bar

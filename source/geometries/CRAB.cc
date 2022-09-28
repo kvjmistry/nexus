@@ -567,8 +567,9 @@ namespace nexus{
 
                 pos=NeedleEyePointSample->GenerateVertex(region);
             }else{
-                G4Exception("[CRAB]", "GenerateVertex()", FatalException,
-                            "Unknown vertex generation region.");
+                G4Exception("[CRAB]", "GenerateVertex()", JustWarning,
+                            "Unknown vertex generation region. setting default region as FIELDCAGE..");
+                pos=vtx_;
 
             }
         return pos;

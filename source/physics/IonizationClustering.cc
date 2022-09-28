@@ -17,6 +17,7 @@
 #include <G4Poisson.hh>
 #include <Randomize.hh>
 #include <G4LorentzVector.hh>
+#include <G4Alpha.hh>
 #include <G4Gamma.hh>
 #include "G4PhysicalVolumeStore.hh"
 #include "G4LogicalVolumeStore.hh"
@@ -120,7 +121,8 @@ namespace nexus {
 
     //G4double ioni_energy = mpt->GetConstProperty("IONIZATIONENERGY");
     //G4double fano_factor = mpt->GetConstProperty("FANOFACTOR");
-    G4double ioni_energy = 22.4 * eV;
+    G4double ioni_energy;
+    (step.GetTrack()->GetParticleDefinition())==G4Alpha::Definition() ? ioni_energy = 22 * eV : ioni_energy=22.4 * eV;
     G4double fano_factor = .15;
 
     G4double mean = energy_dep / ioni_energy;

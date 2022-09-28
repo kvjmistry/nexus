@@ -188,9 +188,11 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
         DetailedElectronCounts::iterator Die=DElectronCounts.find(TempName);
         G4Track* track = step->GetTrack();
 
-        G4String volume = step->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetName();
-        if (volume=="Needle" || volume=="CollimatorWithBlock" ){
+        G4String volumePost = step->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetName();
+
+        if (volumePost!="FIELDCAGE" and volumePost!="EL_GAP"){
             track->SetTrackStatus(fStopAndKill);
+            TotalIonizationElectron++;
             return;
         }
 
