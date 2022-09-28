@@ -147,14 +147,19 @@ echo "/nexus/random_seed ${SEED}" >> ${config_MACRO}
 echo "/Geometry/CRAB/Active_diam 8.5 cm"  >>${config_MACRO}
 echo "/Geometry/CRAB/Active_length 42 cm"  >>${config_MACRO}
 
+#PMTs
+echo "/Geometry/CRAB/PMT1_Pos 2.32 cm"  >>${config_MACRO}
+echo "/Geometry/CRAB/PMT3_Pos 3.52 cm"  >>${config_MACRO}
 ### SourceEncloser
+# GENERATOR
+
 echo "/Geometry/CRAB/HideSource ${HideNeddle}"  >>${config_MACRO}
 echo "/Geometry/CRAB/HideCollimator ${HideCollimator}"  >>${config_MACRO}
-echo "/Generator/SingleParticle/region OUTER_SURFACE"  >>${config_MACRO}
-echo "#/Generator/SingleParticle/region FIELDCAGE"  >>${config_MACRO}
 
-# GENERATOR
-echo "/Generator/CrabSourceGenerator/region FIELDCAGE"  >>${config_MACRO}
+echo "/Generator/CrabSourceGenerator/region OUTER_SURFACE"  >>${config_MACRO}
+echo "#/Generator/CrabSourceGenerator/region FIELDCAGE"  >>${config_MACRO}
+
+
 #Pb_210
 echo "/Generator/CrabSourceGenerator/atomic_number ${ANumber}"  >>${config_MACRO}
 echo "/Generator/CrabSourceGenerator/mass_number ${Mass}"  >>${config_MACRO}

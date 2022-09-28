@@ -510,10 +510,10 @@ namespace nexus{
 
         //PMT TUBE AND PMT BLOCK
         G4LogicalVolume * PmttubeLog0=lvStore->GetVolume("PMT_TUBE0");
-        PmttubeLog0->SetVisAttributes(ChamberVa);
+        PmttubeLog0->SetVisAttributes(G4VisAttributes::GetInvisible());
         G4LogicalVolume * PmttubeBlockLog0=lvStore->GetVolume("PMT_TUBE_BLOCK0");
         G4LogicalVolume * PmttubeLog1=lvStore->GetVolume("PMT_TUBE1");
-        PmttubeLog1->SetVisAttributes(ChamberVa);
+        PmttubeLog1->SetVisAttributes(G4VisAttributes::GetInvisible());
         G4LogicalVolume * PmttubeBlockLog1=lvStore->GetVolume("PMT_TUBE_BLOCK1");
         PmttubeBlockLog0->SetVisAttributes(ChamberVa);
         PmttubeBlockLog1->SetVisAttributes(ChamberVa);
