@@ -12,7 +12,7 @@
 
 ## This is for emmiting particles from outter surface of needle
 /Geometry/CRAB/HideSource false
-/Geometry/CRAB/HideCollimator false
+/Geometry/CRAB/HideCollimator true
 #/Generator/SingleParticle/region FIELDCAGE
 /Generator/SingleParticle/region OUTER_SURFACE
 #/Generator/SingleParticle/particle opticalphoton

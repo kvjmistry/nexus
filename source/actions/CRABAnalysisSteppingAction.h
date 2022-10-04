@@ -31,7 +31,7 @@ namespace nexus{
             typedef std::map<G4String,std::vector<double>> DepositedEnergy;
             typedef std::map<G4String,detectorCounts> DetailedPhotonCounts;
             typedef std::map<G4String,int> DetailedElectronCounts;
-
+            typedef std::map<G4String,int> ProducedPhotonCount;
             detectorCounts my_counts_;
             detectorCounts ObservedPhotons;
             G4double Bi210_FinalTime;
@@ -57,6 +57,7 @@ namespace nexus{
             bool DisplayPhotonEnergy_;
             G4String FileName_;
             bool isLead210Decay_;
+
 
     };
 
