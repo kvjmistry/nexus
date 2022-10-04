@@ -39,7 +39,7 @@ namespace nexus{
             G4int TempTrackID;
             DetailedPhotonCounts DPhotonCounts;
             DetailedPhotonCounts DAbsPhotonCounts;
-
+            ProducedPhotonCount DTotalPhotonCounts;
             DetailedElectronCounts DElectronCounts;
 
             G4String TempName;

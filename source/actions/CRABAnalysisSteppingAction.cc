@@ -68,7 +68,7 @@ CRABAnalysisSteppingAction::~CRABAnalysisSteppingAction()
 
 
     } else{
-        G4cout<<"#### Detailed Detected Photons ####"<<G4endl;
+        G4cout<<"#### Detailed info about  Photons ####"<<G4endl;
 
         DetailedPhotonCounts ::iterator DDetectors=DPhotonCounts.begin();
         while (DDetectors!=DPhotonCounts.end()){
@@ -121,7 +121,6 @@ CRABAnalysisSteppingAction::~CRABAnalysisSteppingAction()
             while(DAbsPhotons!=DAbsDetectors->second.end()){
                 G4cout<<DAbsDetectors->first<<","<<DAbsPhotons->first<<" :"<<DAbsPhotons->second<<G4endl;
                 if(SavetoFile_){
-
                     str=DAbsDetectors->first + "," +DAbsPhotons->first +","+to_string(DAbsPhotons->second) ;
                     f1->SaveToTextFile(Path,"Detector,Source,Counts",str);
                 }
@@ -131,10 +130,26 @@ CRABAnalysisSteppingAction::~CRABAnalysisSteppingAction()
 
             DAbsDetectors++;
         }
+        // Total Produced Photons
+        ProducedPhotonCount ::iterator ProducedPhotons=DTotalPhotonCounts.begin();
+        while (ProducedPhotons!=DTotalPhotonCounts.end()){
+            G4cout<<ProducedPhotons->first<<","<<ProducedPhotons->first<<" :"<<ProducedPhotons->second<<G4endl;
+            if(SavetoFile_){
+                str="All_p," +ProducedPhotons->first +","+to_string(ProducedPhotons->second) ;
+                f1->SaveToTextFile(Path,"Detector,Source,Counts",str);
+            }
+            ProducedPhotons++;
+        }
+        // Total Produced Electrons
+
         G4cout<<"#### Electrons ####"<<G4endl;
         DetailedElectronCounts::iterator Die=DElectronCounts.begin();
         while (Die!=DElectronCounts.end()){
             G4cout<<Die->first<<" :"<<Die->second<<G4endl;
+           /* if(SavetoFile_){
+                str="All_e," +Die->first +","+to_string(Die->second) ;
+                f1->SaveToTextFile(Path,"Detector,Source,Counts",str);
+            } */
             Die++;
         }
     }
@@ -191,8 +206,7 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
         if(track->GetTrackStatus()==fStopAndKill){
 
             TotalIonizationElectron++;
-            if(Die!=DElectronCounts.end()) DElectronCounts[Die->first]++;
-            else DElectronCounts[TempName]++;
+            Die!=DElectronCounts.end() ? DElectronCounts[Die->first]+=1:DElectronCounts[TempName]+=1;
         }
         return;
     }
@@ -235,8 +249,16 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
     }*/
 
     if(track->GetTrackStatus()==fStopAndKill){
+
+        ProducedPhotonCount::iterator PhotonCount=DTotalPhotonCounts.find(TempName);
+
+        PhotonCount!=DTotalPhotonCounts.end() ? DTotalPhotonCounts[PhotonCount->first]+=1 : DTotalPhotonCounts[TempName]=1;
+
         TotalPhotons++;
     }
+
+
+
 
 
     // Retrieve the pointer to the optical boundary process.
@@ -295,6 +317,7 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
             else ObservedPhotons[detector_name] = 1;
 
             DetailedPhotonCounts ::iterator DAbsPhoton=DAbsPhotonCounts.find(detector_name);
+
             if(DAbsPhoton!=DAbsPhotonCounts.end()) {
                 detectorCounts ::iterator ddAbsphoton=DAbsPhoton->second.find(TempName);
                 ddAbsphoton!=DAbsPhoton->second.end() ?  DAbsPhoton->second[ddAbsphoton->first]+=1 :  DAbsPhoton->second[TempName]=1;

@@ -372,7 +372,7 @@ namespace opticalprops {
         std::vector<G4double> AbsEnergy;
         std::vector<G4double> AbsLength;
 
-        AbsEnergy ={
+        /*AbsEnergy ={
                 optPhotMinE_,10.12908497*eV,9.934294872*eV,9.746855346*eV,
                 9.566358025*eV,9.392424242*eV,9.224702381*eV,9.062865497*eV,
                 8.906609195*eV,8.755649718*eV,8.609722222*eV,8.468579235*eV,
@@ -405,6 +405,7 @@ namespace opticalprops {
 
 
         mpt->AddProperty("ABSLENGTH", AbsEnergy, AbsLength);
+         */
 
         return mpt;
   }
