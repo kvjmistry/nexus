@@ -7,10 +7,12 @@
 #include "GeometryBase.h"
 #include "PmtR7378A.h"
 #include "CylinderPointSampler2020.h"
+#include "../physics/UltraFresnelLens.hh"
 class G4GenericMessenger;
 
 namespace nexus {
     class CylinderPointSampler2020;
+    class UltraFresnelLens;
     class CRAB: public GeometryBase
     {
         public:
@@ -27,6 +29,7 @@ namespace nexus {
         private:
             /// Messenger for the definition of control commands
             G4GenericMessenger* msg_;
+            ::UltraFresnelLens * lens;
             G4double Lab_size;
             G4double chamber_diam   ;
             G4double chamber_length ;
@@ -64,6 +67,7 @@ namespace nexus {
             G4double max_step_size_;
             G4double ELyield_;
             CylinderPointSampler2020 * NeedleEyePointSample;
+
 
             void ConstructLab();
             void PlaceVolumes();

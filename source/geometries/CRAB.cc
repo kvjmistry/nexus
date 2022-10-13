@@ -30,6 +30,7 @@
 #include <G4OpticalSurface.hh>
 #include <G4LogicalSkinSurface.hh>
 #include <G4LogicalBorderSurface.hh>
+#include "../physics/UltraFresnelLens.hh"
 
 
 
@@ -191,6 +192,8 @@ namespace nexus{
         G4LogicalVolume* MgF2_window_logic= new G4LogicalVolume(MgF2_window_solid, MgF2, "MgF2_WINDOW");
 
 
+
+
         //////////////////////////////////////////
 
         G4double FielCageGap=(160.3+29.55)*mm;
@@ -308,7 +311,7 @@ namespace nexus{
 
         //LAB
 
-        new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0,false,0, false);
+       auto labPhysical= new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0,false,0, false);
 
         //Flanges on the Chamber
         G4VPhysicalVolume *Left_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0,(chamber_length/2)),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,0,false);
@@ -335,7 +338,7 @@ namespace nexus{
         //  MgF2 Windows
         //G4double window_posz = chamber_length/2+chamber_thickn/2;
         G4double window_posz = chamber_length/2;
-        new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
+        auto PMT3Mgf2=new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
         new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", lab_logic_volume, false, 1, false);
 
         //PMT Tubes
@@ -355,6 +358,9 @@ namespace nexus{
         new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,(PMT1_Pos_-pmt1_->Length()/2-MgF2_window_thickness_/2)),pmt2_logic,pmt2_->GetPMTName(),InsideThePMT_Tube_Logic1,true,0,false);
 
 
+
+        /// CRAB0 Lens
+        lens = new ::UltraFresnelLens(MgF2_window_diam_,13,MgF2,labPhysical,G4ThreeVector(0., 0., window_posz));
 
 
 
@@ -378,7 +384,6 @@ namespace nexus{
             field->SetTransverseDiffusion(.92*mm/sqrt(cm));
             field->SetLongitudinalDiffusion(.36*mm/sqrt(cm));
             if(!HideSourceHolder_){
-
                 if(!HideCollimator_) field->SetStepLimit(3*mm,0.3*mm);
                 else field->SetStepLimit(1*mm,0.2*mm);
             }
@@ -455,6 +460,11 @@ namespace nexus{
         // Visuals
 
         AssignVisuals();
+        if(lens){
+            auto LensVisAtt  = new G4VisAttributes(G4Colour(1.0,0.0,0.0)) ;   // Red
+            LensVisAtt ->SetVisibility(true);
+            lens->GetPhysicalVolume()->GetLogicalVolume()->SetVisAttributes(LensVisAtt);
+        }
         //G4Optic
         this->SetLogicalVolume(lab_logic_volume);
         //this->SetLogicalVolume(chamber_logic);
@@ -532,6 +542,12 @@ namespace nexus{
         MgF2WindowVis.SetForceSolid(true);
         MgF2WindowLog->SetVisAttributes(MgF2WindowVis);
 
+       /* // Lens
+        G4LogicalVolume * LensLog=lvStore->GetVolume("LensMotherPV");
+        G4VisAttributes  LensVis=Red();
+        LensVis.SetForceSolid(true);
+        LensLog->SetVisAttributes(LensVis);
+        */
 
         // EL-Region
         G4LogicalVolume * ELLogic=lvStore->GetVolume("EL_GAP");

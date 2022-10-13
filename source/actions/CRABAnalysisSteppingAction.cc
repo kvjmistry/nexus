@@ -207,6 +207,7 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
 
             TotalIonizationElectron++;
             Die!=DElectronCounts.end() ? DElectronCounts[Die->first]+=1:DElectronCounts[TempName]+=1;
+            G4cout<<"Time -> "<<track->GetLocalTime()<<G4endl;
         }
         return;
     }
