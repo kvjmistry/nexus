@@ -46,22 +46,13 @@
 
 # GENERATOR
 ## Source Enclosures
-/Geometry/CRAB/HideSource false
-/Geometry/CRAB/HideCollimator false
-#/Generator/CrabSourceGenerator/region FIELDCAGE
-/Generator/CrabSourceGenerator/region OUTER_SURFACE
-
-#Pb_210
-/Generator/CrabSourceGenerator/atomic_number 82
-/Generator/CrabSourceGenerator/mass_number 210
+/Geometry/CRAB/HideSource true
+/Geometry/CRAB/HideCollimator true
+/Generator/Kr83mGenerator/region FIELDCAGE
 
 
 /nexus/random_seed -2
 
-/Generator/CrabSourceGenerator/decay_rate 100000 nCi
-#/Generator/CrabSourceGenerator/event_window 13
-#works only if event_window is zero
-#/Generator/CrabSourceGenerator/NDecays 1
 
 #Actions
 #/Actions/DefaultEventAction/energy_threshold 100 eV
@@ -78,6 +69,6 @@
 
 # PERSISTENCY
 /nexus/persistency/eventType background
-#/nexus/persistency/outputFile /media/ilker/Ilker/CRAB/Simulation/testv2
+#/nexus/persistency/outputFile /dev/null/test
 /nexus/persistency/outputFile test
 #/run/printProgress 100

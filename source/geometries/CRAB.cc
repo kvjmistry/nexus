@@ -360,7 +360,7 @@ namespace nexus{
 
 
         /// CRAB0 Lens
-        lens = new ::UltraFresnelLens(MgF2_window_diam_,13,MgF2,labPhysical,G4ThreeVector(0., 0., window_posz));
+        //lens = new ::UltraFresnelLens(MgF2_window_diam_,13,MgF2,labPhysical,G4ThreeVector(0., 0., window_posz));
 
 
 
