@@ -146,10 +146,10 @@ CRABAnalysisSteppingAction::~CRABAnalysisSteppingAction()
         DetailedElectronCounts::iterator Die=DElectronCounts.begin();
         while (Die!=DElectronCounts.end()){
             G4cout<<Die->first<<" :"<<Die->second<<G4endl;
-           /* if(SavetoFile_){
+            if(SavetoFile_){
                 str="All_e," +Die->first +","+to_string(Die->second) ;
                 f1->SaveToTextFile(Path,"Detector,Source,Counts",str);
-            } */
+            }
             Die++;
         }
     }
@@ -197,17 +197,15 @@ void CRABAnalysisSteppingAction::UserSteppingAction(const G4Step* step)
 
         G4String volumePost = step->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetName();
 
+        if(volumePost=="EL_GAP"){
+            TotalIonizationElectron++;
+            Die!=DElectronCounts.end() ? DElectronCounts[Die->first]+=1:DElectronCounts[TempName]+=1;
+            // G4cout<<"Time -> "<<track->GetLocalTime()<<G4endl;
+        }
         if (volumePost!="FIELDCAGE" and volumePost!="EL_GAP"){
             track->SetTrackStatus(fStopAndKill);
             TotalIonizationElectron++;
             return;
-        }
-
-        if(track->GetTrackStatus()==fStopAndKill){
-
-            TotalIonizationElectron++;
-            Die!=DElectronCounts.end() ? DElectronCounts[Die->first]+=1:DElectronCounts[TempName]+=1;
-            G4cout<<"Time -> "<<track->GetLocalTime()<<G4endl;
         }
         return;
     }

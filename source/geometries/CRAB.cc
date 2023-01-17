@@ -576,6 +576,7 @@ namespace nexus{
     {
 
             G4ThreeVector pos;
+            G4cout<<"This is the region --> " <<region <<G4endl;
             if((region=="LAB" || region=="GAS" || region=="ACTIVE" || region=="FIELDCAGE")){
 
                 pos= vtx_;

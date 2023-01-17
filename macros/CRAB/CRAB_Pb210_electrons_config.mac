@@ -5,8 +5,8 @@
 /process/em/verbose 0
 ## Making sure electroluminescence is turned on
 ## Nexus Physics List
-/PhysicsList/Nexus/clustering           false
-/PhysicsList/Nexus/drift                false
+/PhysicsList/Nexus/clustering           true
+/PhysicsList/Nexus/drift                true
 /PhysicsList/Nexus/electroluminescence  false
 
 
@@ -14,13 +14,13 @@
 
 #GEOMETRY
 /Geometry/CRAB/gas_pressure 9.7 bar
-#/Geometry/CRAB/scinYield 10 1/MeV
+/Geometry/CRAB/scinYield 0 1/MeV
 /Geometry/CRAB/chamber_diam  15. cm
 /Geometry/CRAB/chamber_length 43.18 cm
 /Geometry/CRAB/chamber_thickn 2. mm
 #/Geometry/CRAB/SourcePosition -4.5 -4.5 -4.5 cm
 #/Geometry/CRAB/SourcePosition -3 0 -5 cm
-#/Geometry/CRAB/SourcePosition 0 0 0 cm
+/Geometry/CRAB/SourcePosition -1.6 0 -5 cm
 /Actions/CRABAnalysisSteppingAction/FileSave true
 /Actions/CRABAnalysisSteppingAction/FileName test.txt
 
@@ -29,13 +29,12 @@
 /Geometry/CRAB/Active_diam 8.5 cm
 /Geometry/CRAB/Active_length 42 cm
 
-#SourceEncloser
-/Geometry/CRAB/SourceEn_diam 10 mm
-/Geometry/CRAB/SourceEn_holedi 5 mm
-/Geometry/CRAB/SourceEn_offset 5.7 cm
+## Source Enclosures
+/Geometry/CRAB/HideSource false
+/Geometry/CRAB/HideCollimator false
 
 # GENERATOR
-/Generator/CrabSourceGenerator/region FIELDCAGE
+/Generator/CrabSourceGenerator/region OUTER_SURFACE
 #Pb_210
 /Generator/CrabSourceGenerator/atomic_number 82
 /Generator/CrabSourceGenerator/mass_number 210
@@ -53,5 +52,5 @@
 
 # PERSISTENCY
 /nexus/persistency/eventType background
-#/nexus/persistency/outputFile /media/ilker/Ilker/CRAB/Simulation/For_Nick/WithNicksYieldv2
-/nexus/persistency/outputFile kkv121
+/nexus/persistency/outputFile /media/ilker/Ilker/SimResults/Jan1_2023/pb210t
+#/nexus/persistency/outputFile kkv121

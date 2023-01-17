@@ -195,12 +195,11 @@ namespace nexus {
    phcath_mpt->AddProperty("REFLECTIVITY", ENERGIES, REFLECTIVITY, entries);
 
 
-
-    G4OpticalSurface* phcath_opsur =
-      new G4OpticalSurface(DetName, unified, polished, dielectric_metal);
+    G4OpticalSurface* phcath_opsur =new G4OpticalSurface(DetName, unified, polished, dielectric_metal);
     phcath_opsur->SetMaterialPropertiesTable(phcath_mpt);
 
     new G4LogicalSkinSurface(DetName, phcath_logic, phcath_opsur);
+
   }
 
 

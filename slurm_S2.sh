@@ -3,7 +3,7 @@
 #SBATCH -p run         # Partition
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --mem=50GB         # Memory request (Mb)
+#SBATCH --mem=15GB         # Memory request (Mb)
 #SBATCH -t 5-10:08           # Maximum execution time (D-HH:MM)
 #SBATCH -o /dev/null        # Standard output
 #SBATCH -e /dev/null        # Standard error
@@ -16,8 +16,8 @@ SEED=`echo "scale = 2;  $JOBNUMBER" | bc`
 
 ## Path to output files and G4Executable
 #outputDir="/media/argon/Ilker/CRAB/Sim/new/S2"
-outputDir="/media/argon/Ilker/CRAB/Sim/Isotropic/S2"
-PathToG4Executable="/home/argon/Projects/Ilker/latest_nexus/build/nexus"
+outputDir="/media/ilker/Ilker/SimResults/Dec_21_2022"
+PathToG4Executable="/home/ilker/Projects/nexus/build/nexus"
 
 
 #outputDir="/media/ilker/Ilker/SimResults/Sim/S2"
@@ -28,10 +28,10 @@ NumberOfEvents=1
 
 ### Options
 drift=true
-EL=true
+EL=false
 cluster=true
 HideNeddle=false
-HideCollimator=false
+HideCollimator=true
 
 Pressure=9.7
 Run=S2
@@ -39,8 +39,8 @@ Run=S2
 ###Info
 ANumber=82
 Mass=210
-Syield=25510   ## 1/MeV
-ELYield=970    ## photons/cm*electron
+Syield=0   ##25510   ## 1/MeV
+ELYield=0    ##926    ## photons/cm*electron
 ELifeTime=1000
 ELGap=7
 
