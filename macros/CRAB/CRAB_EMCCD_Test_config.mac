@@ -1,0 +1,49 @@
+
+
+# VERBOSITY
+/run/verbose 1
+/event/verbose 0
+/tracking/verbose 0
+/process/em/verbose 0
+## Making sure electroluminescence is turned on
+
+
+## Nexus Physics List
+/PhysicsList/Nexus/clustering           true
+/PhysicsList/Nexus/drift                true
+/PhysicsList/Nexus/electroluminescence  false
+
+# GENERATION
+
+
+/Generator/SingleParticle/region FIELDCAGE
+#/Generator/SingleParticle/region OUTER_SURFACE
+#/Generator/SingleParticle/particle opticalphoton
+#/Generator/SingleParticle/min_energy 7.295 eV
+#/Generator/SingleParticle/max_energy 7.295 eV
+/Generator/SingleParticle/particle alpha
+/Generator/SingleParticle/min_energy 0.5 keV
+/Generator/SingleParticle/max_energy 0.5 keV
+#/Generator/SingleParticle/min_costheta 1
+#/Generator/SingleParticle/max_costheta 1
+#/Generator/SingleParticle/min_phi 0
+#/Generator/SingleParticle/max_phi 0
+
+
+### Isotropic Photon  Emmission
+/Generator/SingleParticle/min_costheta -1
+/Generator/SingleParticle/max_costheta 1
+/Generator/SingleParticle/min_phi -3.14
+/Generator/SingleParticle/max_phi 3.14
+
+/Actions/CRABAnalysisSteppingAction/FileSave false
+
+
+
+
+
+
+# PERSISTENCY
+/nexus/persistency/eventType background
+/nexus/persistency/outputFile /media/ilker/Ilker/CRAB/Simulation/Betas
+#/run/printProgress 100
