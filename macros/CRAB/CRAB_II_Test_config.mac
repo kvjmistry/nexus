@@ -5,6 +5,9 @@
 /event/verbose 0
 /tracking/verbose 0
 /process/em/verbose 0
+
+
+
 ## Making sure electroluminescence is turned on
 
 
@@ -37,7 +40,6 @@
 /Generator/SingleParticle/max_phi 3.14
 
 /Actions/CRABAnalysisSteppingAction/FileSave false
-
 
 
 

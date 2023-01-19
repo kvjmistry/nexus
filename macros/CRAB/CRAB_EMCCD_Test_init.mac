@@ -28,4 +28,6 @@
 /nexus/RegisterSteppingAction CRABAnalysisSteppingAction
 
 
+## You can now add visuals from init-file
+/nexus/RegisterCommand /vis/scene/add/text_10_10_10_cm_24_0_0_CRAB0-EMCCD
 #/nexus/RegisterMacro macros/CRAB/CRAB_EMCCD_Test_config.mac

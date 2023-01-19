@@ -22,7 +22,7 @@ namespace nexus {
     REGISTER_CLASS(CRAB_EMCCD,GeometryBase)
     //Construct
     CRAB_EMCCD::CRAB_EMCCD() :GeometryBase(),msg_(nullptr),fvisual(true){
-        msg_=new G4GenericMessenger(this,"/Geometry/CRAB_EMMCD","This is the geometry of the EMCCD");
+        msg_=new G4GenericMessenger(this,"/Geometry/CRAB_EMMCD/","This is the geometry of the EMCCD");
 
     }
 
@@ -32,6 +32,7 @@ namespace nexus {
     void CRAB_EMCCD::Construct() {
         // C91000-23B Camera Pixel Size
         float pixelSize=16*um;
+        //float pixelSize=5*mm;
         float effectiveXandY=8.192*mm;
 
         // LAB
@@ -44,7 +45,7 @@ namespace nexus {
         // Solids
         G4Box * CamBody_solid=new G4Box("CamBody",(110/2)*mm,(110/2)*mm,(156/2)*mm);
 
-        G4Tubs * CamFront_solid=new G4Tubs("CamFront",0,(76/2)*mm,(25/2)*mm,0,twopi);
+        G4Tubs * CamFront_solid=new G4Tubs("CamFront",(25.4/2)*mm,(76/2)*mm,(25/2)*mm,0,twopi);
 
         G4Box * PixelLocation_solid= new G4Box("PixelLocation",effectiveXandY/2,effectiveXandY/2,1*mm);
 
@@ -67,15 +68,30 @@ namespace nexus {
 
         new G4PVPlacement(0,G4ThreeVector(0,0,0),CamBody_solid->GetName(),CamBody_logic,labPhysical,false,0,false);
         new G4PVPlacement(0,G4ThreeVector(0,0,(-156/2-25/2)*mm),CamFront_logic->GetName(),CamFront_logic,labPhysical,false,0,false);
-        new G4PVPlacement(0,G4ThreeVector(0,0,(-156/2-25/2-1)*mm),EffectiveArea_logic->GetName(),EffectiveArea_logic,labPhysical,false,0,false);
-        new G4PVPlacement(0,G4ThreeVector(0,0,(-156/2-25/2-1-pixelSize/4)*mm),Pixel_Logic->GetName(),Pixel_Logic,labPhysical,true,0,false);
+        new G4PVPlacement(0,G4ThreeVector(0,0,(-156/2-1)*mm),EffectiveArea_logic->GetName(),EffectiveArea_logic,labPhysical,false,0,false);
+        //new G4PVPlacement(0,G4ThreeVector(0,0,(-156/2-1-pixelSize/(4))*mm),Pixel_Logic->GetName(),Pixel_Logic,labPhysical,true,0,false);
 
+        G4int PixelSize=512;
+        G4int XOffset=256;
+        G4int YOffset=256;
+
+
+        /*G4float zposition=(-156/2-1-pixelSize/(4)-25/2)*mm;
+        G4int PixelCount = 0;
+        for (int px=0;px<PixelSize;px++){
+            for (int py=0;py<PixelSize;py++){
+                G4String PixelName=Pixel_Logic->GetName()+"_"+std::to_string(PixelCount);
+                new G4PVPlacement(0,G4ThreeVector((px-XOffset)*pixelSize,(py-YOffset)*pixelSize,zposition),PixelName,Pixel_Logic,labPhysical,true,PixelCount,false);
+                PixelCount++;
+            }
+        }*/
         // Visuals
         if (fvisual){
+
             G4VisAttributes * Camfront = new G4VisAttributes(nexus::DarkRed());
             G4VisAttributes * CamBody = new G4VisAttributes(nexus::DarkGrey());
             G4VisAttributes * EffectiveArea = new G4VisAttributes(nexus::Yellow());
-            G4VisAttributes * Pixels = new G4VisAttributes(nexus::DarkRedAlpha());
+            G4VisAttributes * Pixels = new G4VisAttributes(nexus::Red());
             Camfront->SetForceSolid(true);
             CamBody->SetForceSolid(true);
             EffectiveArea->SetForceSolid(true);
@@ -86,6 +102,8 @@ namespace nexus {
             EffectiveArea_logic->SetVisAttributes(EffectiveArea);
             Pixel_Logic->SetVisAttributes(Pixels);
             CamFront_logic->SetVisAttributes(Camfront);
+            //CamFront_logic->SetVisAttributes(G4VisAttributes::GetInvisible());
+
         }
 
         this->SetLogicalVolume(lab_logic_volume);

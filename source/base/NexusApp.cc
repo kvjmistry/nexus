@@ -55,6 +55,9 @@ NexusApp::NexusApp(G4String init_macro): G4RunManager(), gen_name_(""),
   msg_->DeclareMethod("random_seed", &NexusApp::SetRandomSeed,
                       "Set a seed for the random number generator.");
 
+    // Define the commands to be executed.
+    msg_->DeclareMethod("RegisterCommand",&NexusApp::RegisterCommand,"");
+
 // Define the command to set the desired generator
   msg_->DeclareProperty("RegisterGenerator", gen_name_, "");
 
@@ -70,6 +73,8 @@ NexusApp::NexusApp(G4String init_macro): G4RunManager(), gen_name_(""),
   msg_->DeclareProperty("RegisterSteppingAction", stepact_name_, "");
   msg_->DeclareProperty("RegisterTrackingAction", trkact_name_, "");
   msg_->DeclareProperty("RegisterStackingAction", stkact_name_, "");
+
+
 
 
   /////////////////////////////////////////////////////////
@@ -140,6 +145,7 @@ NexusApp::NexusApp(G4String init_macro): G4RunManager(), gen_name_(""),
   }
 
 
+
   /////////////////////////////////////////////////////////
 
   // Set by default a random seed (system time) for the random
@@ -166,6 +172,7 @@ void NexusApp::RegisterMacro(G4String macro)
 
 
 
+
 void NexusApp::RegisterDelayedMacro(G4String macro)
 {
   // Store the name of the macro file
@@ -173,14 +180,19 @@ void NexusApp::RegisterDelayedMacro(G4String macro)
 }
 
 
+void NexusApp::RegisterCommand(G4String lines) {
+
+    std::replace(lines.begin(),lines.end(),'_',' ');
+    commands_.push_back(lines);
+}
+
 
 void NexusApp::Initialize()
 {
   // Execute all command macro files before initializing the app
   // so that all objects get configured
-  // G4UImanager* UI = G4UImanager::GetUIpointer();
-
-  for (unsigned int i=0; i<macros_.size(); i++) {
+   //G4UImanager* UI = G4UImanager::GetUIpointer();
+   for (unsigned int i=0; i<macros_.size(); i++) {
     ExecuteMacroFile(macros_[i].data());
   }
 
@@ -208,6 +220,13 @@ void NexusApp::ExecuteMacroFile(const char* filename)
   UI->SetSession(previousSession);
 }
 
+void NexusApp::ApplyVisualCommands(G4UImanager*  UI) {
+    if(commands_.size()==0) return;
+    for (int i=0;i<commands_.size();i++){
+        G4cout<<"Code is --> "<<commands_[i]<<G4endl;
+        UI->ApplyCommand(commands_[i]);
+    }
+}
 
 
 void NexusApp::SetRandomSeed(G4int seed)

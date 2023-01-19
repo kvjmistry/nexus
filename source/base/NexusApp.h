@@ -14,7 +14,7 @@
 #include "PersistencyManagerBase.h"
 
 #include <G4RunManager.hh>
-
+#include "G4UImanager.hh"
 class G4GenericMessenger;
 
 
@@ -32,7 +32,7 @@ namespace nexus {
 
     /// Returns the number of events to be processed in the current run
     G4int GetNumberOfEventsToBeProcessed() const;
-
+    void ApplyVisualCommands(G4UImanager*  UI);
   private:
     void RegisterMacro(G4String);
 
@@ -43,6 +43,10 @@ namespace nexus {
     /// Set a seed for the G4 random number generator.
     /// If a negative value is chosen, the system time is set as seed.
     void SetRandomSeed(G4int);
+
+
+
+   void RegisterCommand(G4String);
 
   private:
     std::unique_ptr<G4GenericMessenger> msg_;
@@ -57,7 +61,7 @@ namespace nexus {
 
     std::vector<G4String> macros_;
     std::vector<G4String> delayed_;
-
+    std::vector<G4String> commands_;
     std::unique_ptr<PersistencyManagerBase> pm_;
 
   };

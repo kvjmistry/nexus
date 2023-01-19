@@ -5,6 +5,7 @@
 /event/verbose 0
 /tracking/verbose 0
 /process/em/verbose 0
+
 ## Making sure electroluminescence is turned on
 
 
@@ -47,3 +48,4 @@
 /nexus/persistency/eventType background
 /nexus/persistency/outputFile /media/ilker/Ilker/CRAB/Simulation/Betas
 #/run/printProgress 100
+

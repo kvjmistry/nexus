@@ -27,7 +27,7 @@ namespace nexus {
     REGISTER_CLASS(CRABImageIntensifier, GeometryBase)
 
     CRABImageIntensifier::CRABImageIntensifier() : GeometryBase(), msg_(nullptr), fvisual(true){
-        msg_=new G4GenericMessenger(this,"/Geometry/CRABImageIntesifier","Control command sof geometry of CRAB TPC");
+        msg_=new G4GenericMessenger(this,"/Geometry/CRABImageIntesifier/","Control command sof geometry of CRAB TPC");
         msg_->DeclareProperty("gain",PhotonGain,"This is the amount of the photons that are produced");
     }
 

@@ -113,6 +113,7 @@ G4int main(int argc, char** argv)
     std::unique_ptr<G4VisManager> visManager{new G4VisExecutive};
     visManager->Initialize();
     UI->ApplyCommand("/control/execute macros/vis.mac");
+    app->ApplyVisualCommands(UI);
     ui->SessionStart();
   }
   else {

@@ -253,8 +253,6 @@ namespace nexus{
         //G4LogicalVolume* SourceHolderGas_logic = new G4LogicalVolume(SourceHolChamber_solid, gxe, "SourceHolderGAS_logic");
 
 
-
-
         ///
         //Adding the PMTs in here
         pmt1_->SetPMTName("S2");
@@ -306,11 +304,9 @@ namespace nexus{
         G4Tubs * InsideThePMT_Tube_solid1=new G4Tubs("PMT_TUBE_VACUUM1",0,(PMTTubeDiam/2+0.5*cm),PMT_Tube_Length1,0,twopi);
         G4LogicalVolume * InsideThePMT_Tube_Logic1=new G4LogicalVolume(InsideThePMT_Tube_solid1,vacuum,InsideThePMT_Tube_solid1->GetName());
 
-
         // Place the Volumes
 
         //LAB
-
        auto labPhysical= new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0,false,0, false);
 
         //Flanges on the Chamber
