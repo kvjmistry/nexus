@@ -195,6 +195,7 @@ namespace nexus {
             // pmanager->AddDiscreteProcess(fRayleighScatteringProcess);
             pmanager->AddDiscreteProcess(fTheWLSProcess);
             pmanager->AddDiscreteProcess(fBoundaryProcess);
+            pmanager->AddDiscreteProcess(fastSimProcess_garfield);
           }
         }
       }
@@ -208,8 +209,6 @@ namespace nexus {
       anInstance = pTable->FindParticle("S2Photon");
       pmanager = anInstance->GetProcessManager();
       pmanager->AddDiscreteProcess(fastSimProcess_garfield);
-
-
 
     }
   
