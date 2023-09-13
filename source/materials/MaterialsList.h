@@ -138,6 +138,9 @@ namespace materials {
 
   G4Material* CopyMaterial(G4Material*, const G4String&);
 
+  // MgF2
+  G4Material * MgF2();
+
 
 } // end namespace materials
 
