@@ -10,6 +10,7 @@
 #define XE_SPHERE_H
 
 #include "GeometryBase.h"
+#include "BoxPointSampler.h"
 
 class G4Material;
 class G4GenericMessenger;
@@ -40,6 +41,7 @@ namespace nexus {
 
     /// Vertexes random generator
     SpherePointSampler* sphere_vertex_gen_;
+    BoxPointSampler* box_vertex_gen_;
 
     /// Messenger for the definition of control commands
     G4GenericMessenger* msg_;

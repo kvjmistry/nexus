@@ -15,6 +15,7 @@
 
 #include <G4GenericMessenger.hh>
 #include <G4Orb.hh>
+#include <G4Box.hh>
 #include <G4NistManager.hh>
 #include <G4LogicalVolume.hh>
 #include <G4PVPlacement.hh>
@@ -22,6 +23,9 @@
 #include <G4VisAttributes.hh>
 #include <G4SDManager.hh>
 #include <G4VUserDetectorConstruction.hh>
+#include <G4UserLimits.hh>
+#include "G4LogicalVolumeStore.hh"
+#include "Visibilities.h"
 
 #include <CLHEP/Units/SystemOfUnits.h>
 
@@ -56,7 +60,8 @@ namespace nexus {
     radius_cmd.SetRange("radius>0.");
 
     // Create a vertex generator for a sphere
-    sphere_vertex_gen_ = new SpherePointSampler(radius_, 0.);
+    // sphere_vertex_gen_ = new SpherePointSampler(radius_, 0.);
+    box_vertex_gen_ = new BoxPointSampler(3.5*m, 3.5*m,3.5*m, 0);
   }
 
 
@@ -74,7 +79,19 @@ namespace nexus {
     G4String name = "XE_SPHERE";
 
     // Define solid volume as a sphere
-    G4Orb* sphere_solid = new G4Orb(name, radius_);
+    // G4Orb* sphere_solid = new G4Orb(name, radius_);
+    
+    G4double gas_dimentions = 5.7*m;
+    G4double chamber_thick = 10*cm;
+
+    G4Box* world = new G4Box("World", radius_/2.0,radius_/2.0,radius_/2.0);
+    G4LogicalVolume* world_logic = new G4LogicalVolume(world, G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic"), name);
+    
+    G4Box* gas = new G4Box("GAS", gas_dimentions/2, gas_dimentions/2, gas_dimentions/2);
+
+    G4Box* chamber = new G4Box("Chamber", (gas_dimentions+chamber_thick)/2, (gas_dimentions+chamber_thick)/2, (gas_dimentions+chamber_thick)/2);
+    G4LogicalVolume *chamber_logic = new G4LogicalVolume(chamber, materials::Steel(), "CHAMBER");
+
 
     // Define the material (LXe or GXe) for the sphere.
     // We use for this the NIST manager or the nexus materials list.
@@ -86,9 +103,8 @@ namespace nexus {
 
     // Define the logical volume of the sphere using the material
     // and the solid volume defined above
-    G4LogicalVolume* sphere_logic =
-    new G4LogicalVolume(sphere_solid, xenon, name);
-    GeometryBase::SetLogicalVolume(sphere_logic);
+    G4LogicalVolume* sphere_logic = new G4LogicalVolume(gas, xenon, name);
+    GeometryBase::SetLogicalVolume(world_logic);
 
     // Set the logical volume of the sphere as an ionization
     // sensitive detector, i.e. position, time and energy deposition
@@ -97,13 +113,40 @@ namespace nexus {
     IonizationSD* ionizsd = new IonizationSD("/XE_SPHERE");
     G4SDManager::GetSDMpointer()->AddNewDetector(ionizsd);
     sphere_logic->SetSensitiveDetector(ionizsd);
+
+
+    G4VPhysicalVolume *chamber_phys = new G4PVPlacement(0, G4ThreeVector(0., 0., 0), chamber_logic, chamber->GetName(), world_logic, false, 0, false);
+    G4VPhysicalVolume *gas_phys = new G4PVPlacement(0, G4ThreeVector(0., 0., 0), sphere_logic, gas->GetName(), chamber_logic, false, 0, false);
+    
+
+     // Chamber
+    G4LogicalVolumeStore *lvStore = G4LogicalVolumeStore::GetInstance();
+
+
+    // Gas
+    G4LogicalVolume *Gas = lvStore->GetVolume("XE_SPHERE");
+    G4VisAttributes *GasVa = new G4VisAttributes(nexus::WhiteAlpha());
+    GasVa->SetForceCloud(false);
+    Gas->SetVisAttributes(GasVa);
+    
+    //Chamber
+    G4LogicalVolume *Chamber = lvStore->GetVolume("CHAMBER");
+    G4VisAttributes *ChamberVa = new G4VisAttributes(nexus::TitaniumGreyAlpha());
+    ChamberVa->SetForceSolid(true);
+    // Chamber->SetVisAttributes(ChamberVa);
+
+
+    // Limit the step size in this volume for better tracking precision
+    sphere_logic->SetUserLimits(new G4UserLimits(0.1*mm));
   }
+  
 
 
 
   G4ThreeVector XeSphere::GenerateVertex(const G4String& region) const
   {
-    return sphere_vertex_gen_->GenerateVertex(region);
+    // return sphere_vertex_gen_->GenerateVertex(region);
+    return box_vertex_gen_->GenerateVertex(region);
   }
 
 

@@ -110,8 +110,8 @@ void HDF5Writer::WriteHitInfo(int64_t evt_number, int particle_indx, int hit_ind
   trueInfo.z = hit_position_z;
   trueInfo.time = hit_time;
   trueInfo.energy = hit_energy;
-  memset(trueInfo.label, 0, STRLEN);
-  strcpy(trueInfo.label, label);
+  // memset(trueInfo.label, 0, STRLEN);
+  // strcpy(trueInfo.label, label);
   trueInfo.particle_id = particle_indx;
   trueInfo.hit_id = hit_indx;
   writeHit(&trueInfo,  hitInfoTable_, memtypeHitInfo_, ihit_);

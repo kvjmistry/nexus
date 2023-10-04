@@ -89,7 +89,7 @@ namespace nexus {
 
   // Inline definitions ///////////////////////////////////
 
-  inline GeometryBase::GeometryBase(): logicVol_(0), span_(25.*m), drift_(false), el_z_(0.*mm) {}
+  inline GeometryBase::GeometryBase(): logicVol_(0), span_(10.*m), drift_(false), el_z_(0.*mm) {}
 
   inline GeometryBase::~GeometryBase() {}
 

@@ -34,7 +34,7 @@
 	float z;
 	float time;
 	float energy;
-        char label[STRLEN];
+        // char label[STRLEN];
         int particle_id;
         int hit_id;
   } hit_info_t;
