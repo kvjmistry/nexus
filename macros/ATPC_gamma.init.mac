@@ -1,0 +1,26 @@
+## ----------------------------------------------------------------------------
+## nexus | ATPC_gamma.init.mac
+##
+## Initialization macro to simulate gamma decays in an atmospheric TPC
+##
+## The NEXT Collaboration
+## ----------------------------------------------------------------------------
+## Roughly 1000000 will generate 3k gammas in the active with energy > 2.3 MeV
+
+/PhysicsList/RegisterPhysics G4EmStandardPhysics_option4
+/PhysicsList/RegisterPhysics G4DecayPhysics
+/PhysicsList/RegisterPhysics G4RadioactiveDecayPhysics
+/PhysicsList/RegisterPhysics NexusPhysics
+/PhysicsList/RegisterPhysics G4StepLimiterPhysics
+
+/nexus/RegisterGeometry ATPC
+
+/nexus/RegisterGenerator SingleParticleGenerator
+
+/nexus/RegisterPersistencyManager PersistencyManager
+
+/nexus/RegisterRunAction DefaultRunAction
+/nexus/RegisterEventAction DefaultEventAction
+/nexus/RegisterTrackingAction DefaultTrackingAction
+
+/nexus/RegisterMacro macros/ATPC_gamma.config.mac
