@@ -92,6 +92,9 @@ namespace nexus{
         G4Box* gas_solid = new G4Box("GAS", cube_size/2., cube_size/2., cube_size/2.);
         G4LogicalVolume* gas_logic = new G4LogicalVolume(gas_solid, GXe, "GAS");
 
+        /// Limit the step size in this volume for better tracking precision
+        gas_logic->SetUserLimits(new G4UserLimits(1*mm));
+
         // Place the Volumes
 
         // LAB
