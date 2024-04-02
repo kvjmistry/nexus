@@ -156,7 +156,7 @@ namespace nexus{
             if (region == "AD_HOC") {
                 pos = vtx_;
             }else if((region=="ACTIVE")){
-                pos= active_gen_->GenerateVertex("INSIDE");
+                pos= active_gen_->GenerateVertex(INSIDE);
             }else{
                 G4Exception("[ATPC]", "GenerateVertex()", JustWarning,
                             "Unknown vertex generation region. setting default region as FIELDCAGE..");
