@@ -121,6 +121,7 @@ Next100FieldCage::Next100FieldCage(G4double grid_thickn):
   /// Define new categories
   new G4UnitDefinition("kilovolt/cm","kV/cm","Electric field", kilovolt/cm);
   new G4UnitDefinition("mm/sqrt(cm)","mm/sqrt(cm)","Diffusion", mm/sqrt(cm));
+  new G4UnitDefinition("mm/mus","mm/mus","Velocity", mm/microsecond);
 
   /// Initializing the geometry navigator (used in vertex generation)
   geom_navigator_ =
