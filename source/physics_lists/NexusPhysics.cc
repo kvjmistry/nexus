@@ -204,7 +204,6 @@ namespace nexus {
         // S1 photons created in NEST
         anInstance = pTable->FindParticle("NESTS1Photon");
         pmanager = anInstance->GetProcessManager();
-        pmanager->AddDiscreteProcess(wls);
         pmanager->AddDiscreteProcess(fastSimProcess_garfield);
       }
     }
