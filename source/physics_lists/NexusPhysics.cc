@@ -186,9 +186,19 @@ namespace nexus {
           }
 
           // Clustering
-          if (clust->IsApplicable(*particle) && particleName != "alpha") {
-            pmanager->AddDiscreteProcess(clust);
-            pmanager->AddRestProcess(clust);
+          if (clust->IsApplicable(*particle)) {
+
+            // If NEST is turned on, make sure clustering is not added for alphas as its done in NEST
+            if (nest_){
+              if (particleName != "alpha"){
+                pmanager->AddDiscreteProcess(clust);
+                pmanager->AddRestProcess(clust);
+              }
+            }
+            else {
+                pmanager->AddDiscreteProcess(clust);
+                pmanager->AddRestProcess(clust);
+            }
           }
 
         }

@@ -34,6 +34,7 @@
 #include "TrajectoryMap.h"
 #include "XenonProperties.h"
 #include "PhysicsUtils.h"
+#include "IonizationElectron.h"
 
 
 namespace nexus{
@@ -44,8 +45,10 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(G4String modelName,G4Region* enve
     
     GH_ = GH;
     GH_.DumpParams();
-    ionMobFile = "IonMobility_Xe+_P12_Xe.txt";
-    gasFile = "Xenon_5Bar.gas";
+    // ionMobFile = "IonMobility_Xe+_P12_Xe.txt";
+    // gasFile = "Xenon_5Bar.gas";
+    ionMobFile = "IonMobility_Ar+_Ar.txt";
+    gasFile = "Argon_4bar.gas";
     InitialisePhysics();
     BuildThePhysicsTable(theFastIntegralTable_);
     dm_ = (DegradModel*)(G4GlobalFastSimulationManager::GetInstance()->GetFastSimulationModel("DegradModel"));
@@ -184,9 +187,11 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
   // Insert hits
   if (dm_ && dm_->GetCurrentTrackIndex(trk_id) != -1){
     G4int parent_track_idx = GetCurrentTrackIndex(trk_id);
-    InsertHits(x0, y0, z0, t0, trk_id, mean_ioni_E, dm_->GetBremID(trk_id,N_ioni_[parent_track_idx]-1));
+
+    // The brem id could be buggy
+    InsertHits(x0, y0, z0, t0, trk_id, mean_ioni_E, dm_->GetBremID(trk_id,N_ioni_[parent_track_idx]-1, t0));
   }
-  return;
+  // return;
 
   // Print Electric Field
   // PrintElectricField(x0, y0, z0);
@@ -260,7 +265,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
     // Set the gas Properties
     fMediumMagboltz = new Garfield::MediumMagboltz();
-    fMediumMagboltz->SetComposition("Xe", 100.);
+    fMediumMagboltz->SetComposition("Ar", 100.);
     fMediumMagboltz->DisableDebugging();
     
     //  --- Load in Ion Mobility file --- 
@@ -332,8 +337,13 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
     // Load in the events
     if (GH_.useELFile_)
-        GetTimeProfileData(nexus_path + "/data/Garfield/" + GH_.DetName_ + "_Profiles_Rotated.csv", EL_profiles, EL_events);
+        GetTimeProfileData(nexus_path + "/data/Garfield/" + GH_.DetName_ + "_Profiles.csv", EL_profiles, EL_events);
     
+
+    // generator
+    active_gen_ = new CylinderPointSampler(0., GH_.DetChamberR_, GH_.DetChamberL_/2., 0., twopi, nullptr, G4ThreeVector(GH_.origin_.x(), GH_.origin_.y(), GH_.origin_.z()));
+
+
 }
 
 void GarfieldVUVPhotonModel::Reset(){
@@ -413,44 +423,73 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
     std::vector<std::vector<G4double>> EL_profile = EL_profiles[EL_event];
 
     // Now loop over and make the photons
-    G4int el_gain = EL_profile.size();
-    // el_gain=1 ;
+    G4int n_rows = EL_profile.size();
 
     G4double tig4(0.);
     
-    for (G4int i=0;i<el_gain;i++){
-      
-      // std::cout << xi << ", " <<  EL_profile[i][0]  << std::endl;
+    for (G4int i=0;i<n_rows;i++){
+
+      // Number of photons in profile segment
+      G4int n_photons = EL_profile[i][4]; 
+
       G4ThreeVector fakepos ( (xi+ EL_profile[i][0])*cm, (yi+ EL_profile[i][1])*cm, (zi+ EL_profile[i][2])*cm ); // 0 = x, 1 = y, 2 = z. Garfield units are cm, x10 for mm G4 units
-    
-      auto* optphot = G4OpticalPhoton::OpticalPhotonDefinition();
-
-      G4ThreeVector momentum, polarization;
-      GetPhotonPol(momentum, polarization);
-
-      // Get Photon energy
-      G4double sc_max = spectrum_integral->GetMaxValue();
-      G4double sc_value = G4UniformRand()*sc_max;
-      G4double sampled_energy = spectrum_integral->GetEnergy(sc_value);
-
-      
-      G4DynamicParticle VUVphoton(optphot, momentum, sampled_energy);
-
       G4double drift_time = EL_profile[i][3];
-      G4bool el_survived = GetAttachment(GH_.gap_EL_*cm/GH_.v_drift_el_);
 
-      // The electron did not survive drifting in the EL gap due to attachment
-      if (!el_survived)
-        break;
+      for (G4int n=0;n<n_photons;n++){
+  
       
-      tig4 = ti + drift_time + GetScintTime(); // in nsec, t = index 3 in vector. Units are ns, so just add it on
-      // std::cout <<  "fakepos,time is " << fakepos[0] << ", " << fakepos[1] << ", " << fakepos[2] << ", " << tig4 << std::endl;
+        auto* optphot = G4OpticalPhoton::OpticalPhotonDefinition();
+
+        G4ThreeVector momentum, polarization;
+        GetPhotonPol(momentum, polarization);
+
+        // Get Photon energy
+        G4double sc_max = spectrum_integral->GetMaxValue();
+        G4double sc_value = G4UniformRand()*sc_max;
+        G4double sampled_energy = spectrum_integral->GetEnergy(sc_value);
       
-      G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
-      newTrack->SetPolarization(polarization);
-    
-      N_S2_[GetCurrentTrackIndex(trk_id)]++;
+        G4DynamicParticle VUVphoton(optphot, momentum, sampled_energy);
+  
+        G4bool el_survived = GetAttachment(GH_.gap_EL_*cm/GH_.v_drift_el_);
+
+        // The electron did not survive drifting in the EL gap due to attachment
+        if (!el_survived)
+          break;
+        
+        tig4 = ti + drift_time + GetScintTime(); // in nsec, t = index 3 in vector. Units are ns, so just add it on
+
+        // Add a random ionization component due to impurities in the gas
+        // Generate a random number to determine which distribution to sample from
+        G4double randomNumber = G4UniformRand();
+
+        // Probability = 0.5%
+        if (randomNumber < 0.005) {
+
+          G4ThreeVector vertex;
+          G4ThreeVector CoordOrigin(GH_.origin_.x(), GH_.origin_.y(), GH_.origin_.z());
+          
+          G4VPhysicalVolume *VertexVolume;
+          do {
+            vertex = active_gen_->GenerateVertex(VOLUME);
+            vertex = vertex - CoordOrigin;
+            VertexVolume = theNavigator_->LocateGlobalPointAndSetup(vertex, 0, false);
+          } while (VertexVolume->GetName() != "ACTIVE");
+
+          // Create secondary electron
+          G4DynamicParticle electron(IonizationElectron::Definition(),G4RandomDirection(), 1.13*eV);
+          G4Track *newTrack=fastStep.CreateSecondaryTrack(electron, vertex, tig4, false);
+          continue;
+        } 
+        
+        // std::cout <<  "fakepos,time is " << fakepos[0] << ", " << fakepos[1] << ", " << fakepos[2] << ", " << tig4 << std::endl;
+        
+        G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
+        newTrack->SetPolarization(polarization);
+      
+        N_S2_[GetCurrentTrackIndex(trk_id)]++;
+      }
     }
+
 }
 
 
@@ -535,7 +574,7 @@ G4double GarfieldVUVPhotonModel::GetScintTime(){
   G4double scint_time = 0;
 
   // Generate a random number to determine which distribution to sample from
-  double randomNumber = G4UniformRand();
+  G4double randomNumber = G4UniformRand();
 
   // Fast Component - 4.5 ns
   if (randomNumber < slow_prob_) {
@@ -630,7 +669,7 @@ void GarfieldVUVPhotonModel::AddTrack(G4int trk_id){
 
     // Check if track exists in vec, if not then add
     if (std::find(track_ids_.begin(), track_ids_.end(), trk_id) == track_ids_.end()) {
-        std::cout <<"Adding Track!" << std::endl;
+        // std::cout <<"Adding Track!" << std::endl;
         track_ids_.push_back(trk_id);
         N_ioni_.push_back(0);
         N_S2_.push_back(0);

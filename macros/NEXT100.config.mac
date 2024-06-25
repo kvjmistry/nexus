@@ -27,8 +27,8 @@
 
 ##### GENERATOR #####
 /Generator/SingleParticle/particle e-
-/Generator/SingleParticle/min_energy 2.5 MeV
-/Generator/SingleParticle/max_energy 2.5 MeV
+/Generator/SingleParticle/min_energy 2 MeV
+/Generator/SingleParticle/max_energy 2 MeV
 /Generator/SingleParticle/region CENTER
 
 #/Generator/Decay0Interface/region CENTER
@@ -51,4 +51,4 @@
 /nexus/persistency/output_file Next100.next
 ## eventType options: bb0nu, bb2nu, background
 /nexus/persistency/event_type background
-/nexus/random_seed 4456
+/nexus/random_seed 997

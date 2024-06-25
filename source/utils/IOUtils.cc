@@ -233,9 +233,7 @@ namespace nexus {
         }
 
         // Read the Data from the file as strings
-        std::string s_event, s_x, s_y, s_z, s_t;
-
-        G4double event, x, y, z, t;
+        std::string s_event, s_x, s_y, s_z, s_t, s_n;
 
         std::vector<G4double> temp_data;
         std::vector<std::vector<G4double>> temp_profile;
@@ -245,11 +243,13 @@ namespace nexus {
         // Loop over the lines in the file and add the values to a vector
         while (FileIn_.peek()!=EOF) {
 
+            // File structure is event number, x,y,z,t,num photons
             std::getline(FileIn_, s_event, ',');
             std::getline(FileIn_, s_x, ',');
             std::getline(FileIn_, s_y, ',');
             std::getline(FileIn_, s_z, ',');
-            std::getline(FileIn_, s_t, '\n');
+            std::getline(FileIn_, s_t, ',');
+            std::getline(FileIn_, s_n, '\n');
 
             // Set it to the first event
             if (temp_event == -1)
@@ -266,6 +266,7 @@ namespace nexus {
             temp_data.push_back(stod(s_y));
             temp_data.push_back(stod(s_z));
             temp_data.push_back(stod(s_t));
+            temp_data.push_back(stod(s_n));
 
             temp_profile.push_back(temp_data);
             temp_data.clear();

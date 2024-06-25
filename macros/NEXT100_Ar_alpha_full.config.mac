@@ -15,7 +15,7 @@
 /process/em/verbose 0
 
 ##### GEOMETRY #####
-/Geometry/Next100/elfield true
+/Geometry/Next100/elfield false
 /Geometry/Next100/EL_field 6.7 kV/cm
 /Geometry/Next100/max_step_size 1. mm
 /Geometry/Next100/pressure 4.2 bar
@@ -33,11 +33,13 @@
 /Geometry/Next100/ELtransv_diff 0.46 mm/sqrt(cm)
 /Geometry/Next100/ELlong_diff 0.30 mm/sqrt(cm)
 
+/Geometry/Next100/e_lifetime 60 ms
+
 
 ##### GENERATOR #####
 /Generator/SingleParticle/particle alpha
-/Generator/SingleParticle/min_energy 100 keV
-/Generator/SingleParticle/max_energy 100 keV
+/Generator/SingleParticle/min_energy 5 MeV
+/Generator/SingleParticle/max_energy 5 MeV
 /Generator/SingleParticle/region ACTIVE
 
 ##### ACTIONS #####

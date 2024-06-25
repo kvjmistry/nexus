@@ -47,6 +47,7 @@
 #include "CRAB0.h"
 #include "IonizationSD.h"
 #include "DegradModel.h"
+#include "CylinderPointSampler.h"
 
 class G4GenericMessenger;
 namespace nexus {
@@ -152,6 +153,8 @@ namespace nexus {
 
         DegradModel* dm_;
 
+        // Vertex generators
+        CylinderPointSampler* active_gen_;
 
     };
 
