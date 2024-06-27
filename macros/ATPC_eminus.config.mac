@@ -7,14 +7,14 @@
 # GENERATION
 /Generator/SingleParticle/region AD_HOC
 /Generator/SingleParticle/particle e-
-/Generator/SingleParticle/min_energy 2.4578 MeV
-/Generator/SingleParticle/max_energy 2.4578 MeV
+/Generator/SingleParticle/min_energy 100 keV
+/Generator/SingleParticle/max_energy 500 keV
 
 
 
 ##### ACTIONS #####
-/Actions/DefaultEventAction/min_energy 2.3 MeV
-/Actions/DefaultEventAction/max_energy 2.6 MeV
+/Actions/DefaultEventAction/min_energy 100 keV
+/Actions/DefaultEventAction/max_energy 500 keV
 
 ## Nexus Physics List
 /PhysicsList/Nexus/clustering           false
@@ -25,6 +25,8 @@
 /Geometry/ATPC/gas_pressure 1. bar
 /Geometry/ATPC/cube_size  6 m
 /Geometry/ATPC/chamber_thickn 5 cm
+/Geometry/ATPC/max_step_size 0.1 mm
+
 
 # PERSISTENCY
 #/nexus/persistency/eventType background

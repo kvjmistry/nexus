@@ -46,19 +46,22 @@ namespace nexus{
              msg_(nullptr),
              Lab_size(30. * m), cube_size (5.7 * m), chamber_thickn (50. * mm),
              vtx_(0,0,0), active_gen_(nullptr),
-             max_step_size_(1.*mm), 
+             max_step_size_(0.1*mm), 
              gas_pressure_(1. * bar)
 
     {
         msg_ = new G4GenericMessenger(this, "/Geometry/ATPC/","Control commands of geometry of ATPC TPC");
         G4GenericMessenger::Command&  Pressure_cmd =msg_->DeclarePropertyWithUnit("gas_pressure","bar",gas_pressure_,"Pressure of Gas");
-        Pressure_cmd.SetParameterName("XeNonPressure", false);
+        Pressure_cmd.SetParameterName("XenonPressure", false);
 
         G4GenericMessenger::Command&  cube_size_cmd =msg_->DeclarePropertyWithUnit("cube_size","m",cube_size,"Cube Side Length");
         cube_size_cmd .SetParameterName("cubesize", false);
 
         G4GenericMessenger::Command&  chamber_thickn_cmd =msg_->DeclarePropertyWithUnit("chamber_thickn","mm",chamber_thickn,"Chamber Wall thickness");
         chamber_thickn_cmd .SetParameterName("chamberthickn", false);
+
+        G4GenericMessenger::Command&  step_size_cmd =msg_->DeclarePropertyWithUnit("max_step_size","mm",max_step_size_,"The maximum step size");
+        step_size_cmd .SetParameterName("max_step_size", false);
 
     }
 
@@ -74,7 +77,7 @@ namespace nexus{
 
         // Materials
         // G4Material *GXe=G4NistManager::Instance()->FindOrBuildMaterial("G4_Xe");
-        G4Material *GXe = materials::GXeEnriched(1*bar, 293. * kelvin);
+        G4Material *GXe = materials::GXeEnriched(gas_pressure_, 293. * kelvin);
         G4Material *Steel=materials::Steel();
 
         //Constructing Lab Space
@@ -93,7 +96,7 @@ namespace nexus{
         G4LogicalVolume* gas_logic = new G4LogicalVolume(gas_solid, GXe, "GAS");
 
         /// Limit the step size in this volume for better tracking precision
-        gas_logic->SetUserLimits(new G4UserLimits(0.1*mm));
+        gas_logic->SetUserLimits(new G4UserLimits(max_step_size_));
 
         // Place the Volumes
 
