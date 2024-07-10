@@ -8,6 +8,7 @@
 ## Roughly 1000000 will generate 3k gammas in the active with energy > 2.3 MeV
 
 /PhysicsList/RegisterPhysics G4EmStandardPhysics_option4
+#/PhysicsList/RegisterPhysics G4EmStandardPhysicsSS
 /PhysicsList/RegisterPhysics G4DecayPhysics
 /PhysicsList/RegisterPhysics G4RadioactiveDecayPhysics
 /PhysicsList/RegisterPhysics NexusPhysics
