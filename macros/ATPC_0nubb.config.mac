@@ -17,9 +17,13 @@
 /PhysicsList/Nexus/electroluminescence  false
 
 #GEOMETRY
-/Geometry/ATPC/gas_pressure 1. bar
+/Geometry/ATPC/gas_pressure 15. bar
 /Geometry/ATPC/cube_size  6 m
 /Geometry/ATPC/chamber_thickn 5 cm
+/Geometry/ATPC/max_step_size 4 mm
+
+/nexus/random_seed 12
+/nexus/persistency/start_id 0
 
 # PERSISTENCY
 #/nexus/persistency/eventType background
