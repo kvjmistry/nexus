@@ -6,7 +6,7 @@
 
 # GENERATION
 /Generator/ElecPair/region AD_HOC
-/Generator/ElecPair/dist_file data/nudobe/Leptoquark_SM.txt
+/Generator/ElecPair/dist_file data/nudobe/mbb_SM.txt
 
 
 ## Nexus Physics List
@@ -20,7 +20,9 @@
 /Geometry/ATPC/chamber_thickn 5 cm
 /Geometry/ATPC/max_step_size 4 mm
 
+/nexus/random_seed 12
+/nexus/persistency/start_id 0
 
 # PERSISTENCY
 #/nexus/persistency/eventType background
-/nexus/persistency/output_file ATPC_leptoquark
+/nexus/persistency/output_file mbb

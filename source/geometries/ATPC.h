@@ -34,6 +34,7 @@ namespace nexus {
             G4ThreeVector vertex;
             G4double max_step_size_;
             BoxPointSampler* active_gen_;
+            G4String gastype_;
             
             void ConstructLab();
             void PlaceVolumes();

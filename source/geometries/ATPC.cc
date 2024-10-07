@@ -47,7 +47,8 @@ namespace nexus{
              Lab_size(30. * m), cube_size (5.7 * m), chamber_thickn (50. * mm),
              vtx_(0,0,0), active_gen_(nullptr),
              max_step_size_(0.1*mm), 
-             gas_pressure_(1. * bar)
+             gas_pressure_(1. * bar),
+             gastype_("xenon")
 
     {
         msg_ = new G4GenericMessenger(this, "/Geometry/ATPC/","Control commands of geometry of ATPC TPC");
@@ -63,6 +64,8 @@ namespace nexus{
         G4GenericMessenger::Command&  step_size_cmd =msg_->DeclarePropertyWithUnit("max_step_size","mm",max_step_size_,"The maximum step size");
         step_size_cmd .SetParameterName("max_step_size", false);
 
+        msg_->DeclareProperty("gastype", gastype_, "The GAS to use in the detector");
+
     }
 
     ATPC::~ATPC()
@@ -77,7 +80,20 @@ namespace nexus{
 
         // Materials
         // G4Material *GXe=G4NistManager::Instance()->FindOrBuildMaterial("G4_Xe");
-        G4Material *GXe = materials::GXeEnriched(gas_pressure_, 293. * kelvin);
+        G4Material *GAS;
+        
+        if (gastype_ == "xenon"){
+            std::cout << "Using Xenon! "<< gas_pressure_/bar << " bar"  << std::endl;
+            GAS = materials::GXeEnriched(gas_pressure_, 293. * kelvin);
+        }
+        else if (gastype_ == "argon"){
+            std::cout << "Using Argon! "<< gas_pressure_/bar << " bar"  << std::endl;
+            GAS = materials::GAr(gas_pressure_, 293. * kelvin);
+        }
+        else 
+            std::cout << "Error in specified gas" << std::endl;
+        
+        
         G4Material *Steel=materials::Steel();
 
         //Constructing Lab Space
@@ -93,7 +109,7 @@ namespace nexus{
 
         // Gas Volume
         G4Box* gas_solid = new G4Box("GAS", cube_size/2., cube_size/2., cube_size/2.);
-        G4LogicalVolume* gas_logic = new G4LogicalVolume(gas_solid, GXe, "GAS");
+        G4LogicalVolume* gas_logic = new G4LogicalVolume(gas_solid, GAS, "GAS");
 
         /// Limit the step size in this volume for better tracking precision
         gas_logic->SetUserLimits(new G4UserLimits(max_step_size_));
