@@ -44,7 +44,7 @@ namespace nexus{
              ATPC::ATPC():
              GeometryBase(),
              msg_(nullptr),
-             Lab_size(30. * m), cube_size (5.7 * m), chamber_thickn (50. * mm),
+             Lab_size(550. * m), cube_size (5.7 * m), chamber_thickn (50. * mm),
              vtx_(0,0,0), active_gen_(nullptr),
              max_step_size_(0.1*mm), 
              gas_pressure_(1. * bar),

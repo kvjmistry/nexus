@@ -61,6 +61,12 @@ namespace nexus {
 
     G4String region_;
 
+    G4int event_index_;
+
+    G4bool brandomindex_;
+
+    G4bool verbosity_;
+
   };
 
 } // end namespace nexus

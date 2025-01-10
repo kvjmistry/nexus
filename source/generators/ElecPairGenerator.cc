@@ -33,7 +33,7 @@ REGISTER_CLASS(ElecPairGenerator, G4VPrimaryGenerator)
 
 ElecPairGenerator::ElecPairGenerator():
 G4VPrimaryGenerator(), msg_(0), particle_definition_(0),
-dist_file_(""), bInitialize_(false), geom_(0)
+dist_file_(""), bInitialize_(false), geom_(0), event_index_(0), brandomindex_(false), verbosity_(true)
 {
   msg_ = new G4GenericMessenger(this, "/Generator/ElecPair/",
     "Control commands of single-particle generator.");
@@ -44,6 +44,12 @@ dist_file_(""), bInitialize_(false), geom_(0)
   msg_->DeclareProperty("region", region_,
                         "Region of the geometry where the vertex will be generated.");
 
+
+  msg_->DeclareProperty("randomindex", brandomindex_,
+                        "Select a random index from file rather than from seed");
+
+  msg_->DeclareProperty("verbosity", verbosity_,
+                        "Choose to print the index from file");
 
   DetectorConstruction* detconst = (DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
   geom_ = detconst->GetGeometry();
@@ -161,10 +167,19 @@ void ElecPairGenerator::OpenFile(const std::string& filename){
 
 Data ElecPairGenerator::GetEvent(){
     
+    // std::cout << "The SEED is: "<< CLHEP::HepRandom::getTheSeed() << "  event index is: " << event_index_ << std::endl;
 
     // Seed the random number generator
     // Randomly select a line
     G4int randomIndex =  G4UniformRand() * lines_.size();
+    
+    // This will use a seed sequential from the line
+    if (!brandomindex_)
+      randomIndex = CLHEP::HepRandom::getTheSeed() + event_index_;
+    
+    if (verbosity_)
+      std::cout << "The random index is: " << randomIndex << std::endl;
+    
     std::istringstream selectedLine(lines_[randomIndex]);
 
     Data data;
@@ -173,6 +188,8 @@ Data ElecPairGenerator::GetEvent(){
     // Parse the selected line
     selectedLine >> data.x1_dir >> comma >> data.y1_dir >> comma >> data.z1_dir >> comma >> data.e1 >> comma
                  >> data.x2_dir >> comma >> data.y2_dir >> comma >> data.z2_dir >> comma >> data.e2;
+
+    event_index_++;
 
     return data;
 }
