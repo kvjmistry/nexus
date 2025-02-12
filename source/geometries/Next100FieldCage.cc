@@ -439,6 +439,16 @@ void Next100FieldCage::BuildCathode()
                                       cathode_zpos_ + grid_thickn_/2.0),
                       cathode_logic, "CATHODE_RING", mother_logic_, false, 0, false);
 
+      // Add optical surface
+      G4OpticalSurface* gas_cath_ring_opsur = new G4OpticalSurface("GAS_CATHODE_RING_OPSURF");
+      gas_cath_ring_opsur->SetType(dielectric_metal);
+      gas_cath_ring_opsur->SetModel(unified);
+      gas_cath_ring_opsur->SetFinish(ground);
+      gas_cath_ring_opsur->SetSigmaAlpha(0.0);
+      gas_cath_ring_opsur->SetMaterialPropertiesTable(opticalprops::Steel());
+      new G4LogicalSkinSurface("GAS_CATHODE_RING_OPSURF",
+                              cathode_logic, gas_cath_ring_opsur);
+
       // Dist from centre of hex to hex vertex, excluding the land width (circumradius)
       G4double hex_circumradius = cathode_mesh_diam_/std::sqrt(3);
 

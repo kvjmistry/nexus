@@ -12,13 +12,14 @@
 /PhysicsList/RegisterPhysics G4OpticalPhysics
 /PhysicsList/RegisterPhysics NexusPhysics
 
-/nexus/RegisterGeometry Next100OpticalGeometry
+/nexus/RegisterGeometry Next100
 
 /nexus/RegisterGenerator ScintillationGenerator
 
 /nexus/RegisterPersistencyManager PersistencyManager
 
 /nexus/RegisterRunAction DefaultRunAction
-/nexus/RegisterTrackingAction DefaultTrackingAction
+/nexus/RegisterTrackingAction OpticalTrackingAction
+/nexus/RegisterSteppingAction AnalysisSteppingAction
 
 /nexus/RegisterMacro macros/NEXT100_S2_LT.config.mac

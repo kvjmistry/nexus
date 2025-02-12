@@ -437,7 +437,7 @@ namespace opticalprops {
     rIndex.push_back(rIndex[rIndex.size()-1]);
     // for (unsigned int i=0; i<ri_energy.size(); i++) {
     //   G4cout << "* Sapphire rIndex:  " << std::setw(5)
-    //          << ri_energy[i]/eV << " eV -> " << rIndex[i] << G4endl;
+    //          << ri_energy[i]/eV << " eV -> " << rIndex[i] << "  " << 1e6*hc_ / (ri_energy[i]) << "  " << 100*(1-((rIndex[i]-1)/ (rIndex[i]+1)) * ((rIndex[i]-1)/ (rIndex[i]+1)))<< G4endl;
     // }
     mpt->AddProperty("RINDEX", ri_energy, rIndex);
 

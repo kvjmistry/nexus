@@ -11,6 +11,7 @@
 
 #include "AnalysisSteppingAction.h"
 #include "FactoryBase.h"
+#include <iostream>
 
 #include <G4Step.hh>
 #include <G4SteppingManager.hh>
@@ -18,6 +19,9 @@
 #include <G4OpticalPhoton.hh>
 #include <G4OpBoundaryProcess.hh>
 #include <G4VPhysicalVolume.hh>
+#include <G4EventManager.hh>
+#include "G4Event.hh"
+#include <G4SystemOfUnits.hh>
 
 using namespace nexus;
 
@@ -39,6 +43,10 @@ AnalysisSteppingAction::~AnalysisSteppingAction()
     it ++;
   }
   G4cout << "TOTAL COUNTS: " << total_counts << G4endl;
+
+  // Write the photon data to file
+  writeToFile();
+
 }
 
 
@@ -48,7 +56,7 @@ void AnalysisSteppingAction::UserSteppingAction(const G4Step* step)
   G4ParticleDefinition* pdef = step->GetTrack()->GetDefinition();
 
   //Check whether the track is an optical photon
-  if (pdef != G4OpticalPhoton::Definition()) return;
+  // if (pdef != G4OpticalPhoton::Definition()) return;
 
   /*
   // example of information one can access about optical photons
@@ -66,6 +74,73 @@ void AnalysisSteppingAction::UserSteppingAction(const G4Step* step)
   G4String proc_name = step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
   G4int copy_no = step->GetPostStepPoint()->GetTouchable()->GetReplicaNumber(1);
   */
+
+    G4Track* track = step->GetTrack();
+    
+    // Check if it's an optical photon
+    if (track->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition())
+    {
+        G4StepPoint* preStepPoint = step->GetPreStepPoint();
+        G4StepPoint* postStepPoint = step->GetPostStepPoint();
+        G4String preVolumeName = "World";
+        G4String postVolumeName = "World";
+
+        if (preStepPoint->GetPhysicalVolume()) 
+            preVolumeName = preStepPoint->GetPhysicalVolume()->GetName();
+        if (postStepPoint->GetPhysicalVolume()) 
+            postVolumeName = postStepPoint->GetPhysicalVolume()->GetName();
+
+        G4OpBoundaryProcessStatus boundaryStatus = Undefined;
+
+        static G4ProcessManager* opticalManager =
+            G4OpticalPhoton::OpticalPhotonDefinition()->GetProcessManager();
+
+        if (opticalManager) {
+            G4int nProcesses = opticalManager->GetProcessListLength();
+            for (G4int i = 0; i < nProcesses; i++) {
+                G4VProcess* process = (*opticalManager->GetProcessList())[i];
+                G4OpBoundaryProcess* opProc = dynamic_cast<G4OpBoundaryProcess*>(process);
+                if (opProc) {
+                    boundaryStatus = opProc->GetStatus();
+                    break;
+                }
+            }
+        }
+
+        // Print out reflection/absorption events at the boundary
+        if (boundaryStatus != Undefined)
+        {
+
+            if(postVolumeName !="CATHODE_GRID")
+              return;
+
+            G4double KE = track->GetKineticEnergy();
+            G4ThreeVector point = track->GetPosition();
+            // G4cout << "Optical Photon Interaction at boundary between " 
+            //        << preVolumeName << " and " << postVolumeName << G4endl;
+
+
+            G4String mode = "Absorb";
+            // Abosroption
+            if (boundaryStatus == Absorption){
+              mode = "Absorption";
+            }
+            else if(boundaryStatus == FresnelReflection || 
+                    boundaryStatus == LambertianReflection || 
+                    boundaryStatus == LobeReflection ||
+                    boundaryStatus == SpikeReflection ){
+                    mode = "Reflection";
+                    }
+            else {
+              mode = "Other";
+            }
+
+            G4int event_id = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
+            struct DataPoint photon = {event_id, point.x(), point.y(), point.z(), KE, mode, preVolumeName, postVolumeName};
+            data_test.push_back(photon);
+
+        }
+    }
 
   // Retrieve the pointer to the optical boundary process.
   // We do this only once per run defining our local pointer as static.
@@ -95,4 +170,23 @@ void AnalysisSteppingAction::UserSteppingAction(const G4Step* step)
   }
 
   return;
+}
+
+// Method to write all data points to the file
+void AnalysisSteppingAction::writeToFile() {
+    std::string filename = "photoelectric.txt";
+    std::ofstream file(filename);
+    
+    if (!file) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return;
+    }
+
+    for (const auto& datapoint : data_test) {
+      file << datapoint.event_id << ", " <<  datapoint.x /mm << ", " << datapoint.y /mm << ", " << datapoint.z /mm << ", " << 
+      datapoint.energy /eV << ", " << datapoint.mode << ", " << datapoint.preVolumeName << ", " << datapoint.postVolumeName << "\n";
+    }
+
+    file.close();
+    std::cout << "Data written to " << filename << std::endl;
 }
