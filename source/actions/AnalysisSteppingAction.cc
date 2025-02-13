@@ -135,7 +135,7 @@ void AnalysisSteppingAction::UserSteppingAction(const G4Step* step)
               mode = "Other";
             }
 
-            G4int event_id = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
+            G4int event_id = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID() + CLHEP::HepRandom::getTheSeed();
             struct DataPoint photon = {event_id, point.x(), point.y(), point.z(), KE, mode, preVolumeName, postVolumeName};
             data_test.push_back(photon);
 
