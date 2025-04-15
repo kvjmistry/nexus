@@ -777,7 +777,7 @@ namespace opticalprops {
       6. * eV,       7.2 * eV,  optPhotMaxE_
     };
     std::vector<G4double> REFLECTIVITY = {
-      .98,  .98,  .98,  .98,
+      .94,  .94,  .94,  .94,
       .72,  .72,  .72
     };
     mpt->AddProperty("REFLECTIVITY", ENERGIES, REFLECTIVITY);
@@ -989,7 +989,7 @@ namespace opticalprops {
     // According to the paper, the QE of TPB depends on the incident wavelength.
     // As Geant4 doesn't allow this possibility, it is set to the value corresponding
     // to Xe scintillation spectrum peak.
-    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 0.65);
+    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 0.56);
 
     return mpt;
   }

@@ -136,6 +136,10 @@ namespace nexus {
     G4double sc_yield_;
     G4double e_lifetime_;
     G4double photoe_prob_;
+    G4double el_scale_; // Scale the EL light yield down
+
+    // Vertex decided by user
+    G4ThreeVector specific_vertex_;
 
     // Pointers to materials definition
     G4Material* hdpe_;

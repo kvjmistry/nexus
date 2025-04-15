@@ -115,7 +115,9 @@ Next100FieldCage::Next100FieldCage(G4double grid_thickn):
   // EL gap generation disk parameters
   el_gap_slice_min_(0.), el_gap_slice_max_(1.),
   sipm_pitch_(0),
-  photoe_prob_(0)
+  photoe_prob_(0),
+  el_scale_(1),
+  specific_vertex_{}
 {
   /// Define new categories
   new G4UnitDefinition("kilovolt/cm","kV/cm","Electric field", kilovolt/cm);
@@ -208,6 +210,12 @@ Next100FieldCage::Next100FieldCage(G4double grid_thickn):
 
   msg_->DeclareProperty("photoe_prob", photoe_prob_,
                         "Probability of photon to ie- conversion");
+
+  msg_->DeclareProperty("el_scale", el_scale_,
+                        "Scale the electroluminescent light yield");
+
+  msg_->DeclarePropertyWithUnit("specific_vertex", "mm",  specific_vertex_,
+                                  "Set generation vertex.");
 }
 
 
@@ -742,7 +750,7 @@ void Next100FieldCage::BuildELRegion()
     el_field->SetDriftVelocity(EL_drift_v_);
     el_field->SetTransverseDiffusion(ELtransv_diff_);
     el_field->SetLongitudinalDiffusion(ELlong_diff_);
-    el_field->SetLightYield(XenonELLightYield(ELelectric_field_, pressure_));
+    el_field->SetLightYield(XenonELLightYield(ELelectric_field_, pressure_, el_scale_));
     G4Region* el_region = new G4Region("EL_REGION");
     el_region->SetUserInformation(el_field);
     el_region->AddRootLogicalVolume(el_gap_logic);
@@ -1092,6 +1100,11 @@ G4ThreeVector Next100FieldCage::GenerateVertex(const G4String& region) const
   if (region == "CENTER") {
     vertex = G4ThreeVector(GetCoordOrigin().x(), GetCoordOrigin().y(),
                            active_zpos_);
+  }
+
+  else if (region == "AD_HOC") {
+    vertex = G4ThreeVector(GetCoordOrigin().x()+specific_vertex_.x(), GetCoordOrigin().y()+specific_vertex_.y(),
+                           GetCoordOrigin().z()+specific_vertex_.z());
   }
 
   else if (region == "ACTIVE") {
