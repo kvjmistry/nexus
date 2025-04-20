@@ -35,7 +35,7 @@ namespace nexus {
 
   private:
     G4GenericMessenger* msg_;
-    G4int nevt_, nupdate_;
+    G4int nevt_, nupdate_, nsaved_, max_save_events_;
     G4double energy_min_;
     G4double energy_max_;
   };

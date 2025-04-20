@@ -21,6 +21,7 @@
 #include <G4SDManager.hh>
 #include <G4HCtable.hh>
 #include <globals.hh>
+#include <G4RunManager.hh>
 
 
 namespace nexus {
@@ -28,7 +29,7 @@ namespace nexus {
 REGISTER_CLASS(DefaultEventAction, G4UserEventAction)
 
   DefaultEventAction::DefaultEventAction():
-    G4UserEventAction(), nevt_(0), nupdate_(10), energy_min_(0.), energy_max_(DBL_MAX)
+    G4UserEventAction(), nevt_(0), nupdate_(10), nsaved_(0), max_save_events_(INT_MAX), energy_min_(0.), energy_max_(DBL_MAX)
   {
     msg_ = new G4GenericMessenger(this, "/Actions/DefaultEventAction/");
 
@@ -45,6 +46,9 @@ REGISTER_CLASS(DefaultEventAction, G4UserEventAction)
     max_energy_cmd.SetParameterName("max_energy", true);
     max_energy_cmd.SetUnitCategory("Energy");
     max_energy_cmd.SetRange("max_energy>0.");
+
+    msg_->DeclareProperty("max_save_events", max_save_events_,
+                        "The number of events to save");
 
     PersistencyManager* pm = dynamic_cast<PersistencyManager*>
       (G4VPersistencyManager::GetPersistencyManager());
@@ -110,15 +114,24 @@ REGISTER_CLASS(DefaultEventAction, G4UserEventAction)
         (G4VPersistencyManager::GetPersistencyManager());
 
       if (!event->IsAborted() && edep>0) {
-	pm->InteractingEvent(true);
-      } else {
-	pm->InteractingEvent(false);
+        pm->InteractingEvent(true);
+      } 
+      else {
+        pm->InteractingEvent(false);
       }
+      
       if (!event->IsAborted() && edep > energy_min_ && edep < energy_max_) {
-	pm->StoreCurrentEvent(true);
-      } else {
-	pm->StoreCurrentEvent(false);
+        pm->StoreCurrentEvent(true);
+        nsaved_++;
+      } 
+      else {
+        pm->StoreCurrentEvent(false);
       }
+
+      if (nsaved_ >= max_save_events_) {
+            G4cout << "Reached " << max_save_events_ << " good events. Stopping run." << G4endl;
+            G4RunManager::GetRunManager()->AbortRun();
+        }
 
     }
   }
