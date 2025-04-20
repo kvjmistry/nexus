@@ -1,5 +1,5 @@
 ## ----------------------------------------------------------------------------
-## nexus | NEXT100_Ar_alpha_full.config.mac
+## nexus | NEXT100_Xe_alpha_full.config.mac
 ##
 ## Initialization macro to alpha particle decays in the active
 ## volume of the NEXT-100 detector during the low pressure run.
@@ -16,26 +16,26 @@
 
 ##### GEOMETRY #####
 /Geometry/Next100/elfield true
-/Geometry/Next100/EL_field 7.5 kV/cm
+/Geometry/Next100/EL_field 8.8 kV/cm
 /Geometry/Next100/max_step_size 1. mm
-/Geometry/Next100/pressure 4.0 bar
+/Geometry/Next100/pressure 3.95 bar
 /Geometry/Next100/gas depletedXe
 /Geometry/PmtR11410/time_binning 25. nanosecond
 /Geometry/Next100/sipm_time_binning  1. microsecond
 
-/Geometry/Next100/drift_v   0.88 mm/microsecond
-/Geometry/Next100/EL_drift_v 4.21 mm/microsecond
+/Geometry/Next100/drift_v   0.89 mm/microsecond
+/Geometry/Next100/EL_drift_v 5.14 mm/microsecond
 
-/Geometry/Next100/drift_transv_diff 1.56 mm/sqrt(cm)
-/Geometry/Next100/drift_long_diff 0.55 mm/sqrt(cm)
+/Geometry/Next100/drift_transv_diff 1.45 mm/sqrt(cm)
+/Geometry/Next100/drift_long_diff 0.64 mm/sqrt(cm)
 
-/Geometry/Next100/ELtransv_diff 0.39 mm/sqrt(cm)
-/Geometry/Next100/ELlong_diff 0.25 mm/sqrt(cm)
+/Geometry/Next100/ELtransv_diff 0.36 mm/sqrt(cm)
+/Geometry/Next100/ELlong_diff 0.24 mm/sqrt(cm)
 
-/Geometry/Next100/e_lifetime         65   ms
+/Geometry/Next100/e_lifetime         60   ms
 
 # includes 0.75 for EL emperical gain eqn, and realistic mesh scaling
-/Geometry/Next100/el_scale 0.65 
+/Geometry/Next100/el_scale 1.06
 
 ##### GENERATOR #####
 /Generator/SingleParticle/particle alpha
@@ -44,12 +44,13 @@
 /Generator/SingleParticle/min_energy 5.6 MeV
 /Generator/SingleParticle/max_energy 5.6 MeV
 /Generator/SingleParticle/region AD_HOC
-/Geometry/Next100/specific_vertex  0. 0. 630. mm
+/Geometry/Next100/specific_vertex  0. 0. 600. mm
 
 
 ##### ACTIONS #####
-/Actions/DefaultEventAction/min_energy 20 keV
+/Actions/DefaultEventAction/min_energy 0.1 keV
 /Actions/DefaultEventAction/max_energy 6 MeV
+/Actions/DefaultEventAction/max_save_events 1
 
 ##### PHYSICS #####
 ## Full simulation
