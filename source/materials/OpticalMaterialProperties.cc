@@ -989,7 +989,7 @@ namespace opticalprops {
     // According to the paper, the QE of TPB depends on the incident wavelength.
     // As Geant4 doesn't allow this possibility, it is set to the value corresponding
     // to Xe scintillation spectrum peak.
-    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 0.56);
+    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 0.70);
 
     return mpt;
   }
