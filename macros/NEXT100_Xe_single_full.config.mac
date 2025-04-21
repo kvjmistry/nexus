@@ -41,7 +41,7 @@
 /Geometry/Next100/tpb_thickn   1 micrometer
 
 # old value was 16670 
-/Geometry/Next100/sc_yield 16670 
+/Geometry/Next100/sc_yield 16670 1/MeV
 
 # includes 0.75 for EL emperical gain eqn, and realistic mesh scaling
 /Geometry/Next100/el_scale 1.06
