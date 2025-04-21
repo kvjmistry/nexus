@@ -24,4 +24,4 @@
 /nexus/RegisterEventAction DefaultEventAction
 /nexus/RegisterTrackingAction DefaultTrackingAction
 
-/nexus/RegisterMacro macros/NEXT100_Xe_single_full.config.mac
+/nexus/RegisterMacro macros/NEXT100_Xe_single_full_run14498.config.mac
