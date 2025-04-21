@@ -1,0 +1,79 @@
+## ----------------------------------------------------------------------------
+## nexus | NEXT100_Xe_alpha_full.config.mac
+##
+## Initialization macro to alpha particle decays in the active
+## volume of the NEXT-100 detector during the low pressure run.
+##
+## The NEXT Collaboration
+## ----------------------------------------------------------------------------
+
+##### VERBOSITY #####
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+
+/process/em/verbose 0
+
+##### GEOMETRY #####
+/Geometry/Next100/elfield true
+/Geometry/Next100/EL_field 6.0 kV/cm
+/Geometry/Next100/max_step_size 1. mm
+/Geometry/Next100/pressure 4.0 bar
+/Geometry/Next100/gas depletedXe
+/Geometry/PmtR11410/time_binning 25. nanosecond
+/Geometry/Next100/sipm_time_binning  1. microsecond
+
+/Geometry/Next100/drift_v   0.91 mm/microsecond
+/Geometry/Next100/EL_drift_v 3.34 mm/microsecond
+
+/Geometry/Next100/drift_transv_diff 1.43 mm/sqrt(cm)
+/Geometry/Next100/drift_long_diff 0.54 mm/sqrt(cm)
+
+/Geometry/Next100/ELtransv_diff 0.45 mm/sqrt(cm)
+/Geometry/Next100/ELlong_diff 0.28 mm/sqrt(cm)
+
+/Geometry/Next100/e_lifetime         42.7   ms
+
+/Geometry/Next100/TPB_QE       0.70
+/Geometry/Next100/TPB_QE_EP    0.70
+/Geometry/Next100/TPB_QE_SIPM  0.70
+/Geometry/Next100/TPB_QE_SIPMB 0.70
+/Geometry/Next100/tpb_thickn   1 micrometer
+
+# old value was 16670 
+/Geometry/Next100/sc_yield 16670 
+
+# includes 0.75 for EL emperical gain eqn, and realistic mesh scaling
+/Geometry/Next100/el_scale 1.06
+
+##### GENERATOR #####
+/Generator/SingleParticle/particle alpha
+
+# For N100 use 5.6 MeV here
+/Generator/SingleParticle/min_energy 5.6 MeV
+/Generator/SingleParticle/max_energy 5.6 MeV
+/Generator/SingleParticle/region AD_HOC
+/Geometry/Next100/specific_vertex  0. 0. 522. mm
+
+
+##### ACTIONS #####
+/Actions/DefaultEventAction/min_energy 0.1 keV
+/Actions/DefaultEventAction/max_energy 6 MeV
+/Actions/DefaultEventAction/max_save_events 1
+
+##### PHYSICS #####
+## Full simulation
+/PhysicsList/Nexus/clustering          true
+/PhysicsList/Nexus/drift               true
+/PhysicsList/Nexus/electroluminescence true
+
+##### PERSISTENCY #####
+/nexus/persistency/output_file NEXT100_Xe_single_full_run14498
+
+/nexus/random_seed             100
+/nexus/persistency/start_id    100
+
+## eventType options: bb0nu, bb2nu, background
+/nexus/persistency/event_type background
+
+/process/optical/processActivation Cerenkov false
