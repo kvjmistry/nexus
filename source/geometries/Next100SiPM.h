@@ -13,6 +13,7 @@
 #include "GeometryBase.h"
 
 #include <G4ThreeVector.hh>
+#include <G4GenericMessenger.hh>
 
 namespace nexus {
 
@@ -39,12 +40,16 @@ namespace nexus {
     void SetVisibility          (G4bool visibility);
 
   private:
+    // Messenger for the definition of control commands
+    G4GenericMessenger* msg_;
+
     G4ThreeVector dimensions_;
 
     G4int    sensor_depth_;
     G4int    mother_depth_;
     G4int    naming_order_;
     G4double time_binning_;
+    G4double TPB_QE_; 
 
     G4double coating_thickn_;
     G4bool visibility_;

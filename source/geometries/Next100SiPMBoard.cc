@@ -39,6 +39,7 @@ Next100SiPMBoard::Next100SiPMBoard():
   board_thickness_ (  0.2   * mm),
   mask_thickness_  (  6.0   * mm),
   time_binning_    (1. * microsecond),
+  TPB_QE_(0.65),
   visibility_      (true),
   sipm_visibility_ (false),
   mpv_             (nullptr),
@@ -58,6 +59,8 @@ Next100SiPMBoard::Next100SiPMBoard():
   time_binning_cmd.SetParameterName("sipm_time_binning", false);
   time_binning_cmd.SetUnitCategory("Time");
   time_binning_cmd.SetRange("sipm_time_binning>0.");
+
+  msg_->DeclareProperty("TPB_QE_SIPMB", TPB_QE_, "TBP Quantum Efficiency");
 }
 
 
@@ -138,7 +141,7 @@ void Next100SiPMBoard::Construct()
     new G4Box(mask_wls_name, size_/2., size_/2., wls_thickness/2.);
 
   G4Material* tpb = materials::TPB();
-  tpb->SetMaterialPropertiesTable(opticalprops::TPB());
+  tpb->SetMaterialPropertiesTable(opticalprops::TPB(TPB_QE_));
 
   G4LogicalVolume* mask_wls_logic_vol =
     new G4LogicalVolume(mask_wls_solid_vol, tpb, mask_wls_name);

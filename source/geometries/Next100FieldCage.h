@@ -63,7 +63,7 @@ namespace nexus {
     const G4double drift_ring_dist_, buffer_ring_dist_;
     const G4double buffer_first_ring_dist_, ring_drift_buffer_dist_;
     const G4int num_drift_rings_, num_buffer_rings_;
-    const G4double tpb_thickn_;
+    G4double tpb_thickn_;
     const G4double overlap_;
 
     // Diffusion constants
@@ -137,6 +137,7 @@ namespace nexus {
     G4double e_lifetime_;
     G4double photoe_prob_;
     G4double el_scale_; // Scale the EL light yield down
+    G4double TPB_QE_; 
 
     // Vertex decided by user
     G4ThreeVector specific_vertex_;

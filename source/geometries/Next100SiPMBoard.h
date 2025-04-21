@@ -50,6 +50,7 @@ namespace nexus {
     G4double size_, pitch_, margin_;
     G4double board_thickness_, mask_thickness_;
     G4double time_binning_;
+    G4double TPB_QE_; 
     std::vector<G4ThreeVector> sipm_positions_;
     G4bool   visibility_, sipm_visibility_;
     G4VPhysicalVolume*  mpv_;

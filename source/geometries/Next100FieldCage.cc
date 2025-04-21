@@ -117,12 +117,14 @@ Next100FieldCage::Next100FieldCage(G4double grid_thickn):
   sipm_pitch_(0),
   photoe_prob_(0),
   el_scale_(1),
+  TPB_QE_(0.65),
   specific_vertex_{}
 {
   /// Define new categories
   new G4UnitDefinition("kilovolt/cm","kV/cm","Electric field", kilovolt/cm);
   new G4UnitDefinition("mm/sqrt(cm)","mm/sqrt(cm)","Diffusion", mm/sqrt(cm));
   new G4UnitDefinition("mm/microsecond","mm/microsecond","drift velocity", mm/microsecond);
+  new G4UnitDefinition("micrometer","micrometer","thickness", micrometer);
 
   /// Initializing the geometry navigator (used in vertex generation)
   geom_navigator_ =
@@ -210,6 +212,11 @@ Next100FieldCage::Next100FieldCage(G4double grid_thickn):
 
   msg_->DeclareProperty("photoe_prob", photoe_prob_,
                         "Probability of photon to ie- conversion");
+
+  msg_->DeclareProperty("TPB_QE", TPB_QE_, "TBP Quantum Efficiency");
+
+  G4GenericMessenger::Command& tpb_thickn_cmd = msg_->DeclareProperty("tpb_thickn", tpb_thickn_, "TBP thickness");
+  tpb_thickn_cmd.SetUnitCategory("thickness");
 
   msg_->DeclareProperty("el_scale", el_scale_,
                         "Scale the electroluminescent light yield");
@@ -299,7 +306,7 @@ void Next100FieldCage::DefineMaterials()
 
   /// TPB coating
   tpb_ = materials::TPB();
-  tpb_->SetMaterialPropertiesTable(opticalprops::TPB());
+  tpb_->SetMaterialPropertiesTable(opticalprops::TPB(TPB_QE_));
 
   /// Steel
   steel_ = materials::Steel316Ti();
@@ -853,6 +860,7 @@ void Next100FieldCage::BuildLightTube()
                                      GetCoordOrigin().y(), teflon_drift_zpos_),
                     teflon_drift_logic, "LIGHT_TUBE_DRIFT", mother_logic_, false, 0, false);
 
+  G4cout << "TPB thick " << tpb_thickn_ << G4endl; 
 
   /// TPB on teflon surface
   G4double router_tpb[2] =

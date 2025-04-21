@@ -870,8 +870,11 @@ namespace opticalprops {
 
 
   /// TPB (tetraphenyl butadiene) ///
-  G4MaterialPropertiesTable* TPB()
+  G4MaterialPropertiesTable* TPB(G4double TPB_QE)
   {
+
+    G4cout << "TPB_QE:" << TPB_QE << G4endl;
+
     // Data from https://doi.org/10.1140/epjc/s10052-018-5807-z
     G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
 
@@ -989,7 +992,7 @@ namespace opticalprops {
     // According to the paper, the QE of TPB depends on the incident wavelength.
     // As Geant4 doesn't allow this possibility, it is set to the value corresponding
     // to Xe scintillation spectrum peak.
-    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 0.70);
+    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", TPB_QE);
 
     return mpt;
   }

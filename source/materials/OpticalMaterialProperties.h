@@ -59,7 +59,7 @@ namespace opticalprops {
                                       G4double e_lifetime=1000.*ms,
                                       G4double photoe_p=0);
 
-  G4MaterialPropertiesTable* TPB();
+  G4MaterialPropertiesTable* TPB(G4double TPB_QE=0.65);
 
   G4MaterialPropertiesTable* DegradedTPB(G4double wls_eff);
 

@@ -33,9 +33,17 @@ Next100SiPM::Next100SiPM():
   mother_depth_       (0),
   naming_order_       (0),
   time_binning_       (1.0 * us),
+  TPB_QE_(0.65),
   coating_thickn_     (2. * micrometer),
   visibility_         (true)
 {
+
+  /// Messenger
+  msg_ = new G4GenericMessenger(this, "/Geometry/Next100/",
+                                "Control commands of geometry Next100.");
+
+  msg_->DeclareProperty("TPB_QE_SIPM", TPB_QE_, "TBP Quantum Efficiency");
+
 }
 
 
@@ -82,7 +90,7 @@ void Next100SiPM::Construct()
       new G4Box(coating_name, sipm_width/2., sipm_length/2., coating_thickn_/2.);
 
     G4Material* coating_mt = materials::TPB();
-    coating_mt->SetMaterialPropertiesTable(opticalprops::TPB());
+    coating_mt->SetMaterialPropertiesTable(opticalprops::TPB(TPB_QE_));
 
     G4LogicalVolume* coating_logic_vol =
       new G4LogicalVolume(coating_solid_vol, coating_mt, coating_name);

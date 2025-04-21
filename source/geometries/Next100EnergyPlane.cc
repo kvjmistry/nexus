@@ -58,6 +58,7 @@ namespace nexus {
     sapphire_window_thickn_ (6. * mm),
     optical_pad_thickn_ (1.0 * mm),
     tpb_thickn_ (1.*micrometer),
+    TPB_QE_(0.65),
 
     pmt_stand_out_ (2. * mm), // length that PMTs stand out of copper, in the front
     pmt_base_diam_ (46.8 * mm),
@@ -87,6 +88,7 @@ namespace nexus {
     /// Messenger
     msg_ = new G4GenericMessenger(this, "/Geometry/Next100/",
 				  "Control commands of geometry Next100.");
+    msg_->DeclareProperty("TPB_QE_EP", TPB_QE_, "TBP Quantum Efficiency");
     msg_->DeclareProperty("energy_plane_vis", visibility_, "Energy Plane visibility");
     msg_->DeclareProperty("energy_plane_verbosity", verbosity_, "Energy Plane verbosity");
 
@@ -236,7 +238,7 @@ namespace nexus {
     G4Material* sapphire = materials::Sapphire();
     sapphire->SetMaterialPropertiesTable(opticalprops::Sapphire());
     G4Material* tpb = materials::TPB();
-    tpb->SetMaterialPropertiesTable(opticalprops::TPB());
+    tpb->SetMaterialPropertiesTable(opticalprops::TPB(TPB_QE_));
     G4Material* vacuum =
       G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic");
     vacuum->SetMaterialPropertiesTable(opticalprops::Vacuum());

@@ -131,7 +131,7 @@ REGISTER_CLASS(DefaultEventAction, G4UserEventAction)
       if (nsaved_ >= max_save_events_) {
             G4cout << "Reached " << max_save_events_ << " good events. Stopping run." << G4endl;
             G4RunManager::GetRunManager()->AbortRun();
-        }
+      }
 
     }
   }

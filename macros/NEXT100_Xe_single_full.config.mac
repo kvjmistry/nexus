@@ -34,6 +34,12 @@
 
 /Geometry/Next100/e_lifetime         60   ms
 
+/Geometry/Next100/TPB_QE       0.70
+/Geometry/Next100/TPB_QE_EP    0.70
+/Geometry/Next100/TPB_QE_SIPM  0.70
+/Geometry/Next100/TPB_QE_SIPMB 0.70
+/Geometry/Next100/tpb_thickn   1 micrometer
+
 # includes 0.75 for EL emperical gain eqn, and realistic mesh scaling
 /Geometry/Next100/el_scale 1.06
 

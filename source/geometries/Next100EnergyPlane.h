@@ -73,6 +73,7 @@ namespace nexus {
     const G4int last_hut_long_, last_hut_medium_;
 
     const G4double sapphire_window_thickn_, optical_pad_thickn_, tpb_thickn_;
+    G4double TPB_QE_;
     const G4double pmt_stand_out_;
     const G4double pmt_base_diam_, pmt_base_thickn_;
 
