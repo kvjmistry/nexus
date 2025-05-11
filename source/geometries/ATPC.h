@@ -35,6 +35,7 @@ namespace nexus {
             G4double max_step_size_;
             BoxPointSampler* active_gen_;
             G4String gastype_;
+            G4String genvol_;
             
             void ConstructLab();
             void PlaceVolumes();

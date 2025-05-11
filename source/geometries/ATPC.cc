@@ -66,6 +66,8 @@ namespace nexus{
 
         msg_->DeclareProperty("gastype", gastype_, "The GAS to use in the detector");
 
+        msg_->DeclareProperty("genvol", genvol_, "Decide whether to generate in the gas or Cu shielding");
+
     }
 
     ATPC::~ATPC()
@@ -94,7 +96,8 @@ namespace nexus{
             std::cout << "Error in specified gas" << std::endl;
         
         
-        G4Material *Steel=materials::Steel();
+        // G4Material *Steel=materials::Steel();
+        G4Material *Cu = G4NistManager::Instance()->FindOrBuildMaterial("G4_Cu");
 
         //Constructing Lab Space
         G4String lab_name="LAB";
@@ -105,7 +108,7 @@ namespace nexus{
         
         // Vessel
         G4Box* outer_cube_solid = new G4Box("CHAMBER", outer_cube_size, outer_cube_size, outer_cube_size);
-        G4LogicalVolume* outer_cube_logic = new G4LogicalVolume(outer_cube_solid, Steel, "CHAMBER");
+        G4LogicalVolume* outer_cube_logic = new G4LogicalVolume(outer_cube_solid, Cu, "CHAMBER");
 
         // Gas Volume
         G4Box* gas_solid = new G4Box("GAS", cube_size/2., cube_size/2., cube_size/2.);
@@ -119,7 +122,7 @@ namespace nexus{
         // LAB
         auto labPhysical= new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0, false, 0, false);
 
-        // Place the Outer Steel Cube (Chamber)
+        // Place the Outer Cu Cube (Chamber)
         G4VPhysicalVolume * chamber_phys = new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), outer_cube_logic, outer_cube_solid->GetName(), lab_logic_volume, false, 0, false);
 
         // Xenon Gas in Active Area and Non-Active Area
@@ -132,11 +135,18 @@ namespace nexus{
 
 
         // VERTEX GENERATORS /////////////////////////////////////
-
-        active_gen_ = new BoxPointSampler(cube_size/2.,
-                                          cube_size/2.,
-                                          cube_size/2.,
-                                          0.);
+        if (genvol_ == "Cu"){
+            active_gen_ = new BoxPointSampler(cube_size/2. + chamber_thickn/2.0*cm,
+                                            cube_size/2. + chamber_thickn/2.0*cm,
+                                            cube_size/2. + chamber_thickn/2.0*cm,
+                                            chamber_thickn/2.0*cm);
+        }
+        else {
+            active_gen_ = new BoxPointSampler(cube_size/2.,
+                                            cube_size/2.,
+                                            cube_size/2.,
+                                            0.);
+        }
 
         this->SetLogicalVolume(lab_logic_volume);
 
@@ -176,6 +186,8 @@ namespace nexus{
                 pos = vtx_;
             }else if((region=="ACTIVE")){
                 pos= active_gen_->GenerateVertex(INSIDE);
+            }else if((region=="Cu")){
+                pos= active_gen_->GenerateVertex(VOLUME);
             }else{
                 G4Exception("[ATPC]", "GenerateVertex()", JustWarning,
                             "Unknown vertex generation region. setting default region as FIELDCAGE..");
