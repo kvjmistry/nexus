@@ -58,7 +58,7 @@ namespace nexus{
         G4GenericMessenger::Command&  cube_size_cmd =msg_->DeclarePropertyWithUnit("cube_size","m",cube_size,"Cube Side Length");
         cube_size_cmd .SetParameterName("cubesize", false);
 
-        G4GenericMessenger::Command&  chamber_thickn_cmd =msg_->DeclarePropertyWithUnit("chamber_thickn","mm",chamber_thickn,"Chamber Wall thickness");
+        G4GenericMessenger::Command&  chamber_thickn_cmd =msg_->DeclarePropertyWithUnit("chamber_thickn","cm",chamber_thickn,"Chamber Wall thickness");
         chamber_thickn_cmd .SetParameterName("chamberthickn", false);
 
         G4GenericMessenger::Command&  step_size_cmd =msg_->DeclarePropertyWithUnit("max_step_size","mm",max_step_size_,"The maximum step size");
@@ -136,10 +136,10 @@ namespace nexus{
 
         // VERTEX GENERATORS /////////////////////////////////////
         if (genvol_ == "Cu"){
-            active_gen_ = new BoxPointSampler(cube_size/2. + chamber_thickn/2.0*cm,
-                                            cube_size/2. + chamber_thickn/2.0*cm,
-                                            cube_size/2. + chamber_thickn/2.0*cm,
-                                            chamber_thickn/2.0*cm);
+            active_gen_ = new BoxPointSampler(cube_size/2. + chamber_thickn/2.0,
+                                            cube_size/2. + chamber_thickn/2.0,
+                                            cube_size/2. + chamber_thickn/2.0,
+                                            chamber_thickn/2.0);
         }
         else {
             active_gen_ = new BoxPointSampler(cube_size/2.,
