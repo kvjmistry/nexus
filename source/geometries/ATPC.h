@@ -7,7 +7,7 @@
 #include "GeometryBase.h"
 class G4GenericMessenger;
 
-namespace nexus { class BoxPointSampler; }
+namespace nexus { class BoxPointSampler; class CylinderPointSampler;}
 
 namespace nexus {
     class ATPC: public GeometryBase
@@ -34,8 +34,12 @@ namespace nexus {
             G4ThreeVector vertex;
             G4double max_step_size_;
             BoxPointSampler* active_gen_;
+            CylinderPointSampler* cylinder_gen_;
+            CylinderPointSampler* cylinder_gen_flange1_;
+            CylinderPointSampler* cylinder_gen_flange2_;
             G4String gastype_;
             G4String genvol_;
+            G4String detgeom_;
             
             void ConstructLab();
             void PlaceVolumes();

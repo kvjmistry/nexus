@@ -32,6 +32,7 @@
 #include <G4LogicalSkinSurface.hh>
 #include <G4LogicalBorderSurface.hh>
 #include "BoxPointSampler.h"
+#include "CylinderPointSampler.h"
 
 
 
@@ -45,10 +46,12 @@ namespace nexus{
              GeometryBase(),
              msg_(nullptr),
              Lab_size(550. * m), cube_size (5.7 * m), chamber_thickn (50. * mm),
-             vtx_(0,0,0), active_gen_(nullptr),
+             vtx_(0,0,0), active_gen_(nullptr), cylinder_gen_(nullptr), cylinder_gen_flange1_(nullptr), cylinder_gen_flange2_(nullptr),
              max_step_size_(0.1*mm), 
              gas_pressure_(1. * bar),
-             gastype_("xenon")
+             gastype_("xenon"),
+             genvol_("Cu"),
+             detgeom_("cube")
 
     {
         msg_ = new G4GenericMessenger(this, "/Geometry/ATPC/","Control commands of geometry of ATPC TPC");
@@ -68,6 +71,8 @@ namespace nexus{
 
         msg_->DeclareProperty("genvol", genvol_, "Decide whether to generate in the gas or Cu shielding");
 
+        msg_->DeclareProperty("detgeom", detgeom_, "Decide whether to generate cube or cylinder");
+
     }
 
     ATPC::~ATPC()
@@ -75,6 +80,9 @@ namespace nexus{
 
         delete msg_;
         delete active_gen_;
+        delete cylinder_gen_;
+        delete cylinder_gen_flange1_;
+        delete cylinder_gen_flange2_;
     }
 
 
@@ -106,47 +114,79 @@ namespace nexus{
 
         G4double outer_cube_size = cube_size/2. + chamber_thickn;
         
-        // Vessel
-        G4Box* outer_cube_solid = new G4Box("CHAMBER", outer_cube_size, outer_cube_size, outer_cube_size);
-        G4LogicalVolume* outer_cube_logic = new G4LogicalVolume(outer_cube_solid, Cu, "CHAMBER");
+        G4LogicalVolume* gas_logic;
+        if (detgeom_ == "cube"){
+            G4cout << "Using Cube Geometry" << G4endl;
+            // Vessel
+            G4Box* outer_cube_solid = new G4Box("CHAMBER", outer_cube_size, outer_cube_size, outer_cube_size);
+            G4LogicalVolume* outer_cube_logic = new G4LogicalVolume(outer_cube_solid, Cu, "CHAMBER");
 
-        // Gas Volume
-        G4Box* gas_solid = new G4Box("GAS", cube_size/2., cube_size/2., cube_size/2.);
-        G4LogicalVolume* gas_logic = new G4LogicalVolume(gas_solid, GAS, "GAS");
+            // Gas Volume
+            G4Box* gas_solid = new G4Box("GAS", cube_size/2., cube_size/2., cube_size/2.);
+            gas_logic = new G4LogicalVolume(gas_solid, GAS, "GAS");
 
-        /// Limit the step size in this volume for better tracking precision
-        gas_logic->SetUserLimits(new G4UserLimits(max_step_size_));
+            // Place the Volumes
 
-        // Place the Volumes
+            // LAB
+            auto labPhysical= new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0, false, 0, false);
 
-        // LAB
-        auto labPhysical= new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0, false, 0, false);
+            // Place the Outer Cu Cube (Chamber)
+            G4VPhysicalVolume * chamber_phys = new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), outer_cube_logic, outer_cube_solid->GetName(), lab_logic_volume, false, 0, false);
 
-        // Place the Outer Cu Cube (Chamber)
-        G4VPhysicalVolume * chamber_phys = new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), outer_cube_logic, outer_cube_solid->GetName(), lab_logic_volume, false, 0, false);
+            // Xenon Gas in Active Area and Non-Active Area
+            G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),outer_cube_logic, false, 0, false);
+
+            // VERTEX GENERATORS /////////////////////////////////////
+            if (genvol_ == "Cu"){
+                active_gen_ = new BoxPointSampler(cube_size/2.,
+                                                cube_size/2.,
+                                                cube_size/2.,
+                                                chamber_thickn);
+            }
+            else {
+                active_gen_ = new BoxPointSampler(cube_size/2.,
+                                                cube_size/2.,
+                                                cube_size/2.,
+                                                0.);
+            }
+        }
+        else {
+            G4cout << "Using Cylinder Geometry" << G4endl;
+            // Vessel
+
+            G4Tubs* outer_cylinder_solid = new G4Tubs("CHAMBER", 0, outer_cube_size, outer_cube_size, 0, twopi);
+            G4LogicalVolume* outer_cylinder_logic = new G4LogicalVolume(outer_cylinder_solid, Cu, "CHAMBER");
+
+            // Gas Volume
+            G4Tubs* gas_solid = new G4Tubs("GAS", 0, cube_size/2., cube_size/2., 0, twopi);
+            gas_logic = new G4LogicalVolume(gas_solid, GAS, "GAS");
+
+            // Place the Volumes
+
+            // LAB
+            auto labPhysical= new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0, false, 0, false);
+
+            // Place the Outer Cu Cube (Chamber)
+            G4VPhysicalVolume * chamber_phys = new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), outer_cylinder_logic, outer_cylinder_solid->GetName(), lab_logic_volume, false, 0, false);
+
+            // Xenon Gas in Active Area and Non-Active Area
+            G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),outer_cylinder_logic, false, 0, false);
+
+            // VERTEX GENERATORS /////////////////////////////////////
+            cylinder_gen_ = new CylinderPointSampler(cube_size/2., outer_cube_size, outer_cube_size, 0., twopi, nullptr, G4ThreeVector (0,0,0));
+            cylinder_gen_flange1_ = new CylinderPointSampler(0, cube_size/2., chamber_thickn/2.0, 0., twopi, nullptr, G4ThreeVector (0,0,cube_size/2.+chamber_thickn/2.0));
+            cylinder_gen_flange2_ = new CylinderPointSampler(0, cube_size/2., chamber_thickn/2.0, 0., twopi, nullptr, G4ThreeVector (0,0,-cube_size/2.-chamber_thickn/2.0));
+
+        }
 
         // Xenon Gas in Active Area and Non-Active Area
-        G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),outer_cube_logic, false, 0, false);
-
-
         IonizationSD* gasSD = new IonizationSD("/ATPC/GAS");
         gas_logic->SetSensitiveDetector(gasSD);
         G4SDManager::GetSDMpointer()->AddNewDetector(gasSD);
 
+        /// Limit the step size in this volume for better tracking precision
+        gas_logic->SetUserLimits(new G4UserLimits(max_step_size_));
 
-        // VERTEX GENERATORS /////////////////////////////////////
-        if (genvol_ == "Cu"){
-            active_gen_ = new BoxPointSampler(cube_size/2. + chamber_thickn/2.0,
-                                            cube_size/2. + chamber_thickn/2.0,
-                                            cube_size/2. + chamber_thickn/2.0,
-                                            chamber_thickn/2.0);
-        }
-        else {
-            active_gen_ = new BoxPointSampler(cube_size/2.,
-                                            cube_size/2.,
-                                            cube_size/2.,
-                                            0.);
-        }
 
         this->SetLogicalVolume(lab_logic_volume);
 
@@ -168,7 +208,7 @@ namespace nexus{
         G4VisAttributes *ChamberVa=new G4VisAttributes(nexus::TitaniumGreyAlpha());
         ChamberVa->SetForceSolid(true);
         Chamber->SetVisAttributes(ChamberVa);
-        Chamber->SetVisAttributes(G4VisAttributes::GetInvisible());
+        // Chamber->SetVisAttributes(G4VisAttributes::GetInvisible());
 
         //GAS
         G4LogicalVolume* Gas = lvStore->GetVolume("GAS");
@@ -188,6 +228,27 @@ namespace nexus{
                 pos= active_gen_->GenerateVertex(INSIDE);
             }else if((region=="Cu")){
                 pos= active_gen_->GenerateVertex(VOLUME);
+            }else if((region=="CuCylinder")){
+
+                // pos= cylinder_gen_->GenerateVertex(VOLUME);
+
+                G4double tot_len = cube_size+2*chamber_thickn;
+                G4double V_cyl = (pi/4) * ( std::pow(tot_len, 3) -  cube_size*cube_size*tot_len );
+                G4double V_flange = (pi/4) * ( cube_size*cube_size*chamber_thickn );
+                G4double tot_vol = V_cyl + 2*V_flange;
+                // G4cout << V_cyl/tot_vol << ", " << V_flange/tot_vol << G4endl;
+            
+                G4double rand = G4UniformRand();
+                if (rand<0.67){
+                    pos= cylinder_gen_->GenerateVertex(VOLUME);
+                }
+                else if (rand>=0.67 && rand < 0.83){
+                    pos= cylinder_gen_flange1_->GenerateVertex(VOLUME);
+                }
+                else {
+                    pos= cylinder_gen_flange2_->GenerateVertex(VOLUME);
+                }
+
             }else{
                 G4Exception("[ATPC]", "GenerateVertex()", JustWarning,
                             "Unknown vertex generation region. setting default region as FIELDCAGE..");
