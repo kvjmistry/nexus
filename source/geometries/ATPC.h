@@ -37,6 +37,7 @@ namespace nexus {
             CylinderPointSampler* cylinder_gen_;
             CylinderPointSampler* cylinder_gen_flange1_;
             CylinderPointSampler* cylinder_gen_flange2_;
+            CylinderPointSampler* cylinder_gen_active_;
             G4String gastype_;
             G4String genvol_;
             G4String detgeom_;

@@ -46,7 +46,7 @@ namespace nexus{
              GeometryBase(),
              msg_(nullptr),
              Lab_size(550. * m), cube_size (5.7 * m), chamber_thickn (50. * mm),
-             vtx_(0,0,0), active_gen_(nullptr), cylinder_gen_(nullptr), cylinder_gen_flange1_(nullptr), cylinder_gen_flange2_(nullptr),
+             vtx_(0,0,0), active_gen_(nullptr), cylinder_gen_(nullptr), cylinder_gen_flange1_(nullptr), cylinder_gen_flange2_(nullptr),cylinder_gen_active_(nullptr),
              max_step_size_(0.1*mm), 
              gas_pressure_(1. * bar),
              gastype_("xenon"),
@@ -83,6 +83,7 @@ namespace nexus{
         delete cylinder_gen_;
         delete cylinder_gen_flange1_;
         delete cylinder_gen_flange2_;
+        delete cylinder_gen_active_;
     }
 
 
@@ -173,7 +174,8 @@ namespace nexus{
             G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),outer_cylinder_logic, false, 0, false);
 
             // VERTEX GENERATORS /////////////////////////////////////
-            cylinder_gen_ = new CylinderPointSampler(cube_size/2., outer_cube_size, outer_cube_size, 0., twopi, nullptr, G4ThreeVector (0,0,0));
+            cylinder_gen_active_  = new CylinderPointSampler(0., cube_size/2., cube_size/2., 0., twopi, nullptr, G4ThreeVector (0,0,0));
+            cylinder_gen_         = new CylinderPointSampler(cube_size/2., outer_cube_size, outer_cube_size, 0., twopi, nullptr, G4ThreeVector (0,0,0));
             cylinder_gen_flange1_ = new CylinderPointSampler(0, cube_size/2., chamber_thickn/2.0, 0., twopi, nullptr, G4ThreeVector (0,0,cube_size/2.+chamber_thickn/2.0));
             cylinder_gen_flange2_ = new CylinderPointSampler(0, cube_size/2., chamber_thickn/2.0, 0., twopi, nullptr, G4ThreeVector (0,0,-cube_size/2.-chamber_thickn/2.0));
 
@@ -237,7 +239,7 @@ namespace nexus{
                 G4double V_flange = (pi/4) * ( cube_size*cube_size*chamber_thickn );
                 G4double tot_vol = V_cyl + 2*V_flange;
                 // G4cout << V_cyl/tot_vol << ", " << V_flange/tot_vol << G4endl;
-            
+        
                 G4double rand = G4UniformRand();
                 if (rand<0.67){
                     pos= cylinder_gen_->GenerateVertex(VOLUME);
@@ -249,6 +251,8 @@ namespace nexus{
                     pos= cylinder_gen_flange2_->GenerateVertex(VOLUME);
                 }
 
+            }else if((region=="CuCylinderActive")){
+                pos= cylinder_gen_active_->GenerateVertex(VOLUME);
             }else{
                 G4Exception("[ATPC]", "GenerateVertex()", JustWarning,
                             "Unknown vertex generation region. setting default region as FIELDCAGE..");
