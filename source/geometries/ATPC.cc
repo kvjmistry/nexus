@@ -107,6 +107,7 @@ namespace nexus{
         
         // G4Material *Steel=materials::Steel();
         G4Material *Cu = G4NistManager::Instance()->FindOrBuildMaterial("G4_Cu");
+        G4Material* PTFE = G4NistManager::Instance()->FindOrBuildMaterial("G4_POLYETHYLENE");
 
         //Constructing Lab Space
         G4String lab_name="LAB";
@@ -151,6 +152,52 @@ namespace nexus{
                                                 0.);
             }
         }
+        // Add a teflon layer between the copper and active volume
+        else if (detgeom_ == "cylinderPTFE"){
+            G4cout << "Using Cylinder Geometry with Teflon between copper and active" << G4endl;
+            // Vessel
+
+            G4double PTFE_thick = 5*mm;
+            G4double PTFE_Cube_size = cube_size/2. - PTFE_thick;
+
+            G4Tubs* outer_cylinder_solid = new G4Tubs("CHAMBER", 0, outer_cube_size, outer_cube_size, 0, twopi);
+            G4LogicalVolume* outer_cylinder_logic = new G4LogicalVolume(outer_cylinder_solid, Cu, "CHAMBER");
+
+            G4Tubs* outer_cylinder_PTFE_solid = new G4Tubs("PTFE", 0., cube_size/2., cube_size/2., 0, twopi);
+            G4LogicalVolume* outer_cylinder_PTFE_logic = new G4LogicalVolume(outer_cylinder_PTFE_solid, PTFE, "PTFE");
+
+            // Gas Volume
+            G4Tubs* gas_solid = new G4Tubs("GAS", 0, PTFE_Cube_size, PTFE_Cube_size, 0, twopi);
+            gas_logic = new G4LogicalVolume(gas_solid, GAS, "GAS");
+
+            // Place the Volumes
+
+            // LAB
+            auto labPhysical= new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0, false, 0, false);
+
+            // Place the Outer Cu Cube (Chamber)
+            G4VPhysicalVolume * chamber_phys = new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), outer_cylinder_logic, outer_cylinder_solid->GetName(), lab_logic_volume, false, 0, true);
+
+            // Xenon Gas in Active Area and Non-Active Area
+            G4VPhysicalVolume * ptfe_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), outer_cylinder_PTFE_logic, outer_cylinder_PTFE_solid->GetName(),outer_cylinder_logic, false, 0, true);
+
+            // Xenon Gas in Active Area and Non-Active Area
+            G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),outer_cylinder_PTFE_logic, false, 0, true);
+
+            // VERTEX GENERATORS /////////////////////////////////////
+            cylinder_gen_active_  = new CylinderPointSampler(0., PTFE_Cube_size, PTFE_Cube_size, 0., twopi, nullptr, G4ThreeVector (0,0,0));
+            cylinder_gen_         = new CylinderPointSampler(cube_size/2., outer_cube_size, outer_cube_size, 0., twopi, nullptr, G4ThreeVector (0,0,0));
+            cylinder_gen_flange1_ = new CylinderPointSampler(0, cube_size/2., chamber_thickn/2.0, 0., twopi, nullptr, G4ThreeVector (0,0,cube_size/2.+chamber_thickn/2.0));
+            cylinder_gen_flange2_ = new CylinderPointSampler(0, cube_size/2., chamber_thickn/2.0, 0., twopi, nullptr, G4ThreeVector (0,0,-cube_size/2.-chamber_thickn/2.0));
+
+            //PTFE
+            G4LogicalVolumeStore* lvStore = G4LogicalVolumeStore::GetInstance();
+            G4LogicalVolume* PTFE = lvStore->GetVolume("PTFE");
+            G4VisAttributes *PTFEVa=new G4VisAttributes(nexus::BloodRedAlpha());
+            PTFEVa->SetForceSolid(true);
+            PTFE->SetVisAttributes(PTFEVa);
+
+        }
         else {
             G4cout << "Using Cylinder Geometry" << G4endl;
             // Vessel
@@ -168,10 +215,10 @@ namespace nexus{
             auto labPhysical= new G4PVPlacement(0,G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0, false, 0, false);
 
             // Place the Outer Cu Cube (Chamber)
-            G4VPhysicalVolume * chamber_phys = new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), outer_cylinder_logic, outer_cylinder_solid->GetName(), lab_logic_volume, false, 0, false);
+            G4VPhysicalVolume * chamber_phys = new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), outer_cylinder_logic, outer_cylinder_solid->GetName(), lab_logic_volume, false, 0, true);
 
             // Xenon Gas in Active Area and Non-Active Area
-            G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),outer_cylinder_logic, false, 0, false);
+            G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),outer_cylinder_logic, false, 0, true);
 
             // VERTEX GENERATORS /////////////////////////////////////
             cylinder_gen_active_  = new CylinderPointSampler(0., cube_size/2., cube_size/2., 0., twopi, nullptr, G4ThreeVector (0,0,0));
@@ -207,7 +254,7 @@ namespace nexus{
 
         //Chamber
         G4LogicalVolume* Chamber = lvStore->GetVolume("CHAMBER");
-        G4VisAttributes *ChamberVa=new G4VisAttributes(nexus::TitaniumGreyAlpha());
+        G4VisAttributes *ChamberVa=new G4VisAttributes(nexus::CopperBrownAlpha());
         ChamberVa->SetForceSolid(true);
         Chamber->SetVisAttributes(ChamberVa);
         // Chamber->SetVisAttributes(G4VisAttributes::GetInvisible());
