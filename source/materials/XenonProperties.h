@@ -28,6 +28,6 @@ std::pair<G4int, G4int> MakeXeDensityDataTable(std::vector<std::vector<G4double>
 G4double GetGasDensity(G4double pressure, G4double temperature);
 
 /// Electroluminescence yield of pure xenon gas
-G4double XenonELLightYield(G4double field_strength, G4double pressure);
+G4double XenonELLightYield(G4double field_strength, G4double pressure, G4double EL_scale=1.0);
 
 #endif

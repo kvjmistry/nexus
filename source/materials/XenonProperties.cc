@@ -205,7 +205,7 @@ G4double LXeScintillation(G4double energy)
   }
 
 
-G4double XenonELLightYield(G4double field_strength, G4double pressure)
+G4double XenonELLightYield(G4double field_strength, G4double pressure, G4double EL_scale)
 {
 
   // Y/x = (a E/p - b) p,
@@ -241,7 +241,7 @@ G4double XenonELLightYield(G4double field_strength, G4double pressure)
   }
 
   // Getting the yield
-  G4double yield = (a * field_strength/pressure - b) * pressure;
+  G4double yield = (a * field_strength/pressure - b) * pressure * EL_scale;
   if (yield < 0.) yield = 0.;
 
   return yield;

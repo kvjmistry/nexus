@@ -115,7 +115,8 @@ Next100FieldCage::Next100FieldCage(G4double grid_thickn):
   // EL gap generation disk parameters
   el_gap_slice_min_(0.), el_gap_slice_max_(1.),
   sipm_pitch_(0),
-  photoe_prob_(0)
+  photoe_prob_(0),
+  el_ly_scale_(1)
 {
   /// Define new categories
   new G4UnitDefinition("kilovolt/cm","kV/cm","Electric field", kilovolt/cm);
@@ -208,6 +209,9 @@ Next100FieldCage::Next100FieldCage(G4double grid_thickn):
 
   msg_->DeclareProperty("photoe_prob", photoe_prob_,
                         "Probability of photon to ie- conversion");
+
+  msg_->DeclareProperty("el_ly_scale", el_ly_scale_,
+                        "Scale the electroluminescent light yield");
 }
 
 
@@ -750,7 +754,7 @@ void Next100FieldCage::BuildELRegion()
     el_field->SetDriftVelocity(EL_drift_v_);
     el_field->SetTransverseDiffusion(ELtransv_diff_);
     el_field->SetLongitudinalDiffusion(ELlong_diff_);
-    el_field->SetLightYield(XenonELLightYield(ELelectric_field_, pressure_));
+    el_field->SetLightYield(XenonELLightYield(ELelectric_field_, pressure_, el_ly_scale_));
     G4Region* el_region = new G4Region("EL_REGION");
     el_region->SetUserInformation(el_field);
     el_region->AddRootLogicalVolume(el_gap_logic);

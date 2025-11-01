@@ -137,6 +137,7 @@ namespace nexus {
     G4double sc_yield_;
     G4double e_lifetime_;
     G4double photoe_prob_;
+    G4double el_ly_scale_;
 
     // Pointers to materials definition
     G4Material* hdpe_;
