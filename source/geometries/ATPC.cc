@@ -225,6 +225,7 @@ namespace nexus{
             cylinder_gen_         = new CylinderPointSampler(cube_size/2., outer_cube_size, outer_cube_size, 0., twopi, nullptr, G4ThreeVector (0,0,0));
             cylinder_gen_flange1_ = new CylinderPointSampler(0, cube_size/2., chamber_thickn/2.0, 0., twopi, nullptr, G4ThreeVector (0,0,cube_size/2.+chamber_thickn/2.0));
             cylinder_gen_flange2_ = new CylinderPointSampler(0, cube_size/2., chamber_thickn/2.0, 0., twopi, nullptr, G4ThreeVector (0,0,-cube_size/2.-chamber_thickn/2.0));
+            cathode_gen_          = new CylinderPointSampler(0, cube_size/2., 0.5*um, 0., twopi, nullptr, G4ThreeVector (0,0,-cube_size/2.+0.5*um));
 
         }
 
@@ -297,6 +298,8 @@ namespace nexus{
                 else {
                     pos= cylinder_gen_flange2_->GenerateVertex(VOLUME);
                 }
+            }else if((region == "Cathode")){
+                pos = cathode_gen_->GenerateVertex(VOLUME);
 
             }else if((region=="CuCylinderActive")){
                 pos= cylinder_gen_active_->GenerateVertex(VOLUME);
