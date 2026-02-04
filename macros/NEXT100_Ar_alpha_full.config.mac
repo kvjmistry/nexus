@@ -23,7 +23,6 @@
 /Geometry/PmtR11410/time_binning 25. nanosecond
 /Geometry/Next100/sipm_time_binning  1. microsecond
 
-## Geant4 only permits units of mm/ns via the macro
 /Geometry/Next100/drift_vel   1.480 mm/mus
 /Geometry/Next100/ELdrift_vel 6.249 mm/mus
 
@@ -38,9 +37,12 @@
 
 ##### GENERATOR #####
 /Generator/SingleParticle/particle alpha
-/Generator/SingleParticle/min_energy 5 MeV
-/Generator/SingleParticle/max_energy 5 MeV
-/Generator/SingleParticle/region ACTIVE
+/Generator/SingleParticle/min_energy 5.6 MeV
+/Generator/SingleParticle/max_energy 5.6 MeV
+#/Generator/SingleParticle/region CENTER
+
+/Generator/SingleParticle/region AD_HOC
+/Geometry/Next100/specific_vertex 26.5 -16.6 95.1 cm
 
 ##### ACTIONS #####
 /Actions/DefaultEventAction/min_energy 50 keV

@@ -17,18 +17,21 @@ namespace nexus {
                                  G4double fieldDrift, G4double fieldEL, G4double v_drift,
                                  G4double v_drift_el, G4double e_lifetime, G4bool useCOMSOL, 
                                  G4bool useELFile,  G4bool useDEGRAD, G4String DetName){
-    DetChamberR_ = DetChamberR;
-    DetChamberL_ = DetChamberL;
-    DetActiveR_  = DetActiveR;
-    DetActiveL_  = DetActiveL;
-    CathodePos_  = CathodePos;
-    ELPos_       = ELPos;
+    // Anything that requires specfic garfield units are translated here. e.g
+    // units are in cm
+    
+    DetChamberR_ = DetChamberR/cm;
+    DetChamberL_ = DetChamberL/cm;
+    DetActiveR_  = DetActiveR/cm;
+    DetActiveL_  = DetActiveL/cm;
+    CathodePos_  = CathodePos/cm;
+    ELPos_       = ELPos/cm;
     nsides_      = nsides;
     GasPressure_ = GasPressure;
-    gap_EL_      = gap_EL;
-    origin_      = origin;
-    fieldDrift_  = fieldDrift;
-    fieldEL_     = fieldEL;
+    gap_EL_      = gap_EL/cm;
+    origin_      = origin/cm;
+    fieldDrift_  = fieldDrift/(volt/cm);
+    fieldEL_     = fieldEL/(volt/cm);
     v_drift_     = v_drift;
     v_drift_el_  = v_drift_el;
     e_lifetime_  = e_lifetime;
@@ -59,7 +62,7 @@ namespace nexus {
                               origin_.y()         << ", "     << origin_.z() 
                               << ") cm" <<"\n"    <<
     "Drift Field: "           << fieldDrift_      << " V/cm"  << "\n" <<
-    "EL Field: "              << fieldEL_         << " kV/cm" << "\n" <<
+    "EL Field: "              << fieldEL_         << " V/cm" << "\n" <<
     "Drift Velocity: "        << v_drift_*microsecond     << " mm/us" << "\n" <<
     "EL Drift Velocity: "     << v_drift_el_*microsecond  << " mm/us" << "\n" <<
     "Electron Lifetime: "     << e_lifetime_/ms           << " ms"    << "\n" <<

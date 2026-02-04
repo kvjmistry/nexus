@@ -25,7 +25,7 @@ DegradModel::~DegradModel() {}
 G4bool DegradModel::IsApplicable(const G4ParticleDefinition& particleType) {
 
     if (GH_.useDEGRAD_){
-        if (particleType.GetParticleName()== "e-" || particleType.GetParticleName()== "gamma" || particleType.GetParticleName()== "e+")
+        if (particleType.GetParticleName()== "e-" || particleType.GetParticleName()== "e+")
             return true;
         else
             return false;
@@ -240,8 +240,6 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
                 Fluorescence = v[i+4]; // 0 to N where N is the ie- for each N absorbed fluorescence photon in the event
                 PairProd     = v[i+5]; // 0: not from pair prod, 1: produced from electron track,     2: produced from positron track
                 Brems        = v[i+6]; // 0: not from brem,      1: produced from remaining electrons, 2: produced from brem gamma
-
-                AddBremID(trk_index, Brems);
                 
                 // Convert from um to mm in GEANT4
                 // also Y and Z axes are swapped in GEANT4 and Garfield++ relatively to Degrad
@@ -249,6 +247,10 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
                 posY=posZDegrad*0.001+posYInitial;
                 posZ=posYDegrad*0.001+posZInitial;
                 time=timeDegrad*0.001+timeInitial; // Convert ps to ns
+
+
+                // Add the brem id
+                AddBremID(trk_index, Brems, time);
 
                 // std::cout << "DegradModel::DoIt(): v[i-4]" << v[i] << "," << v[i+1] << "," << v[i+2] << "," << v[i+3] << "," << v[i+4]   << std::endl;
                 // std::cout << "DegradModel::DoIt(): xinitial, poxXDegrad [mm]" << posXInitial << ", " << posXDegrad*0.001 << std::endl;
@@ -364,6 +366,7 @@ void DegradModel::Reset(){
     N_ioni_.clear();
     trk_len_vec_.clear();
     brem_id_vec_.clear();
+    time_vec_.clear();
 }
 
 void DegradModel::AddTrack(G4int trk_id){
@@ -377,7 +380,9 @@ void DegradModel::AddTrack(G4int trk_id){
         N_ioni_.push_back(0);
         trk_len_vec_.push_back(0.);
         std::vector<G4int> empty_vec;
+        std::vector<G4double> empty_vecd;
         brem_id_vec_.push_back(empty_vec);
+        time_vec_.push_back(empty_vecd);
     }
 }
 
@@ -483,16 +488,29 @@ G4double DegradModel::GetScintTime(){
 
 }
 
-void DegradModel::AddBremID(G4int trk_index, G4int brem_id){
+void DegradModel::AddBremID(G4int trk_index, G4int brem_id, G4double time){
 
-    brem_id_vec_[trk_index].push_back(brem_id);
+    if (brem_id == 2) {
+        brem_id_vec_[trk_index].push_back(brem_id);
+        time_vec_[trk_index].push_back(time);
+    }
 }
 
 
-G4int DegradModel::GetBremID(G4int trk_id, G4int hit_id){
+G4int DegradModel::GetBremID(G4int trk_id, G4int hit_id, G4double time){
 
     G4int trk_index = GetCurrentTrackIndex(trk_id);
 
-    return brem_id_vec_[trk_index][hit_id];
+    // Find the row with matching time
+    for (G4int i = 0; i < time_vec_[trk_index].size(); ++i) {
+        if (std::round(time_vec_[trk_index][i] * 100) / 100 == std::round(time * 100) / 100) {
+            return 2;
+        }
+    }
+
+    // if (time_index == -1)
+    //     std::cout << "Error time index not found: " << std::round(time * 100) / 100 << ", " << std::round(time_vec_[trk_index][10000] * 100) / 100 << std::endl;
+
+    return 1;
 
 }

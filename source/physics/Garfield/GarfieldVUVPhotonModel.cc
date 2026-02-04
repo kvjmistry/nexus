@@ -33,6 +33,7 @@
 #include "Trajectory.h"
 #include "TrajectoryMap.h"
 #include "XenonProperties.h"
+#include "ArgonGasProperties.h"
 #include "PhysicsUtils.h"
 #include "IonizationElectron.h"
 
@@ -194,7 +195,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
   // return;
 
   // Print Electric Field
-  // PrintElectricField(x0, y0, z0);
+  // PrintElectricField(x0,y0,-0.1);
 
   G4double xi,yi,zi,ti;
   
@@ -341,7 +342,10 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
     
 
     // generator
-    active_gen_ = new CylinderPointSampler(0., GH_.DetChamberR_, GH_.DetChamberL_/2., 0., twopi, nullptr, G4ThreeVector(GH_.origin_.x(), GH_.origin_.y(), GH_.origin_.z()));
+    active_gen_ = new CylinderPointSampler(0., GH_.DetChamberR_*cm, GH_.DetChamberL_*cm/2., 0., twopi, nullptr, G4ThreeVector(GH_.origin_.x()*cm, GH_.origin_.y()*cm, GH_.origin_.z()*cm));
+    
+    // Can use this mode for generating electrons in the grids. 
+    // active_gen_ = new CylinderPointSampler(0., GH_.DetChamberR_*cm, 0.127/2*mm, 0., twopi, nullptr, G4ThreeVector(0,0,0));
 
 
 }
@@ -462,8 +466,10 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
         // Generate a random number to determine which distribution to sample from
         G4double randomNumber = G4UniformRand();
 
-        // Probability = 0.5%
-        if (randomNumber < 0.005) {
+        // Probability v1 = 0.05
+        // Probability v2 = 0.1
+        // Probability v3 = 0.2
+        if (randomNumber < 0.2) {
 
           G4ThreeVector vertex;
           G4ThreeVector CoordOrigin(GH_.origin_.x(), GH_.origin_.y(), GH_.origin_.z());
@@ -471,14 +477,30 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
           G4VPhysicalVolume *VertexVolume;
           do {
             vertex = active_gen_->GenerateVertex(VOLUME);
-            vertex = vertex - CoordOrigin;
+            // std::cout << vertex.x() << "," << vertex.y() << "," << vertex.z() << std::endl;
             VertexVolume = theNavigator_->LocateGlobalPointAndSetup(vertex, 0, false);
-          } while (VertexVolume->GetName() != "ACTIVE");
+          } while (VertexVolume->GetName() != "ACTIVE" && vertex.z()>0.1/cm);
+
+          // Calculate the radial distance to the point
+          G4double radial_dist = std::sqrt(  (fakepos.x() - vertex.x())*(fakepos.x() - vertex.x()) + 
+                                             (fakepos.y() - vertex.y())*(fakepos.y() - vertex.y()) +
+                                             (fakepos.z() - vertex.z())*(fakepos.z() - vertex.z()))/cm; // units are mm, use cm 
+
+          // std::cout <<  radial_dist*radial_dist <<", " << vertex.z()*vertex.z() << std::endl;
+
+          G4double p_ioni = 1/(radial_dist*radial_dist); // 1/r^2
+          // G4double p_ioni = 1/(vertex.z()/cm); // 1/r
+
+          // Get a second random number to attenuate based on the z-position
+          randomNumber = G4UniformRand();
+
+          if (randomNumber < p_ioni) {
 
           // Create secondary electron
-          G4DynamicParticle electron(IonizationElectron::Definition(),G4RandomDirection(), 1.13*eV);
-          G4Track *newTrack=fastStep.CreateSecondaryTrack(electron, vertex, tig4, false);
-          continue;
+            G4DynamicParticle electron(IonizationElectron::Definition(),G4RandomDirection(), 1.13*eV);
+            G4Track *newTrack=fastStep.CreateSecondaryTrack(electron, vertex, tig4, false);
+            continue;
+          }
         } 
         
         // std::cout <<  "fakepos,time is " << fakepos[0] << ", " << fakepos[1] << ", " << fakepos[2] << ", " << tig4 << std::endl;
@@ -497,7 +519,8 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
 
     // std::cout << "Generating Photons"<< std::endl;
     // EL field in G4 units (V/mm), Pressure in G4 units (MeV/mm3), gap in G4 units (mm)
-    const G4int el_gain = XenonELLightYield(GH_.fieldEL_*kilovolt/cm, GH_.GasPressure_)*GH_.gap_EL_*cm; // E [V/mm], P [MeV/mm3], EL gap [mm]
+    // const G4int el_gain = XenonELLightYield(GH_.fieldEL_*volt/cm, GH_.GasPressure_)*GH_.gap_EL_*cm; // E [V/mm], P [MeV/mm3], EL gap [mm]
+    const G4int el_gain = ArgonELLightYield(GH_.fieldEL_*volt/cm, GH_.GasPressure_)*GH_.gap_EL_*cm;
 
     // std::cout << " Yield is "<< el_gain <<" Field " <<GH_.fieldEL_<< " Pressure  " << GH_.GasPressure_/bar<< " EL  " << GH_.gap_EL_*cm << std::endl;
     
