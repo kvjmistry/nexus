@@ -21,6 +21,7 @@
 #include <G4StepLimiter.hh>
 #include <G4FastSimulationManagerProcess.hh>
 #include <G4PhysicsConstructorFactory.hh>
+#include <G4FastSimulationPhysics.hh>
 
 
 namespace nexus {
@@ -33,7 +34,7 @@ namespace nexus {
 
   NexusPhysics::NexusPhysics():
     G4VPhysicsConstructor("NexusPhysics"),
-    clustering_(true), drift_(true), electroluminescence_(true), photoelectric_(false)
+    clustering_(true), drift_(true), electroluminescence_(true), photoelectric_(false), modphys_(false)
   {
     msg_ = new G4GenericMessenger(this, "/PhysicsList/Nexus/",
       "Control commands of the nexus physics list.");
@@ -49,6 +50,9 @@ namespace nexus {
 
     msg_->DeclareProperty("photoelectric", photoelectric_,
       "Switch on/off the photoelectric effect.");
+
+    msg_->DeclareProperty("modphys", modphys_,
+      "Switch on/off Modular G4 physics.");
 
   }
 
@@ -135,6 +139,30 @@ namespace nexus {
         }
       }
     }
-  }
+
+    // Modular Physics -- Degrad
+    if (modphys_) {
+      
+      // This is needed to notify Geant4 that the G4FastSimulationModel is to be used as a possible physics process
+      auto ModPhysProcess = new G4FastSimulationManagerProcess("ModPhys");
+
+      auto aParticleIterator = GetParticleIterator();
+      aParticleIterator->reset();
+
+      while ((*aParticleIterator)()) {
+        G4ParticleDefinition* particle     = aParticleIterator->value();
+        G4ProcessManager*     pmanager     = particle->GetProcessManager();
+        G4String              particleName = particle->GetParticleName();
+
+        if (pmanager) {
+          // Add the fast sim process for the other particles
+          pmanager->AddDiscreteProcess(ModPhysProcess);
+        }
+      }
+
+    }
+
+
+  } //
 
 } // end namespace nexus

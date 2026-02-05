@@ -17,6 +17,7 @@
 #include "CylinderPointSampler.h"
 #include "BoxPointSampler.h"
 #include "HexagonMeshTools.h"
+#include "DegradModel.h"
 
 #include <G4Navigator.hh>
 #include <G4SystemOfUnits.hh>
@@ -354,6 +355,9 @@ void Next100FieldCage::BuildActive()
   G4Region* drift_region = new G4Region("DRIFT");
   drift_region->SetUserInformation(field);
   drift_region->AddRootLogicalVolume(active_logic);
+
+  //These commands generate the four gas models and connect it to the GasRegion
+  new DegradModel("DegradModel", drift_region, ionisd, pressure_, 80);
 
   /// Vertex generator
   active_gen_radius_ =
