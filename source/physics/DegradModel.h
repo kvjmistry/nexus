@@ -21,7 +21,7 @@ namespace nexus{
         //-------------------------
         // Constructor, destructor
         //-------------------------
-        DegradModel(G4String, G4Region*, IonizationSD* ionisd, G4double GasPressure_, G4double Efield_);
+        DegradModel(G4String, G4Region*, G4double GasPressure_, G4double Efield_);
         G4ThreeVector GetTrackEndPoint(G4int trk_id);
         G4double GetTrackEndTime(G4int trk_id);
         G4int GetCurrentTrackIndex(G4int trk_id); // Get the index of the track in the vector
@@ -36,6 +36,8 @@ namespace nexus{
         virtual void DoIt(const G4FastTrack&, G4FastStep&);
         void Reset();
         void AddTrack(G4int trk_id);
+
+        void AddSensitiveVolume(IonizationSD* sd, G4String name);
 
         private:
         void GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4Pos, G4ThreeVector G4Dir, G4double G4Time, G4int trk_id);
@@ -71,7 +73,7 @@ namespace nexus{
         G4double fast_prob_; // %
 
         // The sensitive detector to fill hits into
-        IonizationSD* fDegradSD;
+        IonizationSD *SD_active_, *SD_buffer_;
 
         G4PhysicsTable* theFastIntegralTable_;
         G4PhysicsOrderedFreeVector* spectrum_integral;

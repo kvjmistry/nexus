@@ -18,8 +18,8 @@ using namespace nexus;
 
 extern char **environ;
 
-DegradModel::DegradModel(G4String modelName, G4Region* envelope, IonizationSD* ionisd, G4double GasPressure, G4double Efield)
-    : G4VFastSimulationModel(modelName, envelope), theFastIntegralTable_(0), fDegradSD(ionisd){
+DegradModel::DegradModel(G4String modelName, G4Region* envelope, G4double GasPressure, G4double Efield)
+    : G4VFastSimulationModel(modelName, envelope), theFastIntegralTable_(0){
     
     event_id_ = -1;
     GasPressure_ = GasPressure;
@@ -35,8 +35,9 @@ G4bool DegradModel::IsApplicable(const G4ParticleDefinition& particleType) {
 
     if (particleType.GetParticleName()== "e-" || particleType.GetParticleName()== "e+")
         return true;
-    else
+    else{
         return false;
+    }
     
 }
 
@@ -276,7 +277,7 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4P
 
                 G4String solidName = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->LocateGlobalPointAndSetup(DegradPosG4)->GetName();
                 
-                if (solidName != "ACTIVE"){
+                if (solidName != "ACTIVE" && solidName != "BUFFER"){
                     continue;
                 }
 
@@ -292,7 +293,14 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4P
                 ie_hit->SetTime(timeDegrad);
                 ie_hit->SetEnergyDeposit(22.4*eV);
                 ie_hit->SetPosition(DegradPosG4);
-                fDegradSD->InsertIonizationHit(ie_hit);
+                
+                // Add hit to right sensitive volume
+                if (solidName == "ACTIVE"){
+                    SD_active_->InsertIonizationHit(ie_hit);
+                }
+                else if (solidName == "BUFFER"){
+                    SD_buffer_->InsertIonizationHit(ie_hit);
+                }
 
             }
             v.clear();
@@ -327,7 +335,7 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4P
                 G4String solidName = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->LocateGlobalPointAndSetup(DegradPosG4)->GetName();
                 
                 // Do not save depositions that are not in the active volume
-                if (solidName != "ACTIVE"){
+                if (solidName != "ACTIVE" && solidName != "BUFFER"){
                     continue;
                 }
                 
@@ -365,12 +373,8 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4P
     // Add the energy deposited to the trajectory so the event gets stored
     Trajectory* trj = (Trajectory*) TrajectoryMap::Get(trk_id);
     if (trj) {
-
-        std::cout << "Total ionizations:" << electronNumber << std::endl;
         
         G4double mean_ioni_E = GetAvgIoniEnergy(trk_id);
-        // std::cout << "mean_ioni_E:" << mean_ioni_E << std::endl;
-        
         trj->SetEnergyDeposit(mean_ioni_E * electronNumber);
 
     }
@@ -626,4 +630,19 @@ void DegradModel::GetPhotonPol(G4ThreeVector &momentum, G4ThreeVector &polarizat
   polarization = polarization.unit();
 
   return;
+}
+
+void DegradModel::AddSensitiveVolume(IonizationSD* sd, G4String name){
+
+    if (name == "ACTIVE"){
+        SD_active_ = sd;
+    }
+    else if (name == "BUFFER"){
+        SD_buffer_ = sd;
+    }
+    else {
+        G4Exception("[DegradModel]", "AddSensitiveVolume()",
+                FatalErrorInArgument, "Error in adding sensitive volume to degrad");
+    }
+    return;
 }

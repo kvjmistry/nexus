@@ -9,6 +9,7 @@
 #ifndef NEXT100_FIELDCAGE_H
 #define NEXT100_FIELDCAGE_H
 
+#include "DegradModel.h"
 #include "GeometryBase.h"
 #include <vector>
 
@@ -146,6 +147,9 @@ namespace nexus {
     G4Material* teflon_;
     G4Material* copper_;
     G4Material* steel_;
+
+    // Degrad 
+    DegradModel *dm_;
   };
 
 
