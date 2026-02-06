@@ -13,6 +13,7 @@
 #include <G4VFastSimulationModel.hh>
 #include <G4PhysicsTable.hh>
 #include <G4PhysicsOrderedFreeVector.hh>
+#include <G4RotationMatrix.hh>
 
 namespace nexus{
     class DegradModel : public G4VFastSimulationModel {
@@ -37,7 +38,7 @@ namespace nexus{
         void AddTrack(G4int trk_id);
 
         private:
-        void GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degradPos,G4double degradTime, G4int trk_id);
+        void GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4Pos, G4ThreeVector G4Dir, G4double G4Time, G4int trk_id);
         void SetTrackEndPoint(G4ThreeVector pos, G4double time, G4int trk_index);
         void SetNioni(G4int Ne, G4int trk_index); // Set the number of ionization particles
         void AddTrackLength(G4int trk_id); // Get track length
@@ -46,6 +47,8 @@ namespace nexus{
         void BuildThePhysicsTable();
         void ComputeCumulativeDistribution(const G4PhysicsOrderedFreeVector&, G4PhysicsOrderedFreeVector&);
         void GetPhotonPol(G4ThreeVector &momentum, G4ThreeVector &polarization);
+
+        G4int run_degrad(const char* cmd);
 
         G4double fPrimKE;      // Primary kinetic energy of the particle
         G4double GasPressure_; // bar
@@ -59,6 +62,7 @@ namespace nexus{
         std::vector<G4ThreeVector> track_end_pos_;
         std::vector<std::vector<G4double>> time_vec_;
         G4bool degrad_status_; // Checks if degrad has been run
+        G4RotationMatrix RotMatrix_;
 
         std::vector<G4int> track_ids_;
 
