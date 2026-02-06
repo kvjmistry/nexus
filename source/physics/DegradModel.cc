@@ -52,6 +52,12 @@ G4bool DegradModel::ModelTrigger(const G4FastTrack& fastTrack) {
         return false;
     }
 
+    // Dont simulate anything smaller than 1 keV
+    if (fPrimKE < 1*keV){
+        // std::cout << "Primary particle energy smaller than chosen Degrad limit, will use G4 generation" << std::endl;
+        return false;
+    }
+
     // Krishan: Degrad handles gammas/X-Rays but not for energies > 2 MeV
     // The photoelectron should be produced though from the >= 2 MeV gammas
     // if (fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName() == "gamma" && fPrimKE>= 2/eV){
