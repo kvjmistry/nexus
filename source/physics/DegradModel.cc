@@ -23,7 +23,7 @@ DegradModel::DegradModel(G4String modelName, G4Region* envelope, IonizationSD* i
     
     event_id_ = -1;
     GasPressure_ = GasPressure;
-    Efield_ = Efield;
+    Efield_ = Efield/(volt/cm); // Put back in V/cm rather than G4 units
 
     BuildThePhysicsTable();
 
@@ -43,10 +43,10 @@ G4bool DegradModel::IsApplicable(const G4ParticleDefinition& particleType) {
 G4bool DegradModel::ModelTrigger(const G4FastTrack& fastTrack) {
     
     // Set the kinetic energy
-    fPrimKE = fastTrack.GetPrimaryTrack()->GetKineticEnergy()/eV;
+    fPrimKE = fastTrack.GetPrimaryTrack()->GetKineticEnergy()*MeV; // in MeV -- G4 default
 
     // Dont simulate anything larger than 4 MeV
-    if (fPrimKE> 4/eV){
+    if (fPrimKE> 4*MeV){
         std::cout << "Primary particle energy larger than chosen Degrad limit, will use G4 generation" << std::endl;
         return false;
     }
@@ -114,8 +114,8 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
     // std::cout << "The SEED is: " << seed << std::endl;
 
     // Gamma KE
-    std::cout <<"The particle energy is: " << fPrimKE*eV << "MeV" << std::endl;
-    G4int KE = int(fPrimKE); // in eV
+    std::cout <<"The particle energy is: " << fPrimKE << " MeV" << std::endl;
+    G4int KE = int(fPrimKE/eV); // in eV
     G4String particleKE(","+std::to_string(KE));
 
     G4String particle_name = fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
@@ -140,8 +140,10 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
     G4String xenonP(","+std::to_string(Press));
     
     // Electric field
-    G4String Efield_str(std::to_string(Efield_));
-    std::cout << "The electric field is:" <<Efield_ << ", "<<  Efield_str<< std::endl;
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(1) << Efield_; // format to 1 dp 
+    G4String Efield_str(stream.str());
+    std::cout << "The electric field is: " << Efield_str  << " V/cm" << std::endl;
 
     // Create the input card
     // Note the exact precision in below arguments. The integers gammaKE,xenonP in particular need a ".0" tacked on. 
@@ -189,9 +191,6 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4P
     G4int     Fluorescence{0}, PairProd{0}, Brems{0};
     G4String  line;
     std::vector<G4double> v;
-
-    // To Do:
-    // Remove hits that are not in the active volume
 
     // std::cout << "The initial position is: " << G4Pos.x() << ", " << G4Pos.y() << ", "<< G4Pos.z() << std::endl;
 
@@ -368,7 +367,10 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4P
     if (trj) {
 
         std::cout << "Total ionizations:" << electronNumber << std::endl;
-        G4double mean_ioni_E = GetAvgIoniEnergy(trk_id)*eV;
+        
+        G4double mean_ioni_E = GetAvgIoniEnergy(trk_id);
+        // std::cout << "mean_ioni_E:" << mean_ioni_E << std::endl;
+        
         trj->SetEnergyDeposit(mean_ioni_E * electronNumber);
 
     }
@@ -423,7 +425,7 @@ void DegradModel::AddTrack(G4int trk_id){
         track_ids_.push_back(trk_id);
         end_times_.push_back(-1);
         track_end_pos_.push_back(G4ThreeVector(0,0,0));
-        ke_vec_.push_back(fPrimKE);
+        ke_vec_.push_back(fPrimKE/eV);
         N_ioni_.push_back(0);
         trk_len_vec_.push_back(0.);
         std::vector<G4int> empty_vec;
@@ -508,7 +510,7 @@ void DegradModel::AddTrackLength(G4int trk_id){
         }
     }
 
-    trk_len_vec_[trk_index] = length*0.001; // degrad length is in um
+    trk_len_vec_[trk_index] = length*um; // degrad length is in um
 
     // Close the file
     inputFile.close();
@@ -520,7 +522,7 @@ G4double DegradModel::GetScintTime(){
   G4double scint_time = 0;
 
   // Generate a random number to determine which distribution to sample from
-  double randomNumber = G4UniformRand();
+  G4double randomNumber = G4UniformRand();
 
   // Fast Component - 4.5 ns
   if (randomNumber < slow_prob_) {

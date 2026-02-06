@@ -100,6 +100,8 @@ Next100FieldCage::Next100FieldCage(G4double grid_thickn):
   drift_long_diff_ (.3 * mm/sqrt(cm)),
   ELtransv_diff_ (0. * mm/sqrt(cm)),
   ELlong_diff_ (0. * mm/sqrt(cm)),
+  // Drift field
+  drift_field_(118 * volt/cm),
   // Drift velocities
   drift_v_(1. * mm/microsecond),
   EL_drift_v_(2.5 * mm/microsecond),
@@ -119,6 +121,7 @@ Next100FieldCage::Next100FieldCage(G4double grid_thickn):
   photoe_prob_(0)
 {
   /// Define new categories
+  new G4UnitDefinition("volt/cm","V/cm","Drift Electric field", volt/cm);
   new G4UnitDefinition("kilovolt/cm","kV/cm","Electric field", kilovolt/cm);
   new G4UnitDefinition("mm/sqrt(cm)","mm/sqrt(cm)","Diffusion", mm/sqrt(cm));
   new G4UnitDefinition("mm/microsecond","mm/microsecond","drift velocity", mm/microsecond);
@@ -159,6 +162,11 @@ Next100FieldCage::Next100FieldCage(G4double grid_thickn):
                         "Longitudinal diffusion in the EL region");
   ELlong_diff_cmd.SetParameterName("ELlong_diff", true);
   ELlong_diff_cmd.SetUnitCategory("Diffusion");
+
+  G4GenericMessenger::Command& drift_field_cmd =
+  msg_->DeclareProperty("drift_field", drift_field_, "Electric field in the drift region");
+  drift_field_cmd.SetParameterName("drift_field", true);
+  drift_field_cmd.SetUnitCategory("Drift Electric field");
 
   G4GenericMessenger::Command&  drift_vel_cmd =
   msg_->DeclareProperty("drift_v", drift_v_,
@@ -356,8 +364,8 @@ void Next100FieldCage::BuildActive()
   drift_region->SetUserInformation(field);
   drift_region->AddRootLogicalVolume(active_logic);
 
-  //These commands generate the four gas models and connect it to the GasRegion
-  new DegradModel("DegradModel", drift_region, ionisd, pressure_, 80);
+  // These commands generate the four gas models and connect it to the GasRegion
+  new DegradModel("DegradModel", drift_region, ionisd, pressure_, drift_field_);
 
   /// Vertex generator
   active_gen_radius_ =
