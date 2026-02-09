@@ -50,6 +50,8 @@ namespace nexus{
         void ComputeCumulativeDistribution(const G4PhysicsOrderedFreeVector&, G4PhysicsOrderedFreeVector&);
         void GetPhotonPol(G4ThreeVector &momentum, G4ThreeVector &polarization);
 
+        G4int run_degrad();
+
         G4double fPrimKE;      // Primary kinetic energy of the particle
         G4double GasPressure_; // bar
         G4double Efield_;      // V/cm  
@@ -77,6 +79,8 @@ namespace nexus{
 
         G4PhysicsTable* theFastIntegralTable_;
         G4PhysicsOrderedFreeVector* spectrum_integral;
+
+        G4bool verbose_;
 
     };
 }

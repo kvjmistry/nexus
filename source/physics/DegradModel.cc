@@ -12,7 +12,9 @@
 #include <G4PhysicalConstants.hh>
 
 #include <spawn.h>
+#include <fcntl.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 using namespace nexus;
 
@@ -24,6 +26,7 @@ DegradModel::DegradModel(G4String modelName, G4Region* envelope, G4double GasPre
     event_id_ = -1;
     GasPressure_ = GasPressure;
     Efield_ = Efield/(volt/cm); // Put back in V/cm rather than G4 units
+    verbose_ = false;
 
     BuildThePhysicsTable();
 
@@ -55,7 +58,7 @@ G4bool DegradModel::ModelTrigger(const G4FastTrack& fastTrack) {
     // Dont simulate anything smaller than 1 keV
     if (fPrimKE < 1*keV){
         // std::cout << "Primary particle energy smaller than chosen Degrad limit, will use G4 generation" << std::endl;
-        return false;
+        // return false;
     }
 
     // Krishan: Degrad handles gammas/X-Rays but not for energies > 2 MeV
@@ -121,8 +124,9 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
     // std::cout << "The SEED is: " << seed << std::endl;
 
     // Gamma KE
-    std::cout <<"The particle energy is: " << fPrimKE << " MeV" << std::endl;
-    G4int KE = int(fPrimKE/eV); // in eV
+    if (verbose_) std::cout <<"The particle energy is: " << fPrimKE << " MeV" << std::endl;
+    
+        G4int KE = int(fPrimKE/eV); // in eV
     G4String particleKE(","+std::to_string(KE));
 
     G4String particle_name = fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
@@ -130,15 +134,15 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
     G4String degrad_mode = "0";
     if (particle_name == "gamma"){
         degrad_mode = "3";
-        std::cout << "The particle is a gamma"<< std::endl;
+        if (verbose_) std::cout << "The particle is a gamma"<< std::endl;
     }
     // Assume its an electron then
     else{
         degrad_mode = "2";
-        std::cout << "The particle is an electron/positron"<< std::endl;
+        if (verbose_) std::cout << "The particle is an electron/positron"<< std::endl;
     }
     
-    std::cout << "The degrad mode is: " << degrad_mode << std::endl;
+    if (verbose_) std::cout << "The degrad mode is: " << degrad_mode << std::endl;
 
     // Xenon Pressure
     const static G4double torr = 1. / 750.062 * bar;
@@ -150,31 +154,34 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(1) << Efield_; // format to 1 dp 
     G4String Efield_str(stream.str());
-    std::cout << "The electric field is: " << Efield_str  << " V/cm" << std::endl;
+    if (verbose_) std::cout << "The electric field is: " << Efield_str  << " V/cm" << std::endl;
 
     // Create the input card
     // Note the exact precision in below arguments. The integers gammaKE,xenonP in particular need a ".0" tacked on. 
     G4String degradString="printf \"1,1,"+degrad_mode+",2,"+seed+particleKE+".0,7.0,10000.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0"+xenonP+".0\n"+Efield_str+",0.0,0.0,2,0\n100.0,0.5,0,0,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
+    // G4String degradString="printf \"1,1,2,2,1,1000000.0,7.0,10000.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,750.0\n118.0,0.0,0.0,2,0\n100.0,0.5,0,0,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
     G4int stdout=system(degradString.data());
 
     // Execute degrad
-    std::string degrad_exec = std::string(std::getenv("DEGRAD_HOME")) + "/Degrad < conditions_Degrad.txt"+ " > degrad_print.txt";
+    // std::string degrad_exec = std::string(std::getenv("DEGRAD_HOME")) + "/Degrad < conditions_Degrad.txt"+ " > degrad_print.txt";
+    std::string degrad_exec = std::string(std::getenv("DEGRAD_HOME")) + "/Degrad < conditions_Degrad.txt > degrad_print.txt 2> degrad_error.txt";
     const char *degrad_exec_str = degrad_exec.c_str();
 
     // Sometimes degrad just fails, so try running a couple times if it does
     G4int return_status, tries{0};
     do {
         // Execute the command and get the return status
-        return_status = stdout=system(degrad_exec_str);
+        // return_status = stdout=system(degrad_exec_str);
+        int return_status = run_degrad();
 
         // If return status is not zero, print a message
         if (return_status != 0) {
-            std::cout << "Command failed with return status: " << return_status << std::endl;
+            if (verbose_) std::cout << "Command failed with return status: " << return_status << std::endl;
         }
         tries++;
     } while (return_status != 0 && tries < 4);  // Try three times before giving up
 
-    std::cout << "Degrad return status: " << return_status << " number of tries: "<< tries << std::endl;
+    if (verbose_) std::cout << "Degrad return status: " << return_status << " number of tries: "<< tries << std::endl;
     // stdout=system("cat degrad_print.txt");
     AddTrackLength(trk_id);
 
@@ -225,8 +232,12 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4P
             Nexc = v[2];
 
             SetNioni(Nep, trk_index);
-            G4cout << "Total ie-: " << Nep << G4endl;
-            G4cout << "Total S1: " << Nexc << G4endl;
+            
+            if (verbose_) {
+                G4cout << "Total ie-: " << Nep << G4endl;
+                G4cout << "Total S1: " << Nexc << G4endl;
+            }
+            
             v.clear();
         }
         // Ionizations
@@ -373,15 +384,19 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4P
     }
 
     inFile.close();
-    G4cout << "Number of active ie-: " << electronNumber << G4endl;
-    G4cout << "Number of active S1: " << S1Number << G4endl;
+    
+    if (verbose_) {
+        G4cout << "Number of active ie-: " << electronNumber << G4endl;
+        G4cout << "Number of active S1: " << S1Number << G4endl;
+    }
 
     // Add the energy deposited to the trajectory so the event gets stored
     Trajectory* trj = (Trajectory*) TrajectoryMap::Get(trk_id);
     if (trj) {
         
-        G4double mean_ioni_E = GetAvgIoniEnergy(trk_id);
+        G4double mean_ioni_E = GetAvgIoniEnergy(trk_id)*eV;
         trj->SetEnergyDeposit(mean_ioni_E * electronNumber);
+        // std::cout << "Energy saved from degrad is: " << mean_ioni_E << ", "<< electronNumber  <<", " << mean_ioni_E * electronNumber << std::endl;
 
     }
     
@@ -485,7 +500,7 @@ void DegradModel::AddTrackLength(G4int trk_id){
     // Please note, it appears the track length in degrad is actually the dist
     // to the track end point from start rather than the prim length. 
 
-    std::cout << "Adding Track Length from Degrad" << std::endl;
+    if (verbose_) std::cout << "Adding Track Length from Degrad" << std::endl;
 
     G4int trk_index = GetCurrentTrackIndex(trk_id);
 
@@ -651,4 +666,52 @@ void DegradModel::AddSensitiveVolume(IonizationSD* sd, G4String name){
                 FatalErrorInArgument, "Error in adding sensitive volume to degrad");
     }
     return;
+}
+
+/*
+ * Run the DEGRAD executable safely (no system(), no shell).
+ * stdin  <- conditions_Degrad.txt
+ * stdout -> degrad_print.txt
+ * stderr -> degrad_error.txt
+ */
+G4int DegradModel::run_degrad() {
+    pid_t pid;
+
+    posix_spawn_file_actions_t actions;
+    posix_spawn_file_actions_init(&actions);
+
+    // Open files for redirection
+    int fd_in  = open("conditions_Degrad.txt", O_RDONLY);
+    int fd_out = open("degrad_print.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int fd_err = open("degrad_error.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
+    // Redirect stdin / stdout / stderr
+    posix_spawn_file_actions_adddup2(&actions, fd_in,  STDIN_FILENO);
+    posix_spawn_file_actions_adddup2(&actions, fd_out, STDOUT_FILENO);
+    posix_spawn_file_actions_adddup2(&actions, fd_err, STDERR_FILENO);
+
+    // Locate Degrad executable
+    const char* home = std::getenv("DEGRAD_HOME");
+    std::string degrad = std::string(home) + "/Degrad";
+
+    char* argv[] = { degrad.data(), nullptr };
+
+    // Spawn process (no shell)
+    int rc = posix_spawn(&pid, degrad.c_str(), &actions, nullptr, argv, environ);
+
+    close(fd_in);
+    close(fd_out);
+    close(fd_err);
+
+    // DESTROY ACTIONS
+    posix_spawn_file_actions_destroy(&actions);
+
+    if (rc != 0) return rc;
+
+    // Wait for completion
+    int status;
+    waitpid(pid, &status, 0);
+
+    // Return exit code if normal exit
+    return status;
 }
