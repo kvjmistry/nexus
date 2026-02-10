@@ -51,14 +51,14 @@ G4bool DegradModel::ModelTrigger(const G4FastTrack& fastTrack) {
 
     // Dont simulate anything larger than 4 MeV
     if (fPrimKE> 4*MeV){
-        std::cout << "Primary particle energy larger than chosen Degrad limit, will use G4 generation" << std::endl;
+        // std::cout << "Primary particle energy larger than chosen Degrad limit, will use G4 generation" << std::endl;
         return false;
     }
 
-    // Dont simulate anything smaller than 1 keV
-    if (fPrimKE < 1*keV){
-        // std::cout << "Primary particle energy smaller than chosen Degrad limit, will use G4 generation" << std::endl;
-        // return false;
+    // Dont simulate anything smaller than 50 keV
+    // Stops simulating all the auger electrons and stuff after photoelectric effect
+    if (fPrimKE < 50*keV){
+        return false;
     }
 
     // Krishan: Degrad handles gammas/X-Rays but not for energies > 2 MeV
@@ -285,17 +285,16 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4P
 
                 // std::cout << "DegradModel::DoIt(): v[i-4]" << v[i] << "," << v[i+1] << "," << v[i+2] << "," << v[i+3] << "," << v[i+4]   << std::endl;
                 // std::cout << "DegradModel::DoIt(): xinitial, poxXDegrad [mm]" << posXInitial << ", " << posXDegrad*0.001 << std::endl;
-                        
-                // Set the track end position, the 3ns timing is in case there was a brem. May need to adjust
-                if (Fluorescence == 0 && PairProd == 0 && (Brems == 0 || Brems == 1) && timeDegrad < 3*ns){
-                    SetTrackEndPoint(DegradPosG4, timeDegrad, trk_index);
-                }
-
 
                 G4String solidName = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->LocateGlobalPointAndSetup(DegradPosG4)->GetName();
                 
                 if (solidName != "ACTIVE" && solidName != "BUFFER"){
                     continue;
+                }
+
+                // Set the track end position, the 3ns timing is in case there was a brem. May need to adjust
+                if (Fluorescence == 0 && PairProd == 0 && (Brems == 0 || Brems == 1) && timeDegrad < 3*ns){
+                    SetTrackEndPoint(DegradPosG4, timeDegrad, trk_index);
                 }
 
                 electronNumber++;
@@ -397,7 +396,6 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep, G4ThreeVector G4P
         G4double mean_ioni_E = GetAvgIoniEnergy(trk_id)*eV;
         trj->SetEnergyDeposit(mean_ioni_E * electronNumber);
         // std::cout << "Energy saved from degrad is: " << mean_ioni_E << ", "<< electronNumber  <<", " << mean_ioni_E * electronNumber << std::endl;
-
     }
     
 }
