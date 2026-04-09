@@ -926,11 +926,15 @@ namespace opticalprops {
     //  400. * nm,     noAbsLength_   // 100 nm
     //};
 
-    // WLS ABSORPTION LENGTH (Version NoSecWLS)
-    // The NoSecWLS is forced by setting the WLS_absLength to noAbsLength_
-    // for wavelengths higher than 380 nm where the WLS emission spectrum starts.
+    // WLS ABSORPTION LENGTH
+    // A former version only included data up to 380 nm, which intentionally
+    // avoided secondary absorption. Original comment:
+    //     The NoSecWLS is forced by setting the WLS_absLength to noAbsLength_
+    //     for wavelengths higher than 380 nm where the WLS emission spectrum starts.
     std::vector<G4double> WLS_abs_energy = {
       optPhotMinE_,
+      hc_ / (460. * nm),  hc_ / (440. * nm), hc_ / (420. * nm),
+      hc_ / (410. * nm),  hc_ / (400. * nm), hc_ / (390. * nm),
       hc_ / (380. * nm),  hc_ / (370. * nm), hc_ / (360. * nm),
       hc_ / (330. * nm),  hc_ / (320. * nm), hc_ / (310. * nm),
       hc_ / (300. * nm),  hc_ / (270. * nm), hc_ / (250. * nm),
@@ -940,8 +944,10 @@ namespace opticalprops {
     };
 
     std::vector<G4double> WLS_absLength = {
-      noAbsLength_,                 // ~6200 nm
-      noAbsLength_, 50. * nm, 30. * nm, // 380, 370, 360 nm
+      noAbsLength_,                     // ~6200 nm
+      noAbsLength_, 1 * mm, 10. * um,   // 460, 440, 420 nm
+      4 * um, 1.5 * um, 800. * nm,      // 410, 400, 390 nm
+      300 * nm, 50. * nm, 30. * nm,     // 380, 370, 360 nm
       30. * nm, 50. * nm, 80. * nm,     // 330, 320, 310 nm
       100. * nm, 100. * nm, 400. * nm,  // 300, 270, 250 nm
       400. * nm, 350. * nm, 250. * nm,  // 230, 210, 190 nm
