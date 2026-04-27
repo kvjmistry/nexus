@@ -71,8 +71,10 @@ namespace opticalprops {
     // that the transmission goes to zero for energies higher than this (>120 nm)
     // We set n to be an arbitarily high value of 10 so the value is
     // implemented in the simulation (transmission goes to zero)
-    ri_energy.push_back(optPhotMaxE_);
-    rIndex.push_back(10);
+    for (G4double e : {optPhotFusedSilicaMaxE_, optPhotMaxE_}) {
+      ri_energy.push_back(e);
+      rIndex.push_back(10);
+    }
 
     // for (unsigned int i=0; i<ri_energy.size(); i++) {
     // G4cout << "* FusedSilica rIndex:  " << std::setw(5) << ri_energy[i]/eV
@@ -444,8 +446,10 @@ namespace opticalprops {
     // that the transmission goes to zero for energies higher than this (>120 nm)
     // We set n to be an arbitarily high value of 10 so the value is
     // implemented in the simulation (transmission goes to zero)
-    ri_energy.push_back(optPhotMaxE_);
-    rIndex.push_back(10);
+    for (G4double e : {optPhotSapphireMaxE_, optPhotMaxE_}) {
+      ri_energy.push_back(e);
+      rIndex.push_back(10);
+    }
 
     // for (unsigned int i=0; i<ri_energy.size(); i++) {
     //   G4cout << "* Sapphire rIndex:  " << std::setw(5)
