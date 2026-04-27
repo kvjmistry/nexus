@@ -23,8 +23,7 @@
 #include <G4VisAttributes.hh>
 #include <G4NistManager.hh>
 #include <G4UserLimits.hh>
-#include <Randomize.hh>
-#include <G4SystemOfUnits.hh>
+
 
 
 namespace nexus {

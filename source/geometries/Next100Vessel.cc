@@ -211,15 +211,10 @@ namespace nexus {
     G4RotationMatrix* xRot = new G4RotationMatrix;
     xRot->rotateX(180. * deg);
 
-    // NEW SECTION: FOR THE FEEDTHROUGH MODIFICATION
-    G4double ft_radius = 36 *mm; //109.0 *mm;
-    G4double ft_length = 73.3 *mm; //76.0 *mm; 
+    G4double ft_radius = 36 *mm; 
+    G4double ft_length = 73.3 *mm; 
 
-    //G4ThreeVector ft_pos(0.0 *mm, 750.0 *mm, -280.0 *mm); //y was originally 635.5 
     G4ThreeVector ft_pos(0.0 *mm, 750.0 *mm, (port_z_1b_-111.6)*mm);
-    //shifting the position along the z axis to the positive direction because 'location' of the
-    //feedthrough was wrong
-    //G4ThreeVector ft_pos(0.0 *mm, 750.0 *mm, 492.0 *mm);
 
     feedthrough_gen_ = new CylinderPointSampler(0.*mm, ft_radius, ft_length/2., 
       0.*deg, 360.*deg, nullptr, ft_pos);
