@@ -756,8 +756,13 @@ void Next100FieldCage::BuildELRegion()
     if (gas_->GetName() == "GAr"){
       el_field->SetLightYield(ArgonELLightYield(ELelectric_field_, pressure_));
     }
-    else {
+    // Note, the XeHe adopts pure xenon scintillation yeild. This will need to be updated. 
+    else if (gas_->GetName() == "naturalXe" || gas_->GetName() == "enrichedXe" || gas_->GetName() == "depletedXe" || gas_->GetName() == "XeHe"){
       el_field->SetLightYield(XenonELLightYield(ELelectric_field_, pressure_));
+    } else {
+      G4Exception("[Next100FieldCage]", "BuildELRegion()", FatalException,
+      "Unknown kind of gas configured, valid options are: "
+                  "naturalXe, enrichedXe, depletedXe, GAr, or XeHe.");
     }
     
     G4Region* el_region = new G4Region("EL_REGION");
