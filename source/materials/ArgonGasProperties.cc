@@ -28,7 +28,7 @@ namespace nexus {
     // values taken from https://webbook.nist.gov/chemistry/fluid).
     // We assume a linear interpolation between any pair of values in the database.
 
-    G4double density;
+    G4double density = 0 * kg/m3;
 
     const G4int n_pressures = 14;
     G4double data[n_pressures][2] = {{ 1.0 * bar,  1.641 * kg/m3},
@@ -44,7 +44,6 @@ namespace nexus {
                                     { 15.0 * bar, 24.843 * kg/m3},
                                     { 20.0 * bar, 33.231 * kg/m3},
                                     { 30.0 * bar, 50.155 * kg/m3}};
-    G4bool found = false;
 
     for (G4int i=0; i<n_pressures-1; ++i) {
       if  (pressure >= data[i][0] && pressure < data[i+1][0]) {
@@ -53,12 +52,13 @@ namespace nexus {
         G4double y1 = data[i][1];
         G4double y2 = data[i+1][1];
         density = y1 + (y2-y1)*(pressure-x1)/(x2-x1);
-        found = true;
         break;
       }
     }
 
-    if (!found) {
+    // Density has not been set yet.
+    if (density == 0 * kg/m3) {
+      // Last edge case
       if (pressure == data[n_pressures-1][0]) {
         density = data[n_pressures-1][1];
       }
