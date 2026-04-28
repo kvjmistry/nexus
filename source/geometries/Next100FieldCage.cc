@@ -14,6 +14,7 @@
 #include "OpticalMaterialProperties.h"
 #include "UniformElectricDriftField.h"
 #include "XenonProperties.h"
+#include "ArgonGasProperties.h"
 #include "CylinderPointSampler.h"
 #include "BoxPointSampler.h"
 #include "HexagonMeshTools.h"
@@ -750,7 +751,20 @@ void Next100FieldCage::BuildELRegion()
     el_field->SetDriftVelocity(EL_drift_v_);
     el_field->SetTransverseDiffusion(ELtransv_diff_);
     el_field->SetLongitudinalDiffusion(ELlong_diff_);
-    el_field->SetLightYield(XenonELLightYield(ELelectric_field_, pressure_));
+    
+    // Decide whether to use argon or xenon LY
+    if (gas_->GetName() == "GAr"){
+      el_field->SetLightYield(ArgonELLightYield(ELelectric_field_, pressure_));
+    }
+    // Note, the XeHe adopts pure xenon scintillation yeild. This will need to be updated. 
+    else if (gas_->GetName() == "GXe" || gas_->GetName() == "GXeEnriched" || gas_->GetName() == "GXeDepleted" || gas_->GetName() == "GXeHe"){
+      el_field->SetLightYield(XenonELLightYield(ELelectric_field_, pressure_));
+    } else {
+      G4Exception("[Next100FieldCage]", "BuildELRegion()", FatalException,
+      "Unknown kind of gas configured, valid options are: "
+                  "GXe, GXeEnriched, GXeDepleted, GAr, or GXeHe.");
+    }
+    
     G4Region* el_region = new G4Region("EL_REGION");
     el_region->SetUserInformation(el_field);
     el_region->AddRootLogicalVolume(el_gap_logic);
