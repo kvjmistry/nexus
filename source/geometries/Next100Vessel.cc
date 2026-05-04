@@ -209,16 +209,6 @@ namespace nexus {
     G4RotationMatrix* xRot = new G4RotationMatrix;
     xRot->rotateX(180. * deg);
 
-    G4double ft_radius = 36 *mm; 
-    G4double ft_length = 73.3 *mm; 
-
-    G4ThreeVector ft_pos(0.0 *mm, 750.0 *mm, (port_z_1b_-111.6)*mm);
-
-    // NOTE: This is only a cylindrical vertex generator to simulate the feedthrough
-    // There is no actual geometry added
-    feedthrough_gen_ = new CylinderPointSampler(0.*mm, ft_radius, ft_length/2., 
-      0.*deg, 360.*deg, nullptr, ft_pos);
-
     // Body + Energy endcap
     G4UnionSolid* vessel_solid =
       new G4UnionSolid("VESSEL", vessel_body_solid, vessel_endcap_solid, 0, energy_endcap_pos);
@@ -473,6 +463,15 @@ namespace nexus {
     energy_flange_gen_ =
       new CylinderPointSampler(ep_int_flange_in_rad, flange_out_rad, flange_ep_length/2.,
                                0., 360.*deg, 0, energy_flange_pos);
+
+    // Feedthrough generator, NOTE: generator just added without geometry 
+    G4double ft_radius = 36 *mm; 
+    G4double ft_length = 73.3 *mm; 
+                           
+    G4ThreeVector ft_pos(0.0 *mm, 750.0 *mm, (port_z_1b_-111.6)*mm);
+                          
+    feedthrough_gen_ = new CylinderPointSampler(0.*mm, ft_radius, ft_length/2., 
+      0.*deg, 360.*deg, nullptr, ft_pos);
 
     // Calculating some prob
     G4UnionSolid* ep_int_flange_solid =
