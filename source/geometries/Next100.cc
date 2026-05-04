@@ -24,8 +24,6 @@
 #include <G4NistManager.hh>
 #include <G4UserLimits.hh>
 
-
-
 namespace nexus {
 
   REGISTER_CLASS(Next100, GeometryBase)

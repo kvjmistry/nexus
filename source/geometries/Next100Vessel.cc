@@ -205,8 +205,6 @@ namespace nexus {
     G4ThreeVector energy_flange_pos  (0, 0, flange_ep_z_pos);
     G4ThreeVector tracking_flange_pos(0, 0, flange_tp_z_pos);
 
-    
-
     // tracking endcap z --> -z (we can rotate either in X or Y)
     G4RotationMatrix* xRot = new G4RotationMatrix;
     xRot->rotateX(180. * deg);
@@ -216,6 +214,8 @@ namespace nexus {
 
     G4ThreeVector ft_pos(0.0 *mm, 750.0 *mm, (port_z_1b_-111.6)*mm);
 
+    // NOTE: This is only a cylindrical vertex generator to simulate the feedthrough
+    // There is no actual geometry added
     feedthrough_gen_ = new CylinderPointSampler(0.*mm, ft_radius, ft_length/2., 
       0.*deg, 360.*deg, nullptr, ft_pos);
 

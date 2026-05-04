@@ -21,8 +21,7 @@
 ##### GENERATOR #####
 /Generator/IonGenerator/atomic_number 83
 /Generator/IonGenerator/mass_number 214
-##/Generator/IonGenerator/region TP_COPPER_PLATE
-/Generator/IonGenerator/region FEEDTHROUGH 
+/Generator/IonGenerator/region TP_COPPER_PLATE
 
 ##### ACTIONS #####
 /Actions/DefaultEventAction/min_energy 0.6 MeV
@@ -35,6 +34,6 @@
 /PhysicsList/Nexus/electroluminescence false
 
 ##### PERSISTENCY #####
-/nexus/persistency/output_file outputs/feedthrough_check.next
+/nexus/persistency/output_file Next100.next 
 ## eventType options: bb0nu, bb2nu, background
 /nexus/persistency/event_type background
