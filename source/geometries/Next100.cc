@@ -13,6 +13,7 @@
 #include "Next100Ics.h"
 #include "Next100InnerElements.h"
 #include "FactoryBase.h"
+#include "CylinderPointSampler.h"
 
 #include <G4GenericMessenger.hh>
 #include <G4Box.hh>
@@ -22,7 +23,6 @@
 #include <G4VisAttributes.hh>
 #include <G4NistManager.hh>
 #include <G4UserLimits.hh>
-
 
 namespace nexus {
 
@@ -226,7 +226,8 @@ namespace nexus {
              (region == "PORT_1a") ||
              (region == "PORT_2a") ||
              (region == "PORT_1b") ||
-             (region == "PORT_2b")) {
+             (region == "PORT_2b") ||
+             (region == "FEEDTHROUGH")) {
       vertex = vessel_->GenerateVertex(region);
     }
 

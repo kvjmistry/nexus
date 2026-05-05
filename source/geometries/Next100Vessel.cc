@@ -472,6 +472,15 @@ namespace nexus {
       new CylinderPointSampler(ep_int_flange_in_rad, flange_out_rad, flange_ep_length/2.,
                                0., 360.*deg, 0, energy_flange_pos);
 
+    // Feedthrough generator, NOTE: generator just added without geometry 
+    G4double ft_radius = 36 *mm; 
+    G4double ft_length = 73.3 *mm; 
+                           
+    G4ThreeVector ft_pos(0.0 *mm, 750.0 *mm, (port_z_1b_-111.6)*mm);
+                          
+    feedthrough_gen_ = new CylinderPointSampler(0.*mm, ft_radius, ft_length/2., 
+      0.*deg, 360.*deg, nullptr, ft_pos);
+
     // Calculating some prob
     G4UnionSolid* ep_int_flange_solid =
       new G4UnionSolid("VESSEL_EP_INT_FLANGE", ep_int_flange_short_solid,
@@ -610,6 +619,10 @@ namespace nexus {
 
       G4ThreeVector translate (-source_x, source_y, port_z_2b_);
       vertex = vertex + translate;
+    }
+
+    else if (region == "FEEDTHROUGH") {  
+      vertex = feedthrough_gen_->GenerateVertex(VOLUME);
     }
 
     else {

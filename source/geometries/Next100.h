@@ -23,6 +23,7 @@ namespace nexus {
   class Next100Ics;
   class Next100InnerElements;
   class LSCHallA;
+  class CylinderPointSampler;
 
   class Next100: public GeometryBase
   {
