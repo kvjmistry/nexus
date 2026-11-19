@@ -411,6 +411,9 @@ void NextFlexTrackingPlane::BuildSiPMs()
   // Set WLS coating
   SiPM_->SetWithWLSCoating(false);
 
+  // Set the window refractive index to that of the xenon gas
+  SiPM_->SetWindowRefractiveIndex(opticalprops::GXe()->GetProperty("RINDEX"));
+
   // Set time binning
   SiPM_->SetTimeBinning(SiPM_binning_);
 
